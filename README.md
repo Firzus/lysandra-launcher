@@ -73,76 +73,13 @@ npm run tauri build -- --target x86_64-pc-windows-msvc  # Windows x64
 npm run tauri build -- --target x86_64-unknown-linux-gnu  # Linux x64
 ```
 
-### Setup pnpm (optional)
-
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
-
-```bash
-public-hoist-pattern[]=*@heroui/*
-```
-
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
-
 ## CI/CD with GitHub Actions
 
 This project uses GitHub Actions to automate the build and release process across multiple platforms (Windows, macOS, and Linux). When a tag is pushed with the format `v*` (e.g., `v1.0.0`), or when manually triggered, GitHub Actions will build the application for all platforms and create a draft release.
 
 ### Automated Build Process
 
-The workflow is configured in `.github/workflows/release.yml` and performs the following steps:
-
-1. Checks out the repository
-2. Installs platform-specific dependencies
-3. Sets up Node.js and Rust
-4. Installs frontend dependencies
-5. Builds the application using Tauri
-6. Creates a draft release with platform-specific installers
-
-```yaml
-name: Release
-on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
-
-jobs:
-  release:
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.platform }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install frontend dependencies
-        run: npm install      - name: Build the app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Lysandra Launcher v${{ github.ref_name }}'
-          releaseBody: 'See the assets to download and install this version.'
-          releaseDraft: true
-          prerelease: false
-```
+The `.github/workflows/release.yml` workflow automates building the application for Windows, macOS, and Linux, and creates a draft release on GitHub when a `v*` tag is pushed or the workflow is manually dispatched.
 
 ### Creating a Release
 
@@ -160,7 +97,3 @@ To create a new release:
 ## License
 
 Licensed under the [MIT license](https://github.com/frontio-ai/vite-template/blob/main/LICENSE).
-
-```
-
-```
