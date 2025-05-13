@@ -9,10 +9,14 @@ export default {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {
-    extend: {},
-  },
   darkMode: "class",
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["Outfit", "sans-serif"],
+      },
+    },
+  },
   plugins: [
     heroui({
       themes: {
