@@ -1,16 +1,21 @@
-import { LuBolt } from 'react-icons/lu'
-import { RiGameFill } from 'react-icons/ri'
-import { Button } from '@heroui/button'
+import { LuBolt, LuGamepad2 } from 'react-icons/lu'
 import { Tooltip } from '@heroui/tooltip'
+import { Button } from '@heroui/button'
 
-export default function Sidebar() {
+type SidebarProps = {
+  onSettingsClick: () => void
+}
+
+export const Sidebar = ({ onSettingsClick }: SidebarProps) => {
   return (
     <nav className="flex w-16 flex-col items-center justify-between p-3">
-      <RiGameFill className="fill-foreground" size={20} />
+      <span className="flex size-10">
+        <LuGamepad2 size={32} />
+      </span>
 
-      <Tooltip content="Paramètres" placement="right">
-        <Button isIconOnly>
-          <LuBolt className="fill-foreground" size={20} />
+      <Tooltip content="Paramètres" placement="right" showArrow={true}>
+        <Button isIconOnly variant="light" onPress={onSettingsClick}>
+          <LuBolt size={20} />
         </Button>
       </Tooltip>
     </nav>

@@ -7,5 +7,5 @@ type patchInfosProps = {
 export const patchInfos: patchInfosProps = {
   version: '1.0',
   label: 'Un Autre Réveil',
-  description: 'Lyra ✦ Fille d&apos;un autre temps \n Evènement à durée limitée',
+  description: "Lyra ✦ Fille d'un autre temps \n Evènement à durée limitée",
 }

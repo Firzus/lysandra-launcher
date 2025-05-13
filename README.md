@@ -13,7 +13,6 @@ A modern cross-platform desktop application built with Tauri 2.0, Vite, React, a
 - [Tailwind Variants](https://tailwind-variants.org) - Type-safe variants for Tailwind CSS
 - [TypeScript](https://www.typescriptlang.org) - Typed JavaScript
 - [Framer Motion](https://www.framer.com/motion) - Animation library for React
-- [React Router](https://reactrouter.com/) - Routing library for React
 
 ### Desktop App Framework
 
