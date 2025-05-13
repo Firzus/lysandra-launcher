@@ -9,11 +9,7 @@ export default {
   ],
   darkMode: 'class',
   theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Outfit', 'sans-serif'],
-      },
-    },
+    extend: {},
   },
   plugins: [
     heroui({

@@ -9,8 +9,8 @@ type SidebarProps = {
 export const Sidebar = ({ onSettingsClick }: SidebarProps) => {
   return (
     <nav className="flex w-16 flex-col items-center justify-between p-3">
-      <span className="flex size-10">
-        <LuGamepad2 size={32} />
+      <span className="flex size-10 p-1">
+        <LuGamepad2 className="text-foreground" size={32} />
       </span>
 
       <Tooltip content="Paramètres" placement="right" showArrow={true}>

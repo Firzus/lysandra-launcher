@@ -39,14 +39,14 @@ export default function NewsCarousel() {
   }
 
   return (
-    <div className="flex h-[120px] items-center justify-between">
+    <div className="mt-auto flex h-[220px] items-center justify-between">
       <Button
         isIconOnly
         aria-label="Previous news"
         className="absolute left-4 z-10 bg-black/10 text-white backdrop-blur-sm hover:bg-black/30"
         radius="full"
         size="sm"
-        onClick={goToPrevious}
+        onPress={goToPrevious}
       >
         <LuChevronLeft size={18} />
       </Button>
