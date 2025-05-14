@@ -15,7 +15,8 @@
         "title": "Launcher",
         "width": 1280,
         "height": 720,
-        "resizable": false
+        "resizable": false,
+        "decorations": false
       }
     ],
     "security": {
