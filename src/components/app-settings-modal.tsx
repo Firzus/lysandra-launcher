@@ -10,7 +10,9 @@ export default function AppSettingsModal({ isOpen, onOpenChange }: AppSettingsMo
   return (
     <Modal className="dark" isOpen={isOpen} size="3xl" onOpenChange={onOpenChange}>
       <ModalContent>
-        <p className="text-muted-foreground absolute left-8 top-6 text-xl">Paramètres</p>
+        <p className="text-muted-foreground absolute left-8 top-6 text-xl">
+          Paramètres du launcher
+        </p>
 
         <Tabs
           fullWidth
@@ -53,7 +55,7 @@ export default function AppSettingsModal({ isOpen, onOpenChange }: AppSettingsMo
           </Tab>
 
           <Tab key="legal" title="Légal">
-            <p className="text-lg font-semibold">A propos</p>
+            <p className="text-lg font-semibold">Légal</p>
 
             <div className="mt-4 size-full overflow-y-auto">
               <p>{/* Accord utilisateurs */}</p>
