@@ -8,7 +8,7 @@ import '@/styles/globals.css'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider>
-      <main className="bg-background text-foreground antialiased dark">
+      <main className="select-none bg-background text-foreground antialiased dark">
         <App />
       </main>
     </Provider>

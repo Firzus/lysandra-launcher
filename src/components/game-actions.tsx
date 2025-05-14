@@ -1,24 +1,24 @@
+import { LuCloudDownload, LuSettings2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
-import { LuDownload, LuSettings } from 'react-icons/lu'
+import React from 'react'
 
 export default function GameActions() {
+  const actionButtonState = React.useState()
+
   return (
-    <div className="flex gap-3">
+    <div className="space-x-3">
       <Button
-        className="bg-primary font-medium text-default shadow-lg hover:bg-primary/90"
+        aria-label="Game Acion"
+        color="primary"
+        radius="lg"
         size="lg"
-        startContent={<LuDownload size={18} />}
+        startContent={<LuCloudDownload size={24} />}
       >
-        Télécharger
+        <span className="w-24 text-end">Télécharger</span>
       </Button>
 
-      <Button
-        isIconOnly
-        aria-label="Download settings"
-        className="bg-default/20 text-white shadow-lg backdrop-blur-sm hover:bg-default/40"
-        size="lg"
-      >
-        <LuSettings size={18} />
+      <Button isIconOnly aria-label="Game Settings" radius="lg" size="lg" onPress={() => {}}>
+        <LuSettings2 size={24} />
       </Button>
     </div>
   )

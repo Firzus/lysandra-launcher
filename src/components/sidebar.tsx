@@ -1,5 +1,4 @@
 import { LuBolt, LuGamepad2 } from 'react-icons/lu'
-import { Tooltip } from '@heroui/tooltip'
 import { Button } from '@heroui/button'
 
 type SidebarProps = {
@@ -13,11 +12,9 @@ export const Sidebar = ({ onSettingsClick }: SidebarProps) => {
         <LuGamepad2 className="text-foreground" size={32} />
       </span>
 
-      <Tooltip content="Paramètres" placement="right" showArrow={true}>
-        <Button isIconOnly variant="light" onPress={onSettingsClick}>
-          <LuBolt size={20} />
-        </Button>
-      </Tooltip>
+      <Button isIconOnly aria-label="App Settings" variant="light" onPress={onSettingsClick}>
+        <LuBolt size={20} />
+      </Button>
     </nav>
   )
 }
