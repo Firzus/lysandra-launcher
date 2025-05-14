@@ -1,84 +1,73 @@
-import { useState } from 'react'
+import React from 'react'
 import { Button } from '@heroui/button'
+import { Link } from '@heroui/link'
+import { Image } from '@heroui/image'
+import { Card, CardBody, CardFooter } from '@heroui/card'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
-// Mock news data (à remplacer par des données réelles)
-const newsItems = [
-  {
-    id: 1,
-    type: 'INFOS',
-    title: 'Sortie officielle de la version 1.0',
-    date: '20/05',
-    image: 'https://via.placeholder.com/550x150/CC8800/FFFFFF',
-  },
-  {
-    id: 2,
-    type: 'ÉVÉNEMENT',
-    title: 'Un autre réveil - Événement limité',
-    date: '25/05',
-    image: 'https://via.placeholder.com/550x150/CC8800/FFFFFF',
-  },
-  {
-    id: 3,
-    type: 'MISE À JOUR',
-    title: 'Nouvelle zone disponible',
-    date: '01/06',
-    image: 'https://via.placeholder.com/550x150/CC8800/FFFFFF',
-  },
-]
+import { carouselEvents } from '@/data/carousel-events'
 
 export default function NewsCarousel() {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = React.useState(0)
 
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % newsItems.length)
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % carouselEvents.length)
   }
 
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + newsItems.length) % newsItems.length)
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev - 1 + carouselEvents.length) % carouselEvents.length)
   }
+
+  React.useEffect(() => {
+    const timer = setInterval(nextSlide, 10000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   return (
-    <div className="mt-auto flex h-[220px] items-center justify-between">
-      <Button
-        isIconOnly
-        aria-label="Previous news"
-        className="absolute left-4 z-10 bg-black/10 text-white backdrop-blur-sm hover:bg-black/30"
-        radius="full"
-        size="sm"
-        onPress={goToPrevious}
-      >
-        <LuChevronLeft size={18} />
-      </Button>
+    <Card className="mt-auto h-[220px] border border-default backdrop-blur-md">
+      <CardBody className="relative p-0">
+        <Image
+          removeWrapper
+          alt={carouselEvents[currentIndex].title}
+          className="size-full object-cover object-center"
+          radius="none"
+          src={carouselEvents[currentIndex].image}
+        />
 
-      <div className="relative h-full w-full">
-        <div
-          className="flex h-full w-full items-end bg-cover bg-center p-4"
-          style={{
-            backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.3)), url(${newsItems[currentIndex].image})`,
-          }}
+        <Button
+          isIconOnly
+          className="absolute left-4 top-1/2 z-10 -translate-y-1/2"
+          variant="flat"
+          onPress={prevSlide}
         >
-          <div className="w-full">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-primary">
-                {newsItems[currentIndex].type} - Sortie officielle de la version 1.0
-              </span>
-              <span className="text-xs text-white/70">{newsItems[currentIndex].date}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+          <LuChevronLeft size={20} />
+        </Button>
 
-      <Button
-        isIconOnly
-        aria-label="Next news"
-        className="absolute right-4 z-10 bg-black/10 text-white backdrop-blur-sm hover:bg-black/30"
-        radius="full"
-        size="sm"
-        onClick={goToNext}
-      >
-        <LuChevronRight size={18} />
-      </Button>
-    </div>
+        <Button
+          isIconOnly
+          className="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+          variant="flat"
+          onPress={nextSlide}
+        >
+          <LuChevronRight size={20} />
+        </Button>
+      </CardBody>
+
+      <CardFooter className="flex px-4 py-2">
+        <Link
+          isExternal
+          className="truncate pr-2 text-sm font-medium leading-none text-foreground"
+          href={carouselEvents[currentIndex].link}
+          underline="hover"
+        >
+          {carouselEvents[currentIndex].title}
+        </Link>
+
+        <p className="ml-auto text-sm font-medium leading-none text-foreground/70">
+          {carouselEvents[currentIndex].date.toLocaleDateString()}
+        </p>
+      </CardFooter>
+    </Card>
   )
 }

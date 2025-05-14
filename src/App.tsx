@@ -11,13 +11,12 @@ import Artwork from '/images/artwork.png'
 
 export default function App() {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <main className="flex h-screen select-none overflow-hidden bg-background text-foreground antialiased dark">
       <Sidebar onSettingsClick={() => {}} />
       <Divider orientation="vertical" />
 
-      {/* Main content area */}
       <section className="relative flex size-full items-end justify-between p-16">
-        {/* Background artwork */}
+        {/* Background */}
         <img
           alt="Artwork for current game version"
           className="absolute inset-0 size-full object-cover object-center"
@@ -29,6 +28,6 @@ export default function App() {
         <GameInfos />
         <GameActions />
       </section>
-    </div>
+    </main>
   )
 }
