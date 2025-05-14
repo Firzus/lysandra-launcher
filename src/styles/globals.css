@@ -8,4 +8,12 @@
   html {
     font-family: 'Outfit', system-ui, sans-serif;
   }
+
+  .bg-muted-foreground {
+    @apply bg-foreground/70;
+  }
+
+  .text-muted-foreground {
+    @apply text-foreground/70;
+  }
 }

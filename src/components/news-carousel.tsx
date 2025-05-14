@@ -38,19 +38,23 @@ export default function NewsCarousel() {
         <Button
           isIconOnly
           className="absolute left-4 top-1/2 z-10 -translate-y-1/2"
+          radius="full"
+          size="sm"
           variant="flat"
           onPress={prevSlide}
         >
-          <LuChevronLeft size={20} />
+          <LuChevronLeft size={16} />
         </Button>
 
         <Button
           isIconOnly
           className="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+          radius="full"
+          size="sm"
           variant="flat"
           onPress={nextSlide}
         >
-          <LuChevronRight size={20} />
+          <LuChevronRight size={16} />
         </Button>
       </CardBody>
 
@@ -64,7 +68,7 @@ export default function NewsCarousel() {
           {carouselEvents[currentIndex].title}
         </Link>
 
-        <p className="ml-auto text-sm font-medium leading-none text-foreground/70">
+        <p className="text-muted-foreground ml-auto text-sm font-medium leading-none">
           {carouselEvents[currentIndex].date.toLocaleDateString()}
         </p>
       </CardFooter>

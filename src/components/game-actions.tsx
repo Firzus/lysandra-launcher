@@ -1,10 +1,7 @@
 import { LuCloudDownload, LuSettings2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
-import React from 'react'
 
 export default function GameActions() {
-  const actionButtonState = React.useState()
-
   return (
     <div className="space-x-3">
       <Button
@@ -18,7 +15,7 @@ export default function GameActions() {
       </Button>
 
       <Button isIconOnly aria-label="Game Settings" radius="lg" size="lg" onPress={() => {}}>
-        <LuSettings2 size={24} />
+        <LuSettings2 className="text-muted-foreground" size={24} />
       </Button>
     </div>
   )
