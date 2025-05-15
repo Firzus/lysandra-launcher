@@ -1,0 +1,87 @@
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      # 4 builds : mac Silicon, mac Intel, Windows, Linux
+      matrix:
+        include:
+          - platform: macos-latest
+            target: '--target aarch64-apple-darwin'
+          - platform: macos-latest
+            target: '--target x86_64-apple-darwin'
+          - platform: windows-latest
+            target: ''
+          - platform: ubuntu-latest
+            target: ''
+    runs-on: ${{ matrix.platform }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+    steps:
+      - name: 🛎️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 🦀 Set up Rust (stable)
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          components: rustfmt
+          override: true
+
+      - name: 📦 Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref_type == 'tag' }}
+
+      - name: 🟢 Set up Node 18 + PNPM cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'pnpm'
+
+      - name: 🚀 Install PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: 📚 Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🐧 Install Linux system deps
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev libwebkit2gtk-4.1-dev \
+            libappindicator3-dev librsvg2-dev patchelf
+
+      - name: 🏗️ Build & upload Tauri app
+        uses: tauri-apps/tauri-action@v0.5.20
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          args: ${{ matrix.target }}
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Lysandra Launcher ${{ github.ref_name }}'
+          releaseBody: 'See the assets below to download and install this version.'
+          releaseDraft: true
+          prerelease: false

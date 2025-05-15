@@ -25,15 +25,8 @@
       "capabilities": ["default", "opener", "updater"]
     }
   },
-  "plugins": {
-    "updater": {
-      "active": false,
-      "dialog": true,
-      "endpoints": [],
-      "pubkey": ""
-    }
-  },
   "bundle": {
+    "createUpdaterArtifacts": true,
     "active": true,
     "targets": "all",
     "icon": [
@@ -43,5 +36,15 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "dialog": true,
+      "endpoints": [
+        "https://github.com/Firzus/lysandra-launcher/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkxRjgyNzU4MkVEODY3QTkKUldTcFo5Z3VXQ2Y0a1hDbTdlZkNUL0ZEenVCT1ErRzNtTVg5eEl4b2dwVllSR05pUjhhM3lZcXAK"
+    }
   }
 }
