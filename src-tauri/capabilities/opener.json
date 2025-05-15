@@ -1,0 +1,14 @@
+{
+  "identifier": "opener",
+  "windows": ["main"],
+  "permissions": [
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://tauri.app"
+        }
+      ]
+    }
+  ]
+}

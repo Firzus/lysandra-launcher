@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Launcher",
         "width": 1280,
         "height": 720,
@@ -20,7 +21,16 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": ["default", "opener", "updater"]
+    }
+  },
+  "plugins": {
+    "updater": {
+      "active": false,
+      "dialog": true,
+      "endpoints": [],
+      "pubkey": ""
     }
   },
   "bundle": {
