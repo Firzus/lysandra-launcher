@@ -2,12 +2,11 @@ name: Publish
 
 on:
   push:
-    tags: ['v*'] # déclenché dès qu'un tag vX.Y.Z est poussé
-  workflow_dispatch: # exécutable manuellement depuis l’UI
+    tags: ['v*']
+  workflow_dispatch:
 
 permissions:
-  contents: write # création / mise à jour de la GitHub Release
-  # packages: write    # ← supprime ou garde-le en write/read selon tes besoins
+  contents: write
 
 jobs:
   release:
@@ -46,6 +45,13 @@ jobs:
           profile: minimal
           override: true
 
+      # 3.bis. Ajouter les cibles Rust manquantes sur macOS
+      - name: ➕ Add Rust cross-targets (macOS)
+        if: startsWith(matrix.platform, 'macos') && matrix.target != ''
+        run: |
+          rust_target=$(echo "${{ matrix.target }}" | awk '{print $2}')
+          rustup target add "$rust_target"
+
       # 3. Cache Cargo (accélère la compilation Rust)
       - name: 📦 Cache Rust dependencies
         uses: swatinem/rust-cache@v2
@@ -57,11 +63,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm' # met automatiquement en cache ~/.npm
+          cache: 'npm'
 
       # 5. Installer les dépendances front-end
       - name: 📚 Install JS dependencies
-        run: npm ci # rapide & fiable si tu as un package-lock.json
+        run: npm ci
 
       # 6. Dépendances système Linux (GTK/WebKit2GTK 4.1)
       - name: 🐧 Install Linux system deps
@@ -76,13 +82,13 @@ jobs:
       - name: 🏗️ Build & upload Tauri app
         uses: tauri-apps/tauri-action@v0.5.20
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # auto-fourni par GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          args: ${{ matrix.target }} # cible par plateforme
-          tagName: ${{ github.ref_name }} # ex. v0.4.0
+          args: ${{ matrix.target }}
+          tagName: ${{ github.ref_name }}
           releaseName: 'Lysandra Launcher ${{ github.ref_name }}'
           releaseBody: 'See the assets below to download and install this version.'
-          releaseDraft: true # brouillon → review avant publish
+          releaseDraft: true
           prerelease: false
