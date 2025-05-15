@@ -22,7 +22,7 @@
     ],
     "security": {
       "csp": null,
-      "capabilities": ["default", "opener", "updater"]
+      "capabilities": ["default", "opener", "updater", "process"]
     }
   },
   "bundle": {

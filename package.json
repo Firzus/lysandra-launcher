@@ -12,6 +12,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@heroui/alert": "^2.2.19",
     "@heroui/button": "2.2.19",
     "@heroui/card": "^2.2.18",
     "@heroui/divider": "^2.2.13",
@@ -26,6 +27,7 @@
     "@react-types/shared": "3.29.0",
     "@tauri-apps/api": "^2.5.0",
     "@tauri-apps/plugin-opener": "^2.2.6",
+    "@tauri-apps/plugin-process": "^2.2.1",
     "@tauri-apps/plugin-updater": "^2.7.1",
     "framer-motion": "11.15.0",
     "i18next": "^25.1.2",
