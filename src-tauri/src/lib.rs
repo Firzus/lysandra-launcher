@@ -10,12 +10,13 @@ pub fn run() {
         .expect("no main window")
         .set_focus();
     }))
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_opener::init())
-        .setup(|app| {
-            if cfg!(debug_assertions) {
-                app.handle().plugin(
+    .plugin(tauri_plugin_updater::Builder::new().build())
+    .plugin(tauri_plugin_process::init())
+    .plugin(tauri_plugin_opener::init())
+    .plugin(tauri_plugin_dialog::init())
+    .setup(|app| {
+        if cfg!(debug_assertions) {
+            app.handle().plugin(
                     tauri_plugin_log::Builder::default()
                         .level(log::LevelFilter::Info)
                         .build(),
