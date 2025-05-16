@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:local": "tauri dev --config src-tauri/tauri.dev.conf.json",
     "build": "tsc && vite build",
     "build:local": "tauri build --config src-tauri/tauri.dev.conf.json",
     "lint": "eslint --fix",
