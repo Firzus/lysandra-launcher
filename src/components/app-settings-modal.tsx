@@ -2,7 +2,7 @@ import { Modal, ModalContent } from '@heroui/modal'
 import { Tabs, Tab } from '@heroui/tabs'
 import { Button } from '@heroui/button'
 
-import { update } from '@/utils/check-updates'
+import { checkAppUpdates } from '@/utils/check-app-update'
 
 type AppSettingsModalProps = {
   isOpen: boolean
@@ -36,7 +36,7 @@ export default function AppSettingsModal({ isOpen, onOpenChange }: AppSettingsMo
 
             <div className="mt-4 size-full overflow-y-auto">
               <p className="text-foreground">Try Update Launcher</p>
-              <Button onPress={() => update} />
+              <Button onPress={() => checkAppUpdates(true)}>Vérifier les mises à jour</Button>
               <div>{/* Langue du client */}</div>
               <div>{/* Paramètre de démarrage */}</div>
               <div>{/* Fermer le client */}</div>

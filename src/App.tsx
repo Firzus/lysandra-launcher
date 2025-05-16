@@ -1,4 +1,5 @@
 import { Divider } from '@heroui/divider'
+import React from 'react'
 
 import DragZone from './components/drag-zone'
 
@@ -10,7 +11,13 @@ import Sidebar from '@/components/sidebar'
 
 import Artwork from '/images/artwork.png'
 
+import { checkAppUpdates } from '@/utils/check-app-update'
+
 export default function App() {
+  React.useEffect(() => {
+    checkAppUpdates(false)
+  }, [])
+
   return (
     <main className="flex h-screen select-none overflow-hidden bg-background text-foreground antialiased dark">
       <Sidebar />
