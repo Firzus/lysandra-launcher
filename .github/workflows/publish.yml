@@ -5,20 +5,14 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   release:
     strategy:
       fail-fast: false
       matrix:
-        # quatre builds : mac M-chip, mac Intel, Windows, Linux
         include:
           - platform: macos-latest
-            target: '--target aarch64-apple-darwin'
-          - platform: macos-latest
-            target: '--target x86_64-apple-darwin'
+            target: ''
           - platform: windows-latest
             target: ''
           - platform: ubuntu-latest
@@ -44,13 +38,6 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
-
-      # 3.bis. Ajouter les cibles Rust manquantes sur macOS
-      - name: ➕ Add Rust cross-targets (macOS)
-        if: startsWith(matrix.platform, 'macos') && matrix.target != ''
-        run: |
-          rust_target=$(echo "${{ matrix.target }}" | awk '{print $2}')
-          rustup target add "$rust_target"
 
       # 3. Cache Cargo (accélère la compilation Rust)
       - name: 📦 Cache Rust dependencies
@@ -90,6 +77,5 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'Lysandra Launcher ${{ github.ref_name }}'
           releaseBody: 'See the assets below to download and install this version.'
-          # releaseDraft: true
-          # releaseDraft: false
+          releaseDraft: false
           prerelease: false
