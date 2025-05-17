@@ -1,6 +1,5 @@
 import { Modal, ModalContent } from '@heroui/modal'
 import { Tabs, Tab } from '@heroui/tabs'
-import { ScrollShadow } from '@heroui/scroll-shadow'
 
 import { GeneralAppSettings } from './tabs/general-app-settings'
 

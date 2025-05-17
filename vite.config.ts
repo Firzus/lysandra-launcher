@@ -5,4 +5,32 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    sourcemap: false,
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          heroui: [
+            '@heroui/system',
+            '@heroui/button',
+            '@heroui/card',
+            '@heroui/modal',
+            '@heroui/tabs',
+            '@heroui/toast',
+            '@heroui/tooltip',
+            '@heroui/image',
+            '@heroui/link',
+            '@heroui/divider',
+            '@heroui/spinner',
+            '@heroui/theme',
+            '@heroui/scroll-shadow',
+          ],
+        },
+      },
+    },
+  },
 })
