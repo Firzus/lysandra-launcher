@@ -8,7 +8,7 @@ type Props = {}
 
 export const GameLinks: React.FC<Props> = () => {
   return (
-    <div className="absolute right-6 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-2">
+    <div className="absolute right-6 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-4">
       {socialLinks.map((link, i) => (
         <Button
           key={i}
