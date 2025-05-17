@@ -27,7 +27,8 @@ export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
     } else {
       addToast({
         color: 'warning',
-        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        timeout: 5000,
         title: 'Mise à jour disponible',
         description: 'Votre launcher va être redémarré pour appliquer la mise à jour.',
       })
@@ -35,7 +36,7 @@ export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
       new Promise<void>((resolve) => {
         setTimeout(() => {
           resolve()
-        }, 3000)
+        }, 5000)
       }).then(async () => {
         await relaunch()
       })
@@ -43,7 +44,7 @@ export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
   }
 
   return (
-    <Button className={className} onPress={handleCheck}>
+    <Button className={className} color="primary" size="sm" variant="flat" onPress={handleCheck}>
       Vérifier
     </Button>
   )

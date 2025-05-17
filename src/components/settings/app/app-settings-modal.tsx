@@ -1,7 +1,8 @@
 import { Modal, ModalContent } from '@heroui/modal'
 import { Tabs, Tab } from '@heroui/tabs'
+import { ScrollShadow } from '@heroui/scroll-shadow'
 
-import { CheckUpdateButton } from '@/components/settings/app/general/check-update-button'
+import { GeneralAppSettings } from './tabs/general-app-settings'
 
 type Props = {
   isOpen: boolean
@@ -23,23 +24,19 @@ export const AppSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => {
           classNames={{
             tabWrapper: 'text-foreground size-full h-[500px]',
             base: 'px-4 py-6 w-[280px]',
-            panel: 'p-6 w-full flex-1 bg-default',
+            panel: 'pl-6 pr-3 py-6 w-full flex-1 bg-default',
             tabList: 'mt-12',
             tab: 'justify-start',
-            tabContent: '',
+            // tabContent: '',
           }}
           variant="light"
         >
           <Tab key="general" title="Général">
             <p className="text-lg font-semibold">Général</p>
 
-            <div className="mt-4 size-full overflow-y-auto">
-              <p className="text-foreground">Try Update Launcher</p>
-              <CheckUpdateButton className="mt-2" />
-              <div>{/* Langue du client */}</div>
-              <div>{/* Paramètre de démarrage */}</div>
-              <div>{/* Fermer le client */}</div>
-            </div>
+            <section className="mt-4 size-full overflow-y-auto pr-3">
+              <GeneralAppSettings />
+            </section>
           </Tab>
 
           <Tab key="download" title="Téléchargement">
