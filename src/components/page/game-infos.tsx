@@ -1,7 +1,10 @@
-import { patchInfos } from '@/data/patch-infos'
-import NewsCarousel from '@/components/news-carousel'
+import { NewsCarousel } from './news-carousel'
 
-export default function GameInfos() {
+import { patchInfos } from '@/data/patch-infos'
+
+type Props = {}
+
+export const GameInfos: React.FC<Props> = () => {
   return (
     <div className="z-10 flex h-full w-[400px] flex-col">
       <h1 className="text-3xl font-semibold">Lysandra</h1>

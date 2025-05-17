@@ -2,9 +2,11 @@ import { LuCloudDownload, LuSettings2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 
-import GameSettingsModal from './game-settings-modal'
+import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
 
-export default function GameActions() {
+type Props = {}
+
+export const GameActions: React.FC<Props> = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   return (

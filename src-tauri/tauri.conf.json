@@ -18,7 +18,8 @@
         "height": 720,
         "fullscreen": false,
         "resizable": false,
-        "decorations": false
+        "decorations": false,
+        "backgroundColor": "#0C0A09"
       }
     ],
     "security": {
@@ -41,7 +42,7 @@
   "plugins": {
     "updater": {
       "active": true,
-      "dialog": true,
+      "dialog": false,
       "endpoints": [
         "https://github.com/Firzus/lysandra-launcher/releases/latest/download/latest.json"
       ],

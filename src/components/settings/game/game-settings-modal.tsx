@@ -1,14 +1,14 @@
 import { Modal, ModalContent } from '@heroui/modal'
 import { Tabs, Tab } from '@heroui/tabs'
 
-type AppSettingsModalProps = {
+type Props = {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
 }
 
-export default function GameSettingsModal({ isOpen, onOpenChange }: AppSettingsModalProps) {
+export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => {
   return (
-    <Modal className="dark" isOpen={isOpen} size="3xl" onOpenChange={onOpenChange}>
+    <Modal isOpen={isOpen} size="3xl" onOpenChange={onOpenChange}>
       <ModalContent>
         <p className="text-muted-foreground absolute left-8 top-6 text-xl">Paramètres du jeu</p>
 

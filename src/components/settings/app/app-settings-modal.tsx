@@ -1,17 +1,16 @@
 import { Modal, ModalContent } from '@heroui/modal'
 import { Tabs, Tab } from '@heroui/tabs'
-import { Button } from '@heroui/button'
 
-import { checkAppUpdates } from '@/utils/check-app-update'
+import { CheckUpdateButton } from '@/components/settings/app/general/check-update-button'
 
-type AppSettingsModalProps = {
+type Props = {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
 }
 
-export default function AppSettingsModal({ isOpen, onOpenChange }: AppSettingsModalProps) {
+export const AppSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => {
   return (
-    <Modal className="dark" isOpen={isOpen} size="3xl" onOpenChange={onOpenChange}>
+    <Modal isOpen={isOpen} size="3xl" onOpenChange={onOpenChange}>
       <ModalContent>
         <p className="text-muted-foreground absolute left-8 top-6 text-xl">
           Paramètres du launcher
@@ -36,7 +35,7 @@ export default function AppSettingsModal({ isOpen, onOpenChange }: AppSettingsMo
 
             <div className="mt-4 size-full overflow-y-auto">
               <p className="text-foreground">Try Update Launcher</p>
-              <Button onPress={() => checkAppUpdates(true)}>Vérifier les mises à jour</Button>
+              <CheckUpdateButton className="mt-2" />
               <div>{/* Langue du client */}</div>
               <div>{/* Paramètre de démarrage */}</div>
               <div>{/* Fermer le client */}</div>

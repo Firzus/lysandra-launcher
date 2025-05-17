@@ -8,13 +8,16 @@ export default {
     './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}',
   ],
   darkMode: 'class',
-  theme: {
-    extend: {},
-  },
   plugins: [
     heroui({
+      addCommonColors: false,
+      defaultTheme: 'dark',
+      defaultExtendTheme: 'dark',
       themes: {
         dark: {
+          layout: {
+            disabledOpacity: '0.5',
+          },
           colors: {
             default: {
               50: '#080707',
@@ -119,12 +122,13 @@ export default {
               foreground: '#fff',
             },
             focus: '#F6A740',
-            overlay: '#FAFAF9',
+            overlay: '#0C0A09',
           },
         },
-      },
-      layout: {
-        disabledOpacity: '0.5',
+        light: {
+          layout: {},
+          colors: {},
+        },
       },
     }),
   ],

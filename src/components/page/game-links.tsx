@@ -4,7 +4,9 @@ import { Button } from '@heroui/button'
 import { openLink } from '@/utils/opener'
 import { socialLinks } from '@/data/social-links'
 
-export default function SocialLinks() {
+type Props = {}
+
+export const GameLinks: React.FC<Props> = () => {
   return (
     <div className="absolute right-6 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-2">
       {socialLinks.map((link, i) => (

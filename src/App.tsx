@@ -1,41 +1,37 @@
-import { Divider } from '@heroui/divider'
-import React from 'react'
+import { Spinner } from '@heroui/spinner'
 
-import DragZone from './components/drag-zone'
+import { Content } from './content'
+import { useAutoAppUpdate } from './hooks/use-auto-app-update'
 
-import SocialLinks from '@/components/social-links'
-import GameActions from '@/components/game-actions'
-import WindowControls from '@/components/window-controls'
-import GameInfos from '@/components/game-infos'
-import Sidebar from '@/components/sidebar'
-
-import Artwork from '/images/artwork.png'
-
-import { checkAppUpdates } from '@/utils/check-app-update'
+import { WindowControls } from '@/components/system/window-controls'
+import { DragZone } from '@/components/system/drag-zone'
 
 export default function App() {
-  React.useEffect(() => {
-    checkAppUpdates(false)
-  }, [])
+  const { status, progress } = useAutoAppUpdate()
+
+  const message = {
+    idle: 'Initialisation…',
+    checking: 'Vérification des mises à jour…',
+    downloading: `Téléchargement : ${progress}%`,
+    ready: 'Chargement terminé',
+    installing: 'Installation…',
+    error: 'Erreur de mise à jour',
+  }[status]
+
+  const isLoading = status !== 'ready' && status !== 'error'
 
   return (
-    <main className="flex h-screen select-none overflow-hidden bg-background text-foreground antialiased dark">
-      <Sidebar />
-      <Divider orientation="vertical" />{' '}
-      <section className="relative flex size-full items-end justify-between p-16">
-        {/* Background */}
-        <img
-          alt="Artwork for current game version"
-          className="absolute inset-0 size-full object-cover object-center"
-          src={Artwork}
-        />
+    <main className="flex h-screen select-none overflow-hidden bg-background text-foreground antialiased">
+      {/* System */}
+      <DragZone />
+      <WindowControls />
 
-        <DragZone />
-        <WindowControls />
-        <SocialLinks />
-        <GameInfos />
-        <GameActions />
-      </section>
+      {/* Content */}
+      {isLoading ? (
+        <Spinner className="m-auto" label={message} size="lg" variant="dots" />
+      ) : (
+        <Content />
+      )}
     </main>
   )
 }

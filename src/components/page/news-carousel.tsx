@@ -7,7 +7,9 @@ import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
 import { carouselEvents } from '@/data/carousel-events'
 
-export default function NewsCarousel() {
+type Props = {}
+
+export const NewsCarousel: React.FC<Props> = () => {
   const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const nextSlide = () => {
@@ -19,7 +21,7 @@ export default function NewsCarousel() {
   }
 
   React.useEffect(() => {
-    const timer = setInterval(nextSlide, 10000)
+    const timer = setInterval(nextSlide, 30000)
 
     return () => clearInterval(timer)
   }, [])

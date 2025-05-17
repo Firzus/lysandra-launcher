@@ -2,9 +2,11 @@ import { LuBolt, LuGamepad2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 
-import AppSettingsModal from './app-settings-modal'
+import { AppSettingsModal } from '@/components/settings/app/app-settings-modal'
 
-export default function Sidebar() {
+type Props = {}
+
+export const Sidebar: React.FC<Props> = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   return (
