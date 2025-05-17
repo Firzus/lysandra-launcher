@@ -5,11 +5,12 @@ import { Image } from '@heroui/image'
 import { Card, CardBody, CardFooter } from '@heroui/card'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
+import { openLink } from '@/utils/opener'
 import { carouselEvents } from '@/data/carousel-events'
 
 type Props = {}
 
-export const NewsCarousel: React.FC<Props> = () => {
+export const GameCarousel: React.FC<Props> = () => {
   const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const nextSlide = () => {
@@ -63,9 +64,11 @@ export const NewsCarousel: React.FC<Props> = () => {
       <CardFooter className="flex px-4 py-2">
         <Link
           isExternal
-          className="truncate pr-2 text-sm font-medium leading-none text-foreground"
-          href={carouselEvents[currentIndex].link}
+          className="cursor-pointer truncate pr-2 text-sm font-medium leading-none text-foreground"
           underline="hover"
+          onPress={() => {
+            openLink(carouselEvents[currentIndex].link)
+          }}
         >
           {carouselEvents[currentIndex].title}
         </Link>

@@ -1,7 +1,7 @@
-import { GameActions } from '@/components/page/game-actions'
-import { GameBackground } from '@/components/page/game-background'
-import { GameInfos } from '@/components/page/game-infos'
-import { GameLinks } from '@/components/page/game-links'
+import { GameActions } from '@/components/page/game/game-actions'
+import { GameBackground } from '@/components/page/game/game-background'
+import { GameInfos } from '@/components/page/game/game-infos'
+import { GameLinks } from '@/components/page/game/game-links'
 
 import Artwork from '/images/artwork.png'
 

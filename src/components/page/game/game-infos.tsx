@@ -1,4 +1,4 @@
-import { NewsCarousel } from './news-carousel'
+import { GameCarousel } from './game-carousel'
 
 import { patchInfos } from '@/data/patch-infos'
 
@@ -18,7 +18,7 @@ export const GameInfos: React.FC<Props> = () => {
         ))}
       </div>
 
-      <NewsCarousel />
+      <GameCarousel />
     </div>
   )
 }
