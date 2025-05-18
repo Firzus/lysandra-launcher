@@ -1,5 +1,6 @@
 import { Modal, ModalContent } from '@heroui/modal'
 import { Tabs, Tab } from '@heroui/tabs'
+import { useTranslation } from 'react-i18next'
 
 type Props = {
   isOpen: boolean
@@ -7,15 +8,19 @@ type Props = {
 }
 
 export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => {
+  const { t } = useTranslation()
+
   return (
     <Modal isOpen={isOpen} size="3xl" onOpenChange={onOpenChange}>
       <ModalContent>
-        <p className="text-muted-foreground absolute left-8 top-6 text-xl">Paramètres du jeu</p>
+        <p className="text-muted-foreground absolute left-8 top-6 text-xl">
+          {t('game.settings_title')}
+        </p>
 
         <Tabs
           fullWidth
           isVertical
-          aria-label="Settings"
+          aria-label={t('settings.aria')}
           classNames={{
             tabWrapper: 'text-foreground size-full h-[500px]',
             base: 'px-4 py-6 w-[280px]',
@@ -26,24 +31,24 @@ export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => 
           }}
           variant="light"
         >
-          <Tab key="infos" title="Informations">
-            <p className="text-lg font-semibold">Informations</p>
+          <Tab key="infos" title={t('game.infos')}>
+            <p className="text-lg font-semibold">{t('game.infos')}</p>
 
             <div className="mt-4 size-full overflow-y-auto">
-              <div>{/* Taille */}</div>
-              <div>{/* Répertoire */}</div>
-              <div>{/* Vérifier les mises à jour */}</div>
-              <div>{/* Réparer */}</div>
-              <div>{/* Localiser le jeu */}</div>
-              <div>{/* Désinstaller */}</div>
+              <div>{t('game.size')}</div>
+              <div>{t('game.directory')}</div>
+              <div>{t('game.check_updates')}</div>
+              <div>{t('game.repair')}</div>
+              <div>{t('game.locate')}</div>
+              <div>{t('game.uninstall')}</div>
             </div>
           </Tab>
 
-          <Tab key="logs" title="Journaux">
-            <p className="text-lg font-semibold">Journaux</p>
+          <Tab key="logs" title={t('game.logs')}>
+            <p className="text-lg font-semibold">{t('game.logs')}</p>
 
             <div className="mt-4 size-full overflow-y-auto">
-              <p>{/* logs */}</p>
+              <p>{t('game.logs_content')}</p>
             </div>
           </Tab>
         </Tabs>

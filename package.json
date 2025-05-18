@@ -19,6 +19,7 @@
     "@heroui/link": "2.2.16",
     "@heroui/modal": "^2.2.16",
     "@heroui/scroll-shadow": "^2.3.13",
+    "@heroui/select": "^2.4.19",
     "@heroui/spinner": "^2.2.16",
     "@heroui/system": "2.4.15",
     "@heroui/tabs": "^2.2.16",

@@ -28,6 +28,7 @@ export default defineConfig({
             '@heroui/spinner',
             '@heroui/theme',
             '@heroui/scroll-shadow',
+            '@heroui/select',
           ],
         },
       },

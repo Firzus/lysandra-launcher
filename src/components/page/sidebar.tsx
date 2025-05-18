@@ -2,13 +2,13 @@ import { LuBolt, LuGamepad2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import { useDisclosure } from '@heroui/modal'
+import { useTranslation } from 'react-i18next'
 
 import { AppSettingsModal } from '@/components/settings/app/app-settings-modal'
 
-type Props = {}
-
-export const Sidebar: React.FC<Props> = () => {
+export const Sidebar: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const { t } = useTranslation()
 
   return (
     <nav className="flex w-16 flex-col items-center justify-between p-3">
@@ -16,8 +16,8 @@ export const Sidebar: React.FC<Props> = () => {
         <LuGamepad2 className="text-foreground" size={32} />
       </span>
 
-      <Tooltip content="Paramètres" placement="right">
-        <Button isIconOnly aria-label="Game Settings" variant="light" onPress={onOpen}>
+      <Tooltip content={t('sidebar.settings')} placement="right">
+        <Button isIconOnly aria-label={t('sidebar.settings_aria')} variant="light" onPress={onOpen}>
           <LuBolt size={20} />
         </Button>
       </Tooltip>

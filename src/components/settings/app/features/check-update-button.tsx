@@ -1,6 +1,7 @@
 import { relaunch } from '@tauri-apps/plugin-process'
 import { Button } from '@heroui/button'
 import { addToast } from '@heroui/toast'
+import { useTranslation } from 'react-i18next'
 
 import { useAutoAppUpdate } from '@/hooks/use-auto-app-update'
 
@@ -10,27 +11,28 @@ type Props = {
 
 export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
   const { status } = useAutoAppUpdate()
+  const { t } = useTranslation()
 
   const handleCheck = () => {
     if (status === 'ready') {
       addToast({
         color: 'success',
-        title: 'Launcher à jour',
-        description: 'Le launcher est déjà à jour.',
+        title: t('update.ready'),
+        description: t('update.already_latest'),
       })
     } else if (status === 'error') {
       addToast({
         color: 'danger',
-        title: 'Erreur de mise à jour',
-        description: 'Une erreur est survenue lors de la vérification des mises à jour.',
+        title: t('update.error'),
+        description: t('update.error_desc'),
       })
     } else {
       addToast({
         color: 'warning',
         shouldShowTimeoutProgress: true,
         timeout: 5000,
-        title: 'Mise à jour disponible',
-        description: 'Votre launcher va être redémarré pour appliquer la mise à jour.',
+        title: t('update.available'),
+        description: t('update.will_restart'),
       })
 
       new Promise<void>((resolve) => {
@@ -45,7 +47,7 @@ export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
 
   return (
     <Button className={className} color="primary" size="sm" variant="flat" onPress={handleCheck}>
-      Vérifier
+      {t('update.check')}
     </Button>
   )
 }

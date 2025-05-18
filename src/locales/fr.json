@@ -1,4 +1,66 @@
 {
-  "welcome": "Bienvenue",
-  "cta": "Clique-moi"
+  "loader": {
+    "initializing": "Initialisation",
+    "checking": "Vérification des mises à jour",
+    "downloading": "Téléchargement : {{progress}}%",
+    "ready": "Chargement terminé",
+    "installing": "Installation",
+    "error": "Erreur inconnue"
+  },
+  "window": {
+    "minimize": "Minimiser",
+    "close": "Fermer"
+  },
+  "sidebar": {
+    "settings": "Paramètres",
+    "settings_aria": "Ouvrir les paramètres du launcher"
+  },
+  "settings": {
+    "title": "Paramètres du launcher",
+    "general": "Général",
+    "download": "Téléchargement",
+    "download_speed": "Vitesse de téléchargement : illimité / limité",
+    "notifications": "Notifications",
+    "allow_notifications": "Autoriser les notifications sur le bureau",
+    "legal": "Légal",
+    "user_agreement": "Accord utilisateurs",
+    "privacy_policy": "Politique de confidentialité",
+    "language_client": "Langue du client",
+    "language_game": "Langue du jeu",
+    "startup_option": "Paramètre de démarrage",
+    "close_client": "Fermer le client"
+  },
+  "update": {
+    "refresh_launcher": "Actualiser le launcher",
+    "check_desc": "Vérifiez si une nouvelle version du launcher est disponible.",
+    "check": "Vérifier",
+    "ready": "Launcher à jour",
+    "already_latest": "Le launcher est déjà à jour.",
+    "error": "Erreur de mise à jour",
+    "error_desc": "Une erreur est survenue lors de la vérification des mises à jour.",
+    "available": "Mise à jour disponible",
+    "will_restart": "Votre launcher va être redémarré pour appliquer la mise à jour."
+  },
+  "language": {
+    "desciption": "Sélection de la langue",
+    "options": {
+      "en": "Anglais",
+      "fr": "Français"
+    }
+  },
+  "game": {
+    "settings_title": "Paramètres du jeu",
+    "infos": "Informations",
+    "logs": "Journaux",
+    "logs_content": "Aucun journal pour le moment.",
+    "size": "Taille",
+    "directory": "Répertoire",
+    "check_updates": "Vérifier les mises à jour",
+    "repair": "Réparer",
+    "locate": "Localiser le jeu",
+    "uninstall": "Désinstaller",
+    "download": "Télécharger",
+    "download_aria": "Télécharger le jeu",
+    "settings_aria": "Ouvrir les paramètres du jeu"
+  }
 }
