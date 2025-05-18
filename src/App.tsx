@@ -4,10 +4,14 @@ import { Content } from './content'
 import { useAutoAppUpdate } from './hooks/use-auto-app-update'
 import { Loader } from './pages/loader'
 
+import { useLanguagePreference } from '@/hooks/use-language-preference'
 import { WindowControls } from '@/components/system/window-controls'
 import { DragZone } from '@/components/system/drag-zone'
 
 export default function App() {
+  // Charge la langue sauvegardée dès le lancement
+  useLanguagePreference()
+
   const { t } = useTranslation()
   const { status, progress } = useAutoAppUpdate()
 
