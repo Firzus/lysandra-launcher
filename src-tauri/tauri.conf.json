@@ -19,7 +19,12 @@
         "fullscreen": false,
         "resizable": false,
         "decorations": false,
-        "backgroundColor": "#0C0A09"
+        "backgroundColor": "#0C0A09",
+        "zoomHotkeysEnabled": false,
+        "devtools": false,
+        "center": true,
+        "theme": "Dark",
+        "browserExtensionsEnabled": false
       }
     ],
     "security": {
@@ -37,7 +42,27 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "webviewInstallMode": {
+        "silent": true,
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installerIcon": "icons/icon.ico"
+      }
+    },
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": false,
+        "files": {}
+      }
+    },
+    "macOS": {
+      "hardenedRuntime": true,
+      "minimumSystemVersion": "10.13"
+    }
   },
   "plugins": {
     "updater": {
