@@ -1,4 +1,63 @@
 {
-  "welcome": "Welcome",
-  "cta": "Click me"
+  "loader": {
+    "initializing": "Initializing",
+    "checking": "Checking for updates",
+    "downloading": "Downloading: {{progress}}%",
+    "ready": "Loading complete",
+    "installing": "Installing",
+    "error": "Unknown error"
+  },
+  "window": {
+    "minimize": "Minimize",
+    "close": "Close"
+  },
+  "sidebar": {
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Launcher Settings",
+    "general": "General",
+    "download": "Download",
+    "download_speed": "Download speed: unlimited / limited",
+    "notifications": "Notifications",
+    "allow_notifications": "Allow desktop notifications",
+    "legal": "Legal",
+    "user_agreement": "User Agreement",
+    "privacy_policy": "Privacy Policy",
+    "language_client": "Client language",
+    "language_game": "Game language",
+    "startup_option": "Startup option",
+    "close_client": "Close client"
+  },
+  "update": {
+    "refresh_launcher": "Refresh launcher",
+    "check_desc": "Check if a new version of the launcher is available.",
+    "check": "Check",
+    "ready": "Launcher up to date",
+    "already_latest": "The launcher is already up to date.",
+    "error": "Update error",
+    "error_desc": "An error occurred while checking for updates.",
+    "available": "Update available",
+    "will_restart": "Your launcher will restart to apply the update."
+  },
+  "language": {
+    "desciption": "Language selection",
+    "options": {
+      "en": "English",
+      "fr": "French"
+    }
+  },
+  "game": {
+    "settings_title": "Game Settings",
+    "infos": "Information",
+    "logs": "Logs",
+    "logs_content": "No logs yet.",
+    "size": "Size",
+    "directory": "Directory",
+    "check_updates": "Check for updates",
+    "repair": "Repair",
+    "locate": "Locate game",
+    "uninstall": "Uninstall",
+    "download": "Download"
+  }
 }

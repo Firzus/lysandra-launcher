@@ -1,0 +1,35 @@
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { Select, SelectItem } from '@heroui/select'
+
+import { useLanguagePreference } from '@/hooks/use-language-preference'
+
+type Props = {
+  className?: string
+}
+
+export const LanguageSwitcher: React.FC<Props> = ({ className }) => {
+  const { t } = useTranslation()
+  const { selectedLanguage, changeLanguage } = useLanguagePreference()
+  const languages = [
+    { key: 'en', label: t('language.options.en') },
+    { key: 'fr', label: t('language.options.fr') },
+  ]
+
+  const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    changeLanguage(e.target.value)
+  }
+
+  return (
+    <Select
+      className={`${className} w-32`}
+      selectedKeys={[selectedLanguage]}
+      size="sm"
+      onChange={handleSelectionChange}
+    >
+      {languages.map((lang) => (
+        <SelectItem key={lang.key}>{lang.label}</SelectItem>
+      ))}
+    </Select>
+  )
+}
