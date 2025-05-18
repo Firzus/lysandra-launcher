@@ -12,8 +12,7 @@
     "close": "Fermer"
   },
   "sidebar": {
-    "settings": "Paramètres",
-    "settings_aria": "Ouvrir les paramètres du launcher"
+    "settings": "Paramètres"
   },
   "settings": {
     "title": "Paramètres du launcher",
@@ -59,8 +58,6 @@
     "repair": "Réparer",
     "locate": "Localiser le jeu",
     "uninstall": "Désinstaller",
-    "download": "Télécharger",
-    "download_aria": "Télécharger le jeu",
-    "settings_aria": "Ouvrir les paramètres du jeu"
+    "download": "Télécharger"
   }
 }

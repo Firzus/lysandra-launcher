@@ -20,7 +20,6 @@ export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => 
         <Tabs
           fullWidth
           isVertical
-          aria-label={t('settings.aria')}
           classNames={{
             tabWrapper: 'text-foreground size-full h-[500px]',
             base: 'px-4 py-6 w-[280px]',

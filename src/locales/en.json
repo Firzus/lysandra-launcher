@@ -12,8 +12,7 @@
     "close": "Close"
   },
   "sidebar": {
-    "settings": "Settings",
-    "settings_aria": "Open launcher settings"
+    "settings": "Settings"
   },
   "settings": {
     "title": "Launcher Settings",
@@ -59,8 +58,6 @@
     "repair": "Repair",
     "locate": "Locate game",
     "uninstall": "Uninstall",
-    "download": "Download",
-    "download_aria": "Download game",
-    "settings_aria": "Open game settings"
+    "download": "Download"
   }
 }

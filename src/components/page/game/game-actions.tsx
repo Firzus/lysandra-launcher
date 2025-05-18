@@ -11,23 +11,11 @@ export const GameActions: React.FC = () => {
 
   return (
     <div className="space-x-3">
-      <Button
-        aria-label={t('game.download_aria')}
-        color="primary"
-        radius="lg"
-        size="lg"
-        startContent={<LuCloudDownload size={24} />}
-      >
+      <Button color="primary" radius="lg" size="lg" startContent={<LuCloudDownload size={24} />}>
         <span className="w-24 text-end">{t('game.download')}</span>
       </Button>
 
-      <Button
-        isIconOnly
-        aria-label={t('game.settings_aria')}
-        radius="lg"
-        size="lg"
-        onPress={onOpen}
-      >
+      <Button isIconOnly radius="lg" size="lg" onPress={onOpen}>
         <LuSettings2 className="text-muted-foreground" size={24} />
       </Button>
 

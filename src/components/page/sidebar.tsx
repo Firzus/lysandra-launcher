@@ -17,7 +17,7 @@ export const Sidebar: React.FC = () => {
       </span>
 
       <Tooltip content={t('sidebar.settings')} placement="right">
-        <Button isIconOnly aria-label={t('sidebar.settings_aria')} variant="light" onPress={onOpen}>
+        <Button isIconOnly variant="light" onPress={onOpen}>
           <LuBolt size={20} />
         </Button>
       </Tooltip>
