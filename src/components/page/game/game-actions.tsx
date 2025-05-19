@@ -34,12 +34,12 @@ export const GameActions: React.FC = () => {
     <div className="flex flex-col items-start">
       <div className="space-x-3">
         <Button
-          onPress={handleDownload}
           color="primary"
+          isDisabled={isDownloading}
           radius="lg"
           size="lg"
           startContent={<LuCloudDownload size={24} />}
-          isDisabled={isDownloading}
+          onPress={handleDownload}
         >
           <span className="w-24 text-end">{t('game.download')}</span>
         </Button>

@@ -65,7 +65,7 @@ export const DownloadProgress: React.FC = () => {
         <div
           className="h-full bg-primary transition-all duration-300 ease-in-out"
           style={{ width: `${progress}%` }}
-        ></div>
+        />
       </div>
       {progress === 100 && !isDownloading && (
         <div className="mt-2 text-right text-sm text-success-500">
