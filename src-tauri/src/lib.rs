@@ -19,8 +19,6 @@ fn handle_download_progress(
     total: u64,
     version: String,
 ) {
-    println!("Download progress for {}: {}% ({}/{})", version, progress_percentage, progress, total);
-      // Émettre un événement que le frontend peut écouter
     app_handle.emit("download-progress", ProgressEvent {
         progress_percentage,
         progress,
@@ -31,8 +29,6 @@ fn handle_download_progress(
 
 #[tauri::command]
 fn handle_download_complete(app_handle: tauri::AppHandle, version: String) {
-    println!("Download completed for version: {}", version);
-    
     app_handle.emit("download-complete", version).unwrap();
 }
 

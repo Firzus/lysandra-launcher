@@ -27,11 +27,8 @@ export const DownloadProgress: React.FC = () => {
       // Convertir bytes en MB pour un affichage plus convivial
       setDownloadedMB(Math.round((event.payload.progress / 1024 / 1024) * 10) / 10)
       setTotalMB(Math.round((event.payload.total / 1024 / 1024) * 10) / 10)
-    })
-
-    // Écouter l'événement de fin de téléchargement
+    }) // Écouter l'événement de fin de téléchargement
     const unlisten2 = listen<string>('download-complete', (event) => {
-      console.log('Download complete event received for version:', event.payload)
       setIsDownloading(false)
 
       // Garder la barre à 100% pendant quelques instants avant de la masquer

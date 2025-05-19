@@ -28,11 +28,7 @@ export async function downloadOperation(version: string, url: string, localPath:
       total,
       version,
     })
-
-    console.log(`Downloaded ${progress} of ${total} bytes (${progressPercentage}%)`)
   })
 
-  // Informer le backend que le téléchargement est terminé
   invoke('handle_download_complete', { version })
-  console.log('Download complete for version:', version)
 }
