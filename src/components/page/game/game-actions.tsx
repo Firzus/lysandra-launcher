@@ -2,41 +2,57 @@ import { LuCloudDownload, LuSettings2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 
 import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
-import { fetchManifest } from '@/utils/update-service'
+import { DownloadProgress } from '@/components/page/game/download-progress'
+
+// Test
+import { downloadOperation, fetchManifest } from '@/utils/update-service'
 
 export const GameActions: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const { t } = useTranslation()
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const handleDownload = async () => {
-    const { version, url } = await fetchManifest({
-      owner: 'Firzus',
-      repo: 'lysandra-vslice',
-    })
+    try {
+      setIsDownloading(true)
 
-    console.log('Latest version:', version)
-    console.log('Download URL:', url)
+      const { version, url } = await fetchManifest('Firzus', 'lysandra-vslice')
+      const localPath = 'C:/Users/lilia/Downloads'
+
+      await downloadOperation(version, url, localPath)
+    } catch (error) {
+      console.error('Download failed:', error)
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   return (
-    <div className="space-x-3">
-      <Button
-        onPress={handleDownload}
-        color="primary"
-        radius="lg"
-        size="lg"
-        startContent={<LuCloudDownload size={24} />}
-      >
-        <span className="w-24 text-end">{t('game.download')}</span>
-      </Button>
+    <div className="flex flex-col items-start">
+      <div className="space-x-3">
+        <Button
+          onPress={handleDownload}
+          color="primary"
+          radius="lg"
+          size="lg"
+          startContent={<LuCloudDownload size={24} />}
+          isDisabled={isDownloading}
+        >
+          <span className="w-24 text-end">{t('game.download')}</span>
+        </Button>
 
-      <Button isIconOnly radius="lg" size="lg" onPress={onOpen}>
-        <LuSettings2 className="text-muted-foreground" size={24} />
-      </Button>
+        <Button isIconOnly radius="lg" size="lg" onPress={onOpen}>
+          <LuSettings2 className="text-muted-foreground" size={24} />
+        </Button>
 
-      <GameSettingsModal isOpen={isOpen} onOpenChange={onOpenChange} />
+        <GameSettingsModal isOpen={isOpen} onOpenChange={onOpenChange} />
+      </div>
+
+      {/* Composant de progression */}
+      <DownloadProgress />
     </div>
   )
 }

@@ -58,6 +58,9 @@
     "repair": "Réparer",
     "locate": "Localiser le jeu",
     "uninstall": "Désinstaller",
-    "download": "Télécharger"
+    "download": "Télécharger",
+    "downloading": "Téléchargement : {{progress}}%",
+    "download_complete": "Téléchargement terminé",
+    "download_complete_message": "Le fichier a été téléchargé avec succès"
   }
 }

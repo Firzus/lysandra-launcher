@@ -1,4 +1,40 @@
-use tauri::Manager;
+use tauri::{Manager, Emitter};
+use serde::{Serialize, Deserialize};
+
+// Structure pour les événements de progression
+#[derive(Clone, Serialize, Deserialize)]
+pub struct ProgressEvent {
+    pub progress_percentage: u32,
+    pub progress: u64,
+    pub total: u64,
+    pub version: String,
+}
+
+// Commandes Tauri
+#[tauri::command]
+fn handle_download_progress(
+    app_handle: tauri::AppHandle,
+    progress_percentage: u32,
+    progress: u64,
+    total: u64,
+    version: String,
+) {
+    println!("Download progress for {}: {}% ({}/{})", version, progress_percentage, progress, total);
+      // Émettre un événement que le frontend peut écouter
+    app_handle.emit("download-progress", ProgressEvent {
+        progress_percentage,
+        progress,
+        total,
+        version,
+    }).unwrap();
+}
+
+#[tauri::command]
+fn handle_download_complete(app_handle: tauri::AppHandle, version: String) {
+    println!("Download completed for version: {}", version);
+    
+    app_handle.emit("download-complete", version).unwrap();
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -16,6 +52,10 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![
+            handle_download_progress,
+            handle_download_complete
+        ])
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

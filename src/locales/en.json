@@ -58,6 +58,9 @@
     "repair": "Repair",
     "locate": "Locate game",
     "uninstall": "Uninstall",
-    "download": "Download"
+    "download": "Download",
+    "downloading": "Downloading: {{progress}}%",
+    "download_complete": "Download complete",
+    "download_complete_message": "File has been downloaded successfully"
   }
 }
