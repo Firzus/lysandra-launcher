@@ -29,7 +29,7 @@
     ],
     "security": {
       "csp": null,
-      "capabilities": ["default", "opener", "updater", "process", "dialog", "store"]
+      "capabilities": ["default", "opener", "updater", "process", "dialog", "store", "upload"]
     }
   },
   "bundle": {

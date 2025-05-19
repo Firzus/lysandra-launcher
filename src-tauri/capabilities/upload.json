@@ -1,0 +1,5 @@
+{
+  "identifier": "upload",
+  "windows": ["main"],
+  "permissions": ["upload:default"]
+}
