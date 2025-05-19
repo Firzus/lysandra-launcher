@@ -21,7 +21,6 @@
         "decorations": false,
         "backgroundColor": "#0C0A09",
         "zoomHotkeysEnabled": false,
-        "devtools": false,
         "center": true,
         "theme": "Dark",
         "browserExtensionsEnabled": false
