@@ -1,5 +1,6 @@
 use tauri::{Manager, Emitter};
 use serde::{Serialize, Deserialize};
+use tauri_plugin_http::reqwest;
 
 // Module pour la vérification d'intégrité SHA-256
 pub mod hash;
@@ -43,9 +44,21 @@ fn verify_file_integrity(file_path: String) -> Result<String, String> {
     }
 }
 
+#[tauri::command]
+async fn fetch_manifest_from_github(url: String) -> Result<String, String> {
+    let response = reqwest::get(&url).await.map_err(|e| e.to_string())?;
+    if !response.status().is_success() {
+        return Err(format!("Request failed: {}", response.status()));
+    }
+
+    let body = response.text().await.map_err(|e| e.to_string())?;
+    Ok(body)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_upload::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -56,12 +69,13 @@ pub fn run() {
                 .set_focus();
         }))
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())        .invoke_handler(tauri::generate_handler![
+        .plugin(tauri_plugin_process::init())        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())        
+        .invoke_handler(tauri::generate_handler![
             handle_download_progress,
             handle_download_complete,
-            verify_file_integrity
+            verify_file_integrity,
+            fetch_manifest_from_github
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

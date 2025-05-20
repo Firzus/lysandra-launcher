@@ -9,6 +9,7 @@ import { DownloadProgress } from '@/components/page/game/download-progress'
 
 // Test
 import { downloadOperation, fetchManifest } from '@/utils/update-service'
+import { checkFileHash } from '@/utils/hash-verification'
 
 export const GameActions: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -19,12 +20,23 @@ export const GameActions: React.FC = () => {
     try {
       setIsDownloading(true)
 
-      const { version, url } = await fetchManifest('Firzus', 'lysandra-vslice')
+      const { version, url, hash, platform } = await fetchManifest('Firzus', 'lysandra-vslice')
+
       const localPath = 'C:/Users/lilia/Downloads'
 
+      // Appel de la fonction de téléchargement
       await downloadOperation(version, url, localPath)
+
+      console.log('Download completed')
+
+      const fileName = `${localPath}/game-${version}.zip`
+
+      // Vérification du hash
+      const isGood = await checkFileHash(fileName, hash)
+
+      console.log('hash is good', isGood)
     } catch (error) {
-      console.error('Download failed:', error)
+      throw new Error(`Failed to download: ${error}`)
     } finally {
       setIsDownloading(false)
     }

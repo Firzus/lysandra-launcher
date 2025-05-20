@@ -2,19 +2,23 @@ import { download } from '@tauri-apps/plugin-upload'
 import { invoke } from '@tauri-apps/api/core'
 
 export async function fetchManifest(owner: string, repo: string) {
-  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, {
-    headers: { Accept: 'application/vnd.github+json' },
-  })
+  const latestUrl = `https://github.com/${owner}/${repo}/releases/latest/download/latest.json`
 
-  if (!res.ok) {
-    throw new Error(`Error fetching manifest: ${res.statusText}`)
+  const manifestStr = await invoke<string>('fetch_manifest_from_github', { url: latestUrl })
+  const manifest = JSON.parse(manifestStr)
+
+  const platform = getPlatform()
+  const platformZip = manifest.zip[platform]
+
+  if (!platformZip) {
+    throw new Error(`No ZIP available for platform: ${platform}`)
   }
 
-  const data = await res.json()
-
   return {
-    version: data.tag_name,
-    url: data.assets[0].browser_download_url,
+    version: manifest.version,
+    url: platformZip.url,
+    hash: platformZip.sha256,
+    platform,
   }
 }
 
@@ -31,4 +35,14 @@ export async function downloadOperation(version: string, url: string, localPath:
   })
 
   invoke('handle_download_complete', { version })
+}
+
+export function getPlatform(): 'windows' | 'macos' | 'linux' | 'unknown' {
+  const platform = navigator.userAgent.toLowerCase()
+
+  if (platform.includes('win')) return 'windows'
+  if (platform.includes('mac')) return 'macos'
+  if (platform.includes('linux')) return 'linux'
+
+  return 'unknown'
 }
