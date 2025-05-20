@@ -1,6 +1,9 @@
 use tauri::{Manager, Emitter};
 use serde::{Serialize, Deserialize};
 
+// Module pour la vérification d'intégrité SHA-256
+pub mod hash;
+
 // Structure pour les événements de progression
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ProgressEvent {
@@ -32,6 +35,14 @@ fn handle_download_complete(app_handle: tauri::AppHandle, version: String) {
     app_handle.emit("download-complete", version).unwrap();
 }
 
+#[tauri::command]
+fn verify_file_integrity(file_path: String) -> Result<String, String> {
+    match std::panic::catch_unwind(|| hash::compute_sha256(&file_path)) {
+        Ok(hash) => Ok(hash),
+        Err(_) => Err(format!("Failed to compute hash for file: {}", file_path))
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -47,10 +58,10 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![
+        .plugin(tauri_plugin_dialog::init())        .invoke_handler(tauri::generate_handler![
             handle_download_progress,
-            handle_download_complete
+            handle_download_complete,
+            verify_file_integrity
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
