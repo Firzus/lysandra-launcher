@@ -20,7 +20,7 @@ export const GameActions: React.FC = () => {
     try {
       setIsDownloading(true)
 
-      const { version, url, hash, platform } = await fetchManifest('Firzus', 'lysandra-vslice')
+      const { version, url, hash } = await fetchManifest('Firzus', 'lysandra-vslice')
 
       const localPath = 'C:/Users/lilia/Downloads'
 
