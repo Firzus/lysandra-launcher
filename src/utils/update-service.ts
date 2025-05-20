@@ -7,18 +7,16 @@ export async function fetchManifest(owner: string, repo: string) {
   const manifestStr = await invoke<string>('fetch_manifest_from_github', { url: latestUrl })
   const manifest = JSON.parse(manifestStr)
 
-  const platform = getPlatform()
-  const platformZip = manifest.zip[platform]
+  const platformZip = manifest.zip[getPlatform()]
 
   if (!platformZip) {
-    throw new Error(`No ZIP available for platform: ${platform}`)
+    throw new Error(`No ZIP available for platform: ${getPlatform()}`)
   }
 
   return {
     version: manifest.version,
     url: platformZip.url,
     hash: platformZip.sha256,
-    platform,
   }
 }
 
