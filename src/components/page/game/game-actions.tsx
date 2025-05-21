@@ -10,6 +10,8 @@ import { DownloadProgress } from '@/components/page/game/download-progress'
 // Test
 import { downloadOperation, fetchManifest } from '@/utils/update-service'
 import { checkFileHash } from '@/utils/hash-verification'
+import { extractZip } from '@/utils/zip'
+import { writeTextFile } from '@tauri-apps/plugin-fs'
 
 export const GameActions: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -20,26 +22,33 @@ export const GameActions: React.FC = () => {
     try {
       setIsDownloading(true)
 
+      // 1. Récupérer le manifeste
       const { version, url, hash } = await fetchManifest('Firzus', 'lysandra-vslice')
 
       const localPath = 'C:/Users/lilia/Downloads'
-
-      // Appel de la fonction de téléchargement
-      await downloadOperation(version, url, localPath)
-
-      console.log('Download completed')
-
       const fileName = `${localPath}/game-${version}.zip`
 
-      // Vérification du hash
-      const isGood = await checkFileHash(fileName, hash)
+      // 2. Appel de la fonction de téléchargement
+      await downloadOperation(version, url, localPath)
 
-      console.log('hash is good', isGood)
+      // 3. Vérification du hash
+      if (!(await checkFileHash(fileName, hash))) {
+        throw new Error('Hash verification failed')
+      }
+
+      // 4. Extraire le fichier ZIP (au même endroit)
+      await extractZip(fileName, localPath)
+
+      // 5. Sauvegarder la version localement
+      await writeTextFile(`${localPath}/version.txt`, version)
     } catch (error) {
       throw new Error(`Failed to download: ${error}`)
     } finally {
       setIsDownloading(false)
     }
+
+    // succes
+    console.log('Operation complete')
   }
 
   return (

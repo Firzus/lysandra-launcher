@@ -1,0 +1,5 @@
+{
+  "identifier": "file-system",
+  "windows": ["main"],
+  "permissions": ["fs:default", "fs:allow-download-write", "fs:allow-download-write-recursive"]
+}

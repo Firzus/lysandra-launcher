@@ -12,7 +12,8 @@ type ProgressEvent = {
 export const DownloadProgress: React.FC = () => {
   const [isDownloading, setIsDownloading] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [version, setVersion] = useState('')
+  // We're setting this state but not displaying it directly, used as contextual information
+  const [, setVersion] = useState('')
   const [downloadedMB, setDownloadedMB] = useState(0)
   const [totalMB, setTotalMB] = useState(0)
   const { t } = useTranslation()
@@ -28,7 +29,7 @@ export const DownloadProgress: React.FC = () => {
       setDownloadedMB(Math.round((event.payload.progress / 1024 / 1024) * 10) / 10)
       setTotalMB(Math.round((event.payload.total / 1024 / 1024) * 10) / 10)
     }) // Écouter l'événement de fin de téléchargement
-    const unlisten2 = listen<string>('download-complete', (event) => {
+    const unlisten2 = listen<string>('download-complete', (_event) => {
       setIsDownloading(false)
 
       // Garder la barre à 100% pendant quelques instants avant de la masquer

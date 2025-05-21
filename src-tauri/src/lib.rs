@@ -4,6 +4,7 @@ use tauri_plugin_http::reqwest;
 
 // Module pour la vérification d'intégrité SHA-256
 pub mod hash;
+pub mod zip;
 
 // Structure pour les événements de progression
 #[derive(Clone, Serialize, Deserialize)]
@@ -58,6 +59,7 @@ async fn fetch_manifest_from_github(url: String) -> Result<String, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_upload::init())
         .plugin(tauri_plugin_store::Builder::new().build())
@@ -69,13 +71,15 @@ pub fn run() {
                 .set_focus();
         }))
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_process::init())        
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())        
         .invoke_handler(tauri::generate_handler![
             handle_download_progress,
             handle_download_complete,
             verify_file_integrity,
-            fetch_manifest_from_github
+            fetch_manifest_from_github,
+            zip::extract_zip_file
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
