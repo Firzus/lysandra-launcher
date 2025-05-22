@@ -6,7 +6,7 @@ import { Card, CardBody, CardFooter } from '@heroui/card'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
 import { openLink } from '@/utils/opener'
-import { carouselEvents } from '@/data/carousel-events'
+import { carouselEvents } from '@/data/lysandra'
 
 type Props = {}
 

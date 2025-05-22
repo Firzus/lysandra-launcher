@@ -2,7 +2,6 @@ import { LuCloudDownload, LuSettings2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
 
 import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
 import { DownloadProgress } from '@/components/page/game/download-progress'
@@ -12,11 +11,15 @@ import { downloadOperation, fetchManifest } from '@/utils/update-service'
 import { checkFileHash } from '@/utils/hash-verification'
 import { extractZip } from '@/utils/zip'
 import { writeTextFile } from '@tauri-apps/plugin-fs'
+import React from 'react'
+import reducer from '@/utils/game-action-sm'
 
 export const GameActions: React.FC = () => {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const { t } = useTranslation()
-  const [isDownloading, setIsDownloading] = useState(false)
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
+  const [isDownloading, setIsDownloading] = React.useState(false)
 
   const handleDownload = async () => {
     try {
@@ -62,7 +65,7 @@ export const GameActions: React.FC = () => {
           startContent={<LuCloudDownload size={24} />}
           onPress={handleDownload}
         >
-          <span className="w-24 text-end">{t('game.download')}</span>
+          <span className="w-24 text-end">Download</span>
         </Button>
 
         <Button isIconOnly radius="lg" size="lg" onPress={onOpen}>

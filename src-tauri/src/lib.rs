@@ -56,6 +56,11 @@ async fn fetch_manifest_from_github(url: String) -> Result<String, String> {
     Ok(body)
 }
 
+#[tauri::command]
+fn read_version_file() -> Result<String, String> {
+    std::fs::read_to_string("version.txt").map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()

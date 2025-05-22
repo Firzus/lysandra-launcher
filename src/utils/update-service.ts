@@ -1,5 +1,6 @@
 import { download } from '@tauri-apps/plugin-upload'
 import { invoke } from '@tauri-apps/api/core'
+import { getPlatform } from '@/hooks/use-get-platform'
 
 export async function fetchManifest(owner: string, repo: string) {
   const latestUrl = `https://github.com/${owner}/${repo}/releases/latest/download/latest.json`
@@ -35,12 +36,25 @@ export async function downloadOperation(version: string, url: string, localPath:
   invoke('handle_download_complete', { version })
 }
 
-export function getPlatform(): 'windows' | 'macos' | 'linux' | 'unknown' {
-  const platform = navigator.userAgent.toLowerCase()
+export async function isGameUpdate(owner: string, repo: string): Promise<boolean> {
+  try {
+    // Get the current installed version
+    const currentVersion = await invoke<string>('read_version_file').catch(() => {
+      throw new Error('Version file not found')
+    })
 
-  if (platform.includes('win')) return 'windows'
-  if (platform.includes('mac')) return 'macos'
-  if (platform.includes('linux')) return 'linux'
+    // Get the latest version from the manifest
+    const manifest = await fetchManifest(owner, repo)
 
-  return 'unknown'
+    // Inform the application about the version check (keeping existing functionality)
+    await invoke('handle_version_check', { version: currentVersion || '0.0.0' })
+
+    // Compare versions to determine if update is needed
+    return currentVersion !== manifest.version
+  } catch (error) {
+    // Log error but don't crash - just indicate no update
+    console.error('Failed to check for game updates:', error)
+
+    return false
+  }
 }

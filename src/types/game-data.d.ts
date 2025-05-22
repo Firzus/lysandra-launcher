@@ -1,0 +1,28 @@
+type GlobalInfosProps = {
+  name: string
+  owner: string
+  repositoryName: string
+  repositoryUrl: `https://github.com/${owner}/${repositoryName}`
+}
+
+type CarouselEventsProps = {
+  type: 'infos' | 'évènements' | 'mise à jour'
+  title: string
+  date: Date
+  image: string
+  link: string
+}
+
+type PatchInfosProps = {
+  version: string
+  label: string
+  description: string
+}
+
+type SocialLinkProps = {
+  label: string
+  icon: React.ElementType
+  url: string
+}
+
+export { GlobalInfosProps, CarouselEventsProps, PatchInfosProps, SocialLinkProps }

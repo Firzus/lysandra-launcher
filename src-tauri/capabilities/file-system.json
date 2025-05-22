@@ -1,5 +1,11 @@
 {
   "identifier": "file-system",
   "windows": ["main"],
-  "permissions": ["fs:default", "fs:allow-download-write", "fs:allow-download-write-recursive"]
+  "permissions": [
+    "fs:default",
+    "fs:allow-download-write",
+    "fs:allow-download-write-recursive",
+    "fs:allow-download-read",
+    "fs:allow-download-read-recursive"
+  ]
 }

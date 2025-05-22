@@ -2,7 +2,7 @@ import React from 'react'
 import { Button } from '@heroui/button'
 
 import { openLink } from '@/utils/opener'
-import { socialLinks } from '@/data/social-links'
+import { socialLinks } from '@/data/lysandra'
 
 type Props = {}
 

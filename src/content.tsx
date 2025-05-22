@@ -1,7 +1,7 @@
 import { Divider } from '@heroui/divider'
 
 import { Sidebar } from '@/components/page/sidebar'
-import { LysandraGame } from '@/pages/lysandra-game'
+import { LysandraGame } from '@/pages/games/lysandra-game'
 
 export const Content: React.FC = () => {
   return (
