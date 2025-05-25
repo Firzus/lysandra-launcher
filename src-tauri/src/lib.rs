@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tauri::{Emitter, Manager};
+use tauri::Emitter;
 use tauri_plugin_http::reqwest;
 
 // Module pour la vérification d'intégrité SHA-256
@@ -24,22 +24,24 @@ fn handle_download_progress(
     total: u64,
     version: String,
 ) {
-    app_handle
-        .emit(
-            "download-progress",
-            ProgressEvent {
-                progress_percentage,
-                progress,
-                total,
-                version,
-            },
-        )
-        .unwrap();
+    if let Err(e) = app_handle.emit(
+        "download-progress",
+        ProgressEvent {
+            progress_percentage,
+            progress,
+            total,
+            version,
+        },
+    ) {
+        eprintln!("Failed to emit download-progress event: {}", e);
+    }
 }
 
 #[tauri::command]
 fn handle_download_complete(app_handle: tauri::AppHandle, version: String) {
-    app_handle.emit("download-complete", version).unwrap();
+    if let Err(e) = app_handle.emit("download-complete", version) {
+        eprintln!("Failed to emit download-complete event: {}", e);
+    }
 }
 
 #[tauri::command]
@@ -131,10 +133,33 @@ fn initialize_launcher_structure(app_handle: &tauri::AppHandle) -> Result<(), St
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_upload::init());
+
+    // Plugins conditionnels pour desktop uniquement
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        builder = builder
+            .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec!["--flag1", "--flag2"])))
+            .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+                println!("{}, {argv:?}, {cwd}", app.package_info().name);
+            }));
+        
+        // Plugin updater uniquement si activé par variable d'environnement
+        if std::env::var("TAURI_CONFIG_PLUGINS_UPDATER_ACTIVE").unwrap_or_default() == "true" {
+            builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+        }
+    }
+
+    builder
         .invoke_handler(tauri::generate_handler![
             handle_download_progress,
             handle_download_complete,

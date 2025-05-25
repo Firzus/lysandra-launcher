@@ -33,6 +33,7 @@ export default function App() {
       installing: t('loader.installing'),
       error: t('loader.error'),
     }
+
     return messages[status]
   }, [status, progress, t])
 

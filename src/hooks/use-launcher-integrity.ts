@@ -36,6 +36,7 @@ export function useLauncherIntegrity() {
       setStatus('ready')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+
       console.error('Failed to verify launcher structure:', errorMessage, err)
       setError(errorMessage)
     }

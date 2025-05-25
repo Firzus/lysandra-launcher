@@ -37,6 +37,7 @@ export function useLanguagePreference() {
       } catch (error) {
         console.warn('Failed to load language preference:', error)
         const fallbackLang = systemLanguage || 'en'
+
         if (fallbackLang !== i18n.language) {
           await i18n.changeLanguage(fallbackLang)
           setSelectedLanguage(fallbackLang)

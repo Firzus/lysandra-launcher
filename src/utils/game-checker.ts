@@ -54,7 +54,7 @@ export async function checkGameStatus(
           action: 'GAME_NOT_INSTALLED',
         }
       }
-    } catch (error) {
+    } catch {
       // Pas de fichier version = jeu non installé
       console.log('No game installed - version file not found at:', gamePaths.versionFile)
 

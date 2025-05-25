@@ -15,8 +15,6 @@ import {
   InstallGameModal,
   type InstallConfig,
 } from '@/components/settings/game/features/install-game-modal'
-
-// State Machine & Utils
 import reducer from '@/utils/game-action-sm'
 import { initializeGameCheck } from '@/utils/game-checker'
 import { installLysandra, updateLysandra, type GameInstallProgress } from '@/utils/game-installer'
