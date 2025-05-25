@@ -3,6 +3,7 @@ import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 import { useTranslation } from 'react-i18next'
 import { listen } from '@tauri-apps/api/event'
+import { sendNotification, isPermissionGranted, requestPermission } from '@tauri-apps/plugin-notification'
 import React from 'react'
 
 import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
@@ -28,7 +29,6 @@ export const GameActions: React.FC = () => {
   const [isDownloading, setIsDownloading] = React.useState(false)
   const [installProgress, setInstallProgress] = React.useState<GameInstallProgress | null>(null)
   const [downloadProgress, setDownloadProgress] = React.useState<number>(0)
-  const [pendingInstallConfig, setPendingInstallConfig] = React.useState<InstallConfig | null>(null)
 
   // Écouter les événements de progression du téléchargement
   React.useEffect(() => {
@@ -51,6 +51,22 @@ export const GameActions: React.FC = () => {
     return () => {
       if (unlisten) unlisten()
     }
+  }, [])
+
+  // Demander les permissions de notification au chargement
+  React.useEffect(() => {
+    const requestNotificationPermission = async () => {
+      try {
+        const permissionGranted = await isPermissionGranted()
+        if (!permissionGranted) {
+          await requestPermission()
+        }
+      } catch (error) {
+        console.error('Failed to request notification permission:', error)
+      }
+    }
+
+    requestNotificationPermission()
   }, [])
 
   // Déclencher la vérification au chargement de la page
@@ -78,6 +94,22 @@ export const GameActions: React.FC = () => {
     initializeApp()
   }, [])
 
+  const sendDownloadCompleteNotification = async (isUpdate: boolean, version?: string) => {
+    try {
+      const permissionGranted = await isPermissionGranted()
+      if (permissionGranted) {
+        await sendNotification({
+          title: isUpdate ? t('notification.update_complete.title') : t('notification.download_complete.title'),
+          body: isUpdate
+            ? t('notification.update_complete.body', { version: version || 'unknown' })
+            : t('notification.download_complete.body', { game: 'Lysandra', version: version || 'unknown' }),
+        })
+      }
+    } catch (error) {
+      console.error('Failed to send notification:', error)
+    }
+  }
+
   const handleDownloadClick = () => {
     // Ouvrir le modal d'installation/configuration
     onInstallModalOpen()
@@ -88,7 +120,6 @@ export const GameActions: React.FC = () => {
       setIsDownloading(true)
       setInstallProgress(null)
       setDownloadProgress(0)
-      setPendingInstallConfig(config)
 
       // Déterminer si c'est une installation ou une mise à jour
       const isUpdate = gameState === 'ready' || gameState === 'checking'
@@ -127,6 +158,9 @@ export const GameActions: React.FC = () => {
             : t('game.install.complete', { game: 'Lysandra', version: result.version }),
         })
 
+        // Envoyer une notification de fin de téléchargement/mise à jour
+        await sendDownloadCompleteNotification(isUpdate, result.version)
+
         // TODO: Créer les raccourcis si demandés
         if (!isUpdate && config.createDesktopShortcut) {
           console.log('Creating desktop shortcut...')
@@ -152,7 +186,6 @@ export const GameActions: React.FC = () => {
     } finally {
       setIsDownloading(false)
       setDownloadProgress(0)
-      setPendingInstallConfig(null)
       // Nettoyer le message après 5 secondes
       setTimeout(() => setInstallProgress(null), 5000)
     }

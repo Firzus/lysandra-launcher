@@ -1,6 +1,8 @@
 {
   "identifier": "com.lysandra.launcher",
-  "bundle": { "createUpdaterArtifacts": false },
+  "bundle": {
+    "createUpdaterArtifacts": false
+  },
   "plugins": {
     "updater": {
       "active": false

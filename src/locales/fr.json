@@ -144,5 +144,15 @@
     "open": "Ouvrir",
     "copy": "Copier",
     "copied": "Copié !"
+  },
+  "notification": {
+    "download_complete": {
+      "title": "Téléchargement terminé",
+      "body": "{{game}} v{{version}} a été installé avec succès !"
+    },
+    "update_complete": {
+      "title": "Mise à jour terminée",
+      "body": "{{game}} a été mis à jour vers la version {{version}} !"
+    }
   }
 }

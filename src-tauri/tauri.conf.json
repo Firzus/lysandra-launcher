@@ -36,14 +36,19 @@
         "dialog",
         "store",
         "upload",
-        "file-system"
+        "file-system",
+        "notification"
       ]
     }
   },
   "bundle": {
     "createUpdaterArtifacts": true,
     "active": true,
-    "targets": ["nsis", "appimage", "dmg"],
+    "targets": [
+      "nsis",
+      "appimage",
+      "dmg"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
