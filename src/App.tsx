@@ -5,12 +5,16 @@ import { useAutoAppUpdate } from './hooks/use-auto-app-update'
 import { Loader } from './pages/loader'
 
 import { useLanguagePreference } from '@/hooks/use-language-preference'
+import { useLauncherIntegrity } from '@/hooks/use-launcher-integrity'
 import { WindowControls } from '@/components/system/window-controls'
 import { DragZone } from '@/components/system/drag-zone'
 
 export default function App() {
   // Charge la langue sauvegardée dès le lancement
   useLanguagePreference()
+
+  // Vérifier l'intégrité de la structure du launcher
+  const launcherIntegrity = useLauncherIntegrity()
 
   const { t } = useTranslation()
   const { status, progress } = useAutoAppUpdate()
@@ -24,7 +28,13 @@ export default function App() {
     error: t('loader.error'),
   }[status]
 
-  const isLoading = status !== 'ready' && status !== 'error'
+  // Attendre que la structure du launcher soit prête ET que l'app soit prête
+  const isLoading = (status !== 'ready' && status !== 'error') || !launcherIntegrity.isReady
+
+  // Afficher l'erreur de structure si elle existe
+  if (launcherIntegrity.hasError) {
+    console.error('Launcher integrity error:', launcherIntegrity.error)
+  }
 
   return (
     <main className="flex h-screen select-none overflow-hidden bg-background text-foreground antialiased">

@@ -1,13 +1,19 @@
 import { Modal, ModalContent } from '@heroui/modal'
 import { Tabs, Tab } from '@heroui/tabs'
+import { Card, CardBody } from '@heroui/card'
 import { useTranslation } from 'react-i18next'
+
+import { UninstallGameButton } from './features/uninstall-game-button'
+import { GameSizeDisplay } from './features/game-size-display'
+import { OpenGameFolderButton } from './features/open-game-folder-button'
 
 type Props = {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
+  onGameUninstalled?: () => void
 }
 
-export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => {
+export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange, onGameUninstalled }) => {
   const { t } = useTranslation()
 
   return (
@@ -33,13 +39,59 @@ export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => 
           <Tab key="infos" title={t('game.infos')}>
             <p className="text-lg font-semibold">{t('game.infos')}</p>
 
-            <div className="mt-4 size-full overflow-y-auto">
-              <div>{t('game.size')}</div>
-              <div>{t('game.directory')}</div>
-              <div>{t('game.check_updates')}</div>
-              <div>{t('game.repair')}</div>
-              <div>{t('game.locate')}</div>
-              <div>{t('game.uninstall')}</div>
+            <div className="mt-4 size-full space-y-6 overflow-y-auto">
+              {/* Section Taille du jeu */}
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{t('game.actions.game_size')}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {t('game.actions.game_size_desc')}
+                    </p>
+                  </div>
+                  <GameSizeDisplay />
+                </div>
+              </div>
+
+              {/* Section Actions */}
+              <div className="space-y-4">
+                <p className="text-muted-foreground text-sm font-medium">
+                  {t('game.actions.title')}
+                </p>
+
+                {/* Dossier du jeu */}
+                <Card shadow="none">
+                  <CardBody className="flex-row items-center justify-between">
+                    <div>
+                      <p className="font-medium">{t('game.actions.open_folder')}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {t('game.actions.open_folder_desc')}
+                      </p>
+                    </div>
+                    <OpenGameFolderButton />
+                  </CardBody>
+                </Card>
+
+                {/* Désinstallation */}
+                <Card className="border-danger-200" shadow="none">
+                  <CardBody className="flex-row items-center justify-between">
+                    <div>
+                      <p className="font-medium text-danger">{t('game.actions.uninstall_game')}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {t('game.actions.uninstall_game_desc')}
+                      </p>
+                    </div>
+                    <UninstallGameButton
+                      onUninstallComplete={() => {
+                        if (onGameUninstalled) {
+                          onGameUninstalled()
+                        }
+                        onOpenChange(false)
+                      }}
+                    />
+                  </CardBody>
+                </Card>
+              </div>
             </div>
           </Tab>
 

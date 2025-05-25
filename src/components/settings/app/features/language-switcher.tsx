@@ -14,6 +14,8 @@ export const LanguageSwitcher: React.FC<Props> = ({ className }) => {
   const languages = [
     { key: 'en', label: t('language.options.en') },
     { key: 'fr', label: t('language.options.fr') },
+    { key: 'es', label: t('language.options.es') },
+    { key: 'de', label: t('language.options.de') },
   ]
 
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

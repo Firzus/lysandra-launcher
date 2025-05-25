@@ -8,6 +8,7 @@ import {
 } from '@/types/game-data'
 
 const globalInfos: GlobalInfosProps = {
+  id: 1,
   name: 'Lysandra',
   owner: 'Firzus',
   repositoryName: 'lysandra-launcher',

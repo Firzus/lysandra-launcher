@@ -1,5 +1,6 @@
 import { download } from '@tauri-apps/plugin-upload'
 import { invoke } from '@tauri-apps/api/core'
+
 import { getPlatform } from '@/hooks/use-get-platform'
 
 export async function fetchManifest(owner: string, repo: string) {
@@ -21,8 +22,16 @@ export async function fetchManifest(owner: string, repo: string) {
   }
 }
 
-export async function downloadOperation(version: string, url: string, localPath: string) {
-  await download(url, `${localPath}/game-${version}.zip`, ({ progress, total }) => {
+export async function downloadOperation(
+  version: string,
+  url: string,
+  localPath: string,
+  fileName?: string,
+) {
+  const finalFileName = fileName || `game-${version}.zip`
+  const fullPath = `${localPath}/${finalFileName}`
+
+  await download(url, fullPath, ({ progress, total }) => {
     const progressPercentage = Math.floor((progress * 100) / total)
 
     invoke('handle_download_progress', {

@@ -1,0 +1,148 @@
+{
+    "loader": {
+        "initializing": "Initialisierung",
+        "checking": "Suche nach Updates",
+        "downloading": "Herunterladen: {{progress}}%",
+        "ready": "Laden abgeschlossen",
+        "installing": "Installieren",
+        "error": "Unbekannter Fehler"
+    },
+    "window": {
+        "minimize": "Minimieren",
+        "close": "Schließen"
+    },
+    "sidebar": {
+        "settings": "Einstellungen"
+    },
+    "settings": {
+        "title": "Launcher-Einstellungen",
+        "general": "Allgemein",
+        "download": "Download",
+        "download_speed": "Download-Geschwindigkeit: unbegrenzt / begrenzt",
+        "notifications": "Benachrichtigungen",
+        "allow_notifications": "Desktop-Benachrichtigungen erlauben",
+        "legal": "Rechtliches",
+        "user_agreement": "Benutzervereinbarung",
+        "privacy_policy": "Datenschutzrichtlinie",
+        "language_client": "Client-Sprache",
+        "language_game": "Spiel-Sprache",
+        "startup_option": "Startoption",
+        "close_client": "Client schließen"
+    },
+    "update": {
+        "refresh_launcher": "Launcher aktualisieren",
+        "check_desc": "Prüfen, ob eine neue Version des Launchers verfügbar ist.",
+        "check": "Prüfen",
+        "ready": "Launcher ist aktuell",
+        "already_latest": "Der Launcher ist bereits auf dem neuesten Stand.",
+        "error": "Update-Fehler",
+        "error_desc": "Ein Fehler ist beim Prüfen auf Updates aufgetreten.",
+        "available": "Update verfügbar",
+        "will_restart": "Ihr Launcher wird neu gestartet, um das Update anzuwenden."
+    },
+    "language": {
+        "desciption": "Sprachauswahl",
+        "options": {
+            "en": "Englisch",
+            "fr": "Französisch",
+            "es": "Spanisch",
+            "de": "Deutsch"
+        }
+    },
+    "game": {
+        "settings_title": "Spiel-Einstellungen",
+        "infos": "Informationen",
+        "logs": "Protokolle",
+        "logs_content": "Noch keine Protokolle vorhanden.",
+        "size": "Größe",
+        "directory": "Verzeichnis",
+        "check_updates": "Nach Updates suchen",
+        "repair": "Reparieren",
+        "locate": "Spiel lokalisieren",
+        "uninstall": "Deinstallieren",
+        "download": "Herunterladen",
+        "downloading": "Herunterladen: {{progress}}%",
+        "download_complete": "Download abgeschlossen",
+        "download_complete_message": "Die Datei wurde erfolgreich heruntergeladen",
+        "install": {
+            "fetching": "Spiel-Informationen abrufen...",
+            "downloading": "{{game}} v{{version}} herunterladen...",
+            "verifying": "Datei-Integrität überprüfen...",
+            "extracting": "Spiel-Dateien extrahieren...",
+            "installing": "Installation abschließen...",
+            "cleaning": "Temporäre Dateien bereinigen...",
+            "complete": "{{game}} v{{version}} erfolgreich installiert!",
+            "update_preparing": "Update vorbereiten...",
+            "updated_from_to": "Spiel von {{oldVersion}} auf {{newVersion}} aktualisiert"
+        },
+        "uninstall_modal": {
+            "title": "Lysandra deinstallieren",
+            "description": "Diese Aktion entfernt die Spiel-Dateien von Ihrem Computer.",
+            "keep_saves_info": "Standard: Ihre Spielstände und Einstellungen bleiben erhalten.",
+            "delete_all_data": "Auch Spielstände und Einstellungen löschen",
+            "irreversible": "(unwiderruflich)",
+            "warning_complete": "⚠️ Achtung: Alle Ihre Spiel-Daten gehen unwiderruflich verloren!",
+            "cancel": "Abbrechen",
+            "confirm": "Deinstallieren",
+            "in_progress": "Deinstallieren..."
+        },
+        "install_modal": {
+            "install_title": "Installations-Ordner",
+            "update_title": "Spiel aktualisieren",
+            "locate_existing": "Ich habe dieses Spiel bereits installiert",
+            "locate_existing_desc": "Wählen Sie diese Option, wenn Sie eine bestehende Installation des Spiels lokalisieren möchten",
+            "existing_game_path": "Speicherort des Spiel-Ordners",
+            "existing_game_path_placeholder": "Wählen Sie den Ordner mit den Spiel-Dateien",
+            "installation_settings": "Installations-Einstellungen",
+            "install_path": "Installations-Ordner",
+            "install_path_placeholder": "Wählen Sie, wo das Spiel installiert werden soll",
+            "shortcuts": "Verknüpfungen",
+            "desktop_shortcut": "Desktop-Verknüpfung erstellen",
+            "start_menu_shortcut": "Startmenü-Verknüpfung erstellen",
+            "disk_space_info": "Speicherplatz-Informationen",
+            "required_space": "Benötigter Speicherplatz",
+            "recommended_space": "Empfohlener freier Speicherplatz",
+            "select_install_folder": "Installations-Ordner auswählen",
+            "locate_existing_game": "Vorhandenes Spiel lokalisieren",
+            "cancel": "Abbrechen",
+            "install_confirm": "Starten",
+            "update_confirm": "Aktualisieren",
+            "locate_confirm": "Spiel lokalisieren"
+        },
+        "actions": {
+            "title": "Aktionen",
+            "open_folder": "Ordner öffnen",
+            "open_folder_desc": "Den Ordner mit den Spiel-Dateien öffnen",
+            "game_size": "Spiel-Größe",
+            "game_size_desc": "Verwendeter Speicherplatz",
+            "uninstall_game": "Spiel deinstallieren",
+            "uninstall_game_desc": "Lysandra von Ihrem Computer entfernen"
+        },
+        "states": {
+            "checking": "Überprüfen...",
+            "downloading": "Herunterladen...",
+            "extracting": "Extrahieren...",
+            "verifying": "Überprüfen...",
+            "installing": "Installieren...",
+            "cleaning": "Bereinigen...",
+            "processing": "Verarbeiten...",
+            "update": "Aktualisieren",
+            "repair": "Reparieren",
+            "download": "Herunterladen"
+        }
+    },
+    "debug": {
+        "title": "Debug-Tools",
+        "launcher_structure": "Launcher-Struktur",
+        "launcher_structure_desc": "Ordner-Struktur in AppLocalData manuell erstellen",
+        "create_structure": "Struktur erstellen",
+        "creating": "Erstellen...",
+        "created": "Erstellt!",
+        "error": "Fehler",
+        "launcher_folder": "Launcher-Ordner",
+        "launcher_folder_desc": "AppLocalData-Ordner des Launchers anzeigen und öffnen",
+        "open": "Öffnen",
+        "copy": "Kopieren",
+        "copied": "Kopiert!"
+    }
+}

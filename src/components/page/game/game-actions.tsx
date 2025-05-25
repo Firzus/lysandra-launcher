@@ -2,81 +2,262 @@ import { LuCloudDownload, LuSettings2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 import { useTranslation } from 'react-i18next'
+import { listen } from '@tauri-apps/api/event'
+import React from 'react'
 
 import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
-import { DownloadProgress } from '@/components/page/game/download-progress'
+import { InstallGameModal, type InstallConfig } from '@/components/settings/game/features/install-game-modal'
 
-// Test
-import { downloadOperation, fetchManifest } from '@/utils/update-service'
-import { checkFileHash } from '@/utils/hash-verification'
-import { extractZip } from '@/utils/zip'
-import { writeTextFile } from '@tauri-apps/plugin-fs'
-import React from 'react'
+// State Machine & Utils
 import reducer from '@/utils/game-action-sm'
+import { initializeGameCheck } from '@/utils/game-checker'
+import { installLysandra, updateLysandra, type GameInstallProgress } from '@/utils/game-installer'
 
 export const GameActions: React.FC = () => {
-  const { t } = useTranslation()
+  const { t } = useTranslation() as any
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const {
+    isOpen: isInstallModalOpen,
+    onOpen: onInstallModalOpen,
+    onOpenChange: onInstallModalOpenChange
+  } = useDisclosure()
 
+  // State Machine
+  const [gameState, dispatch] = React.useReducer(reducer, 'idle')
   const [isDownloading, setIsDownloading] = React.useState(false)
+  const [installProgress, setInstallProgress] = React.useState<GameInstallProgress | null>(null)
+  const [downloadProgress, setDownloadProgress] = React.useState<number>(0)
+  const [pendingInstallConfig, setPendingInstallConfig] = React.useState<InstallConfig | null>(null)
 
-  const handleDownload = async () => {
-    try {
-      setIsDownloading(true)
+  // Écouter les événements de progression du téléchargement
+  React.useEffect(() => {
+    const setupProgressListener = async () => {
+      const unlisten = await listen('download-progress', (event: any) => {
+        const { progress_percentage } = event.payload
 
-      // 1. Récupérer le manifeste
-      const { version, url, hash } = await fetchManifest('Firzus', 'lysandra-vslice')
+        setDownloadProgress(progress_percentage)
+      })
 
-      const localPath = 'C:/Users/lilia/Downloads'
-      const fileName = `${localPath}/game-${version}.zip`
-
-      // 2. Appel de la fonction de téléchargement
-      await downloadOperation(version, url, localPath)
-
-      // 3. Vérification du hash
-      if (!(await checkFileHash(fileName, hash))) {
-        throw new Error('Hash verification failed')
-      }
-
-      // 4. Extraire le fichier ZIP (au même endroit)
-      await extractZip(fileName, localPath)
-
-      // 5. Sauvegarder la version localement
-      await writeTextFile(`${localPath}/version.txt`, version)
-    } catch (error) {
-      throw new Error(`Failed to download: ${error}`)
-    } finally {
-      setIsDownloading(false)
+      return unlisten
     }
 
-    // succes
-    console.log('Operation complete')
+    let unlisten: (() => void) | null = null
+
+    setupProgressListener().then((fn) => {
+      unlisten = fn
+    })
+
+    return () => {
+      if (unlisten) unlisten()
+    }
+  }, [])
+
+  // Déclencher la vérification au chargement de la page
+  React.useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        // 1. Transition Idle → Checking
+        dispatch({ type: 'SELECT_GAME' })
+
+        // 2. Vérifier l'état du jeu (qui va initialiser sa structure)
+        const result = await initializeGameCheck()
+
+        // 3. Dispatcher l'action selon le résultat
+        dispatch({ type: result.action })
+
+        if (result.error) {
+          console.error('Game check error:', result.error)
+        }
+      } catch (error) {
+        console.error('Failed to initialize app:', error)
+        dispatch({ type: 'CHECK_FAIL' })
+      }
+    }
+
+    initializeApp()
+  }, [])
+
+  const handleDownloadClick = () => {
+    // Ouvrir le modal d'installation/configuration
+    onInstallModalOpen()
+  }
+
+  const handleInstallConfirm = async (config: InstallConfig) => {
+    try {
+      setIsDownloading(true)
+      setInstallProgress(null)
+      setDownloadProgress(0)
+      setPendingInstallConfig(config)
+
+      // Déterminer si c'est une installation ou une mise à jour
+      const isUpdate = gameState === 'ready' || gameState === 'checking'
+
+      // Si l'utilisateur veut localiser un jeu existant
+      if (config.locateExistingGame && config.existingGamePath) {
+        // TODO: Implémenter la logique de localisation
+        console.log('Locating existing game at:', config.existingGamePath)
+        // Pour l'instant, on simule une localisation réussie
+        dispatch({ type: 'DOWNLOAD_COMPLETED' })
+        setInstallProgress({
+          step: 'complete',
+          message: t('game.install_modal.locate_confirm') + ' : ' + config.existingGamePath,
+        })
+        return
+      }
+
+      const installFunction = isUpdate ? updateLysandra : installLysandra
+      const actionType = isUpdate ? 'UPDATE_COMPLETED' : 'DOWNLOAD_COMPLETED'
+
+      // Lancer l'installation/mise à jour avec suivi du progrès
+      const result = await installFunction((progress) => {
+        setInstallProgress(progress)
+      })
+
+      if (result.success) {
+        console.log(`✅ ${isUpdate ? 'Update' : 'Installation'} completed successfully!`)
+        dispatch({ type: actionType })
+        setInstallProgress({
+          step: 'complete',
+          message: isUpdate
+            ? t('game.install.updated_from_to', {
+              oldVersion: 'current',
+              newVersion: result.version,
+            })
+            : t('game.install.complete', { game: 'Lysandra', version: result.version }),
+        })
+
+        // TODO: Créer les raccourcis si demandés
+        if (!isUpdate && config.createDesktopShortcut) {
+          console.log('Creating desktop shortcut...')
+        }
+        if (!isUpdate && config.createStartMenuShortcut) {
+          console.log('Creating start menu shortcut...')
+        }
+      } else {
+        console.error(`❌ ${isUpdate ? 'Update' : 'Installation'} failed:`, result.error)
+        dispatch({ type: isUpdate ? 'FAILED_TO_UPDATE' : 'FAILED_TO_DOWNLOAD' })
+        setInstallProgress({
+          step: 'complete',
+          message: `${t('debug.error')}: ${result.error}`,
+        })
+      }
+    } catch (error) {
+      console.error('Installation/Update error:', error)
+      dispatch({ type: 'CHECK_FAIL' })
+      setInstallProgress({
+        step: 'complete',
+        message: `${t('debug.error')}: ${error}`,
+      })
+    } finally {
+      setIsDownloading(false)
+      setDownloadProgress(0)
+      setPendingInstallConfig(null)
+      // Nettoyer le message après 5 secondes
+      setTimeout(() => setInstallProgress(null), 5000)
+    }
+  }
+
+  const getButtonText = () => {
+    if (gameState === 'checking') return t('game.states.checking')
+    if (isDownloading) {
+      if (installProgress?.step === 'downloading') {
+        return `${downloadProgress}%`
+      }
+
+      return installProgress?.step === 'extracting'
+        ? t('game.states.extracting')
+        : installProgress?.step === 'verifying'
+          ? t('game.states.verifying')
+          : installProgress?.step === 'installing'
+            ? t('game.states.installing')
+            : installProgress?.step === 'cleaning'
+              ? t('game.states.cleaning')
+              : t('game.states.processing')
+    }
+    if (gameState === 'ready') return t('game.states.update')
+    if (gameState === 'error' || gameState === 'waitingForRepair') return t('game.states.repair')
+
+    return t('game.states.download')
   }
 
   return (
     <div className="flex flex-col items-start">
+      {/* Debug: Affichage de l'état actuel */}
+      <div className="mb-4 text-sm text-gray-500">
+        État actuel: <span className="font-mono">{gameState}</span>
+      </div>
+
+      {/* Affichage du progrès d'installation */}
+      {installProgress && (
+        <div className="mb-4 w-full max-w-md">
+          <div
+            className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
+              ? 'animate-pulse'
+              : ''
+              }`}
+          >
+            {installProgress.message}
+          </div>
+          <div className="text-muted-foreground mb-2 text-xs">
+            Étape: <span className="font-mono">{installProgress.step}</span>
+          </div>
+
+          {/* Barre de progression pour le téléchargement */}
+          {installProgress.step === 'downloading' && (
+            <div className="h-2 w-full rounded-full bg-gray-200">
+              <div
+                className="h-2 rounded-full bg-primary transition-all duration-300 ease-out"
+                style={{ width: `${downloadProgress}%` }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="space-x-3">
         <Button
+          className={
+            (isDownloading && installProgress?.step !== 'downloading') || gameState === 'checking'
+              ? 'animate-pulse'
+              : ''
+          }
           color="primary"
-          isDisabled={isDownloading}
+          isDisabled={isDownloading || gameState === 'checking'}
           radius="lg"
           size="lg"
           startContent={<LuCloudDownload size={24} />}
-          onPress={handleDownload}
+          onPress={handleDownloadClick}
         >
-          <span className="w-24 text-end">Download</span>
+          <span className="w-24 text-end">{getButtonText()}</span>
         </Button>
 
         <Button isIconOnly radius="lg" size="lg" onPress={onOpen}>
           <LuSettings2 className="text-muted-foreground" size={24} />
         </Button>
 
-        <GameSettingsModal isOpen={isOpen} onOpenChange={onOpenChange} />
-      </div>
+        <GameSettingsModal
+          isOpen={isOpen}
+          onGameUninstalled={() => {
+            // Relancer la vérification du jeu après désinstallation
+            dispatch({ type: 'SELECT_GAME' })
+            setTimeout(async () => {
+              const result = await initializeGameCheck()
 
-      {/* Composant de progression */}
-      <DownloadProgress />
+              dispatch({ type: result.action })
+            }, 500)
+          }}
+          onOpenChange={onOpenChange}
+        />
+
+        <InstallGameModal
+          isOpen={isInstallModalOpen}
+          onOpenChange={onInstallModalOpenChange}
+          onInstallConfirm={handleInstallConfirm}
+          gameId="lysandra"
+          isUpdate={gameState === 'ready' || gameState === 'checking'}
+        />
+      </div>
     </div>
   )
 }

@@ -44,7 +44,9 @@
     "desciption": "Language selection",
     "options": {
       "en": "English",
-      "fr": "French"
+      "fr": "French",
+      "es": "Spanish",
+      "de": "German"
     }
   },
   "game": {
@@ -61,6 +63,86 @@
     "download": "Download",
     "downloading": "Downloading: {{progress}}%",
     "download_complete": "Download complete",
-    "download_complete_message": "File has been downloaded successfully"
+    "download_complete_message": "File has been downloaded successfully",
+    "install": {
+      "fetching": "Fetching game information...",
+      "downloading": "Downloading {{game}} v{{version}}...",
+      "verifying": "Verifying file integrity...",
+      "extracting": "Extracting game files...",
+      "installing": "Finalizing installation...",
+      "cleaning": "Cleaning temporary files...",
+      "complete": "{{game}} v{{version}} installed successfully!",
+      "update_preparing": "Preparing update...",
+      "updated_from_to": "Game updated from {{oldVersion}} to {{newVersion}}"
+    },
+    "uninstall_modal": {
+      "title": "Uninstall Lysandra",
+      "description": "This action will remove the game files from your computer.",
+      "keep_saves_info": "By default: Your save files and settings will be preserved.",
+      "delete_all_data": "Also delete save files and settings",
+      "irreversible": "(irreversible)",
+      "warning_complete": "⚠️ Warning: All your game data will be permanently lost!",
+      "cancel": "Cancel",
+      "confirm": "Uninstall",
+      "in_progress": "Uninstalling..."
+    },
+    "install_modal": {
+      "install_title": "Installation Folder",
+      "update_title": "Update Game",
+      "locate_existing": "I already have this game installed",
+      "locate_existing_desc": "Select this option if you want to locate an existing installation of the game",
+      "existing_game_path": "Game folder location",
+      "existing_game_path_placeholder": "Select the folder containing the game files",
+      "installation_settings": "Installation Settings",
+      "install_path": "Installation folder",
+      "install_path_placeholder": "Choose where to install the game",
+      "shortcuts": "Shortcuts",
+      "desktop_shortcut": "Create desktop shortcut",
+      "start_menu_shortcut": "Create Start Menu shortcut",
+      "disk_space_info": "Disk Space Information",
+      "required_space": "Required space",
+      "recommended_space": "Recommended free space",
+      "select_install_folder": "Select installation folder",
+      "locate_existing_game": "Locate existing game",
+      "cancel": "Cancel",
+      "install_confirm": "Launch",
+      "update_confirm": "Update",
+      "locate_confirm": "Locate Game"
+    },
+    "actions": {
+      "title": "Actions",
+      "open_folder": "Open folder",
+      "open_folder_desc": "Open the folder containing the game files",
+      "game_size": "Game size",
+      "game_size_desc": "Space used on disk",
+      "uninstall_game": "Uninstall game",
+      "uninstall_game_desc": "Remove Lysandra from your computer"
+    },
+    "states": {
+      "checking": "Checking...",
+      "downloading": "Downloading...",
+      "extracting": "Extracting...",
+      "verifying": "Verifying...",
+      "installing": "Installing...",
+      "cleaning": "Cleaning...",
+      "processing": "Processing...",
+      "update": "Update",
+      "repair": "Repair",
+      "download": "Download"
+    }
+  },
+  "debug": {
+    "title": "Debug Tools",
+    "launcher_structure": "Launcher Structure",
+    "launcher_structure_desc": "Manually create folder structure in AppLocalData",
+    "create_structure": "Create structure",
+    "creating": "Creating...",
+    "created": "Created!",
+    "error": "Error",
+    "launcher_folder": "Launcher Folder",
+    "launcher_folder_desc": "Show and open the launcher's AppLocalData folder",
+    "open": "Open",
+    "copy": "Copy",
+    "copied": "Copied!"
   }
 }

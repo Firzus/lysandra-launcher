@@ -1,4 +1,5 @@
 type GlobalInfosProps = {
+  id: number
   name: string
   owner: string
   repositoryName: string
