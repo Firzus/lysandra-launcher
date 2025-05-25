@@ -1,0 +1,167 @@
+{
+    "loader": {
+        "initializing": "Inicializando",
+        "checking": "Verificando actualizaciones",
+        "downloading": "Descargando: {{progress}}%",
+        "ready": "Carga completa",
+        "installing": "Instalando",
+        "error": "Error desconocido"
+    },
+    "window": {
+        "minimize": "Minimizar",
+        "close": "Cerrar"
+    },
+    "sidebar": {
+        "settings": "Configuración"
+    },
+    "settings": {
+        "title": "Configuración del launcher",
+        "general": "General",
+        "download": "Descarga",
+        "download_speed": "Velocidad de descarga: ilimitada / limitada",
+        "notifications": "Notificaciones",
+        "allow_notifications": "Permitir notificaciones de escritorio",
+        "legal": "Legal",
+        "user_agreement": "Acuerdo de usuario",
+        "privacy_policy": "Política de privacidad",
+        "language_client": "Idioma del cliente",
+        "language_game": "Idioma del juego",
+        "startup_option": "Opción de inicio",
+        "close_client": "Cerrar cliente",
+        "autostart": {
+            "title": "Inicio automático",
+            "description": "Iniciar automáticamente el launcher al arrancar el sistema",
+            "enable": "Activar inicio automático",
+            "error": "Error de inicio automático",
+            "enabled_success": "Inicio automático activado",
+            "disabled_success": "Inicio automático desactivado",
+            "toggle_error": "Error al cambiar la configuración de inicio automático"
+        }
+    },
+    "update": {
+        "refresh_launcher": "Actualizar launcher",
+        "check_desc": "Verificar si hay una nueva versión del launcher disponible.",
+        "check": "Verificar",
+        "ready": "Launcher actualizado",
+        "already_latest": "El launcher ya está actualizado.",
+        "error": "Error de actualización",
+        "error_desc": "Ocurrió un error al verificar las actualizaciones.",
+        "available": "Actualización disponible",
+        "will_restart": "Tu launcher se reiniciará para aplicar la actualización."
+    },
+    "language": {
+        "desciption": "Selección de idioma",
+        "options": {
+            "en": "Inglés",
+            "fr": "Francés",
+            "es": "Español",
+            "de": "Alemán"
+        }
+    },
+    "game": {
+        "settings_title": "Configuración del juego",
+        "infos": "Información",
+        "logs": "Registros",
+        "logs_content": "No hay registros aún.",
+        "size": "Tamaño",
+        "directory": "Directorio",
+        "check_updates": "Verificar actualizaciones",
+        "repair": "Reparar",
+        "locate": "Localizar juego",
+        "uninstall": "Desinstalar",
+        "download": "Descargar",
+        "downloading": "Descargando: {{progress}}%",
+        "download_complete": "Descarga completa",
+        "download_complete_message": "El archivo se ha descargado exitosamente",
+        "install": {
+            "fetching": "Obteniendo información del juego...",
+            "downloading": "Descargando {{game}} v{{version}}...",
+            "verifying": "Verificando integridad del archivo...",
+            "extracting": "Extrayendo archivos del juego...",
+            "installing": "Finalizando instalación...",
+            "cleaning": "Limpiando archivos temporales...",
+            "complete": "{{game}} v{{version}} instalado exitosamente!",
+            "update_preparing": "Preparando actualización...",
+            "updated_from_to": "Juego actualizado de {{oldVersion}} a {{newVersion}}"
+        },
+        "uninstall_modal": {
+            "title": "Desinstalar Lysandra",
+            "description": "Esta acción eliminará los archivos del juego de tu computadora.",
+            "keep_saves_info": "Por defecto: Tus partidas guardadas y configuraciones se conservarán.",
+            "delete_all_data": "Eliminar también partidas guardadas y configuraciones",
+            "irreversible": "(irreversible)",
+            "warning_complete": "⚠️ Atención: ¡Todos tus datos del juego se perderán definitivamente!",
+            "cancel": "Cancelar",
+            "confirm": "Desinstalar",
+            "in_progress": "Desinstalando..."
+        },
+        "install_modal": {
+            "install_title": "Carpeta de instalación",
+            "update_title": "Actualizar juego",
+            "locate_existing": "Ya tengo este juego instalado",
+            "locate_existing_desc": "Selecciona esta opción si quieres localizar una instalación existente del juego",
+            "existing_game_path": "Ubicación de la carpeta del juego",
+            "existing_game_path_placeholder": "Selecciona la carpeta que contiene los archivos del juego",
+            "installation_settings": "Configuración de instalación",
+            "install_path": "Carpeta de instalación",
+            "install_path_placeholder": "Elige dónde instalar el juego",
+            "shortcuts": "Accesos directos",
+            "desktop_shortcut": "Crear acceso directo en el escritorio",
+            "start_menu_shortcut": "Crear acceso directo en el menú Inicio",
+            "disk_space_info": "Información del espacio en disco",
+            "required_space": "Espacio requerido",
+            "recommended_space": "Espacio libre recomendado",
+            "select_install_folder": "Seleccionar carpeta de instalación",
+            "locate_existing_game": "Localizar juego existente",
+            "cancel": "Cancelar",
+            "install_confirm": "Lanzar",
+            "update_confirm": "Actualizar",
+            "locate_confirm": "Localizar juego"
+        },
+        "actions": {
+            "title": "Acciones",
+            "open_folder": "Abrir carpeta",
+            "open_folder_desc": "Abrir la carpeta que contiene los archivos del juego",
+            "game_size": "Tamaño del juego",
+            "game_size_desc": "Espacio utilizado en el disco",
+            "uninstall_game": "Desinstalar juego",
+            "uninstall_game_desc": "Eliminar Lysandra de tu computadora"
+        },
+        "states": {
+            "checking": "Verificando...",
+            "downloading": "Descargando...",
+            "extracting": "Extrayendo...",
+            "verifying": "Verificando...",
+            "installing": "Instalando...",
+            "cleaning": "Limpiando...",
+            "processing": "Procesando...",
+            "update": "Actualizar",
+            "repair": "Reparar",
+            "download": "Descargar"
+        }
+    },
+    "debug": {
+        "title": "Herramientas de depuración",
+        "launcher_structure": "Estructura del Launcher",
+        "launcher_structure_desc": "Crear manualmente la estructura de carpetas en AppLocalData",
+        "create_structure": "Crear estructura",
+        "creating": "Creando...",
+        "created": "¡Creado!",
+        "error": "Error",
+        "launcher_folder": "Carpeta del Launcher",
+        "launcher_folder_desc": "Mostrar y abrir la carpeta AppLocalData del launcher",
+        "open": "Abrir",
+        "copy": "Copiar",
+        "copied": "¡Copiado!"
+    },
+    "notification": {
+        "download_complete": {
+            "title": "Descarga completa",
+            "body": "¡{{game}} v{{version}} se ha instalado exitosamente!"
+        },
+        "update_complete": {
+            "title": "Actualización completa",
+            "body": "¡{{game}} se ha actualizado a la versión {{version}}!"
+        }
+    }
+}

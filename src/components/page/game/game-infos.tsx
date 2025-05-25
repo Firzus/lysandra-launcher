@@ -1,6 +1,6 @@
 import { GameCarousel } from './game-carousel'
 
-import { patchInfos } from '@/data/patch-infos'
+import { patchInfos } from '@/data/lysandra'
 
 type Props = {}
 

@@ -1,0 +1,9 @@
+{
+    "identifier": "notification",
+    "windows": [
+        "main"
+    ],
+    "permissions": [
+        "notification:default"
+    ]
+}

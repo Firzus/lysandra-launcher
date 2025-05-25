@@ -1,18 +1,34 @@
+import { Suspense, lazy, memo } from 'react'
 import { Divider } from '@heroui/divider'
 
-import { Sidebar } from '@/components/page/sidebar'
-import { LysandraGame } from '@/pages/lysandra-game'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
-export const Content: React.FC = () => {
+// Lazy loading des composants
+const Sidebar = lazy(() =>
+  import('@/components/page/sidebar').then((module) => ({ default: module.Sidebar })),
+)
+const LysandraGame = lazy(() =>
+  import('@/pages/games/lysandra-game').then((module) => ({ default: module.LysandraGame })),
+)
+
+const ContentComponent: React.FC = () => {
   return (
     <>
       {/* Navigation */}
-      <Sidebar />
+      <Suspense fallback={<div className="w-16 bg-content1" />}>
+        <Sidebar />
+      </Suspense>
 
       <Divider orientation="vertical" />
 
       {/* Pages */}
-      <LysandraGame />
+      <Suspense fallback={<LoadingSpinner />}>
+        <LysandraGame />
+      </Suspense>
     </>
   )
 }
+
+// Mémorisation du composant pour éviter les re-renders inutiles
+export const Content = memo(ContentComponent)
+Content.displayName = 'Content'

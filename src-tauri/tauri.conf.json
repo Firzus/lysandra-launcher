@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "LysandraLauncher",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "identifier": "com.lysandra.dev",
   "build": {
     "frontendDist": "../dist",
@@ -21,7 +21,6 @@
         "decorations": false,
         "backgroundColor": "#0C0A09",
         "zoomHotkeysEnabled": false,
-        "devtools": false,
         "center": true,
         "theme": "Dark",
         "browserExtensionsEnabled": false
@@ -29,13 +28,28 @@
     ],
     "security": {
       "csp": null,
-      "capabilities": ["default", "opener", "updater", "process", "dialog", "store"]
+      "capabilities": [
+        "default",
+        "opener",
+        "updater",
+        "process",
+        "dialog",
+        "store",
+        "upload",
+        "file-system",
+        "notification",
+        "desktop"
+      ]
     }
   },
   "bundle": {
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "active": true,
-    "targets": ["nsis", "appimage", "dmg"],
+    "targets": [
+      "nsis",
+      "appimage",
+      "dmg"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -66,7 +80,7 @@
   },
   "plugins": {
     "updater": {
-      "active": true,
+      "active": false,
       "dialog": false,
       "endpoints": [
         "https://github.com/Firzus/lysandra-launcher/releases/latest/download/latest.json"
