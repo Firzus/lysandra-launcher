@@ -7,6 +7,7 @@ const loadTranslations = async (language: string) => {
   try {
     // Import dynamique avec gestion explicite des langues supportées
     let translations
+
     switch (language) {
       case 'fr':
         translations = await import('@/locales/fr.json')

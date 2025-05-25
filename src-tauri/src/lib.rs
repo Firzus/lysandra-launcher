@@ -1,5 +1,5 @@
-use tauri::{Manager, Emitter};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use tauri::{Emitter, Manager};
 use tauri_plugin_http::reqwest;
 
 // Module pour la vérification d'intégrité SHA-256
@@ -24,12 +24,17 @@ fn handle_download_progress(
     total: u64,
     version: String,
 ) {
-    app_handle.emit("download-progress", ProgressEvent {
-        progress_percentage,
-        progress,
-        total,
-        version,
-    }).unwrap();
+    app_handle
+        .emit(
+            "download-progress",
+            ProgressEvent {
+                progress_percentage,
+                progress,
+                total,
+                version,
+            },
+        )
+        .unwrap();
 }
 
 #[tauri::command]
@@ -41,7 +46,7 @@ fn handle_download_complete(app_handle: tauri::AppHandle, version: String) {
 fn verify_file_integrity(file_path: String) -> Result<String, String> {
     match std::panic::catch_unwind(|| hash::compute_sha256(&file_path)) {
         Ok(hash) => Ok(hash),
-        Err(_) => Err(format!("Failed to compute hash for file: {}", file_path))
+        Err(_) => Err(format!("Failed to compute hash for file: {}", file_path)),
     }
 }
 
@@ -65,8 +70,6 @@ fn read_version_file() -> Result<String, String> {
 fn read_text_file(path: String) -> Result<String, String> {
     std::fs::read_to_string(&path).map_err(|e| e.to_string())
 }
-
-
 
 #[tauri::command]
 fn create_dir_all(path: String) -> Result<(), String> {
@@ -92,7 +95,7 @@ fn open_folder(path: String) -> Result<(), String> {
             .spawn()
             .map_err(|e| e.to_string())?;
     }
-    
+
     #[cfg(target_os = "macos")]
     {
         std::process::Command::new("open")
@@ -100,7 +103,7 @@ fn open_folder(path: String) -> Result<(), String> {
             .spawn()
             .map_err(|e| e.to_string())?;
     }
-    
+
     #[cfg(target_os = "linux")]
     {
         std::process::Command::new("xdg-open")
@@ -108,7 +111,7 @@ fn open_folder(path: String) -> Result<(), String> {
             .spawn()
             .map_err(|e| e.to_string())?;
     }
-    
+
     Ok(())
 }
 
@@ -139,31 +142,36 @@ fn get_directory_size(path: String) -> Result<u64, String> {
         }
         Ok(size)
     }
-    
+
     dir_size(std::path::Path::new(&path)).map_err(|e| e.to_string())
 }
 
 /// Initialise la structure de base du launcher (appelé au setup)
 fn initialize_launcher_structure(app_handle: &tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
-    
+
     // Obtenir le dossier app local data
-    let app_local_data_dir = app_handle.path().app_local_data_dir()
+    let app_local_data_dir = app_handle
+        .path()
+        .app_local_data_dir()
         .map_err(|e| e.to_string())?;
-    
+
     // Créer la structure de dossiers de base
     let directories = [
         app_local_data_dir.join("games"),
-        app_local_data_dir.join("config"), 
+        app_local_data_dir.join("config"),
         app_local_data_dir.join("cache"),
         app_local_data_dir.join("logs"),
     ];
-    
+
     for dir in directories {
         std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
     }
-    
-    println!("Launcher structure initialized at: {:?}", app_local_data_dir);
+
+    println!(
+        "Launcher structure initialized at: {:?}",
+        app_local_data_dir
+    );
     Ok(())
 }
 
@@ -173,26 +181,30 @@ async fn initialize_launcher_directories(app_handle: tauri::AppHandle) -> Result
 }
 
 #[tauri::command]
-async fn open_folder_dialog(app_handle: tauri::AppHandle, title: String, default_path: Option<String>) -> Result<Option<String>, String> {
-    use tauri_plugin_dialog::DialogExt;
+async fn open_folder_dialog(
+    app_handle: tauri::AppHandle,
+    title: String,
+    default_path: Option<String>,
+) -> Result<Option<String>, String> {
     use std::sync::mpsc;
-    
+    use tauri_plugin_dialog::DialogExt;
+
     let mut dialog = app_handle.dialog().file();
-    
+
     dialog = dialog.set_title(&title);
-    
+
     if let Some(path) = default_path {
         if !path.is_empty() {
             dialog = dialog.set_directory(&path);
         }
     }
-    
+
     let (tx, rx) = mpsc::channel();
-    
+
     dialog.pick_folder(move |result| {
         let _ = tx.send(result);
     });
-    
+
     match rx.recv().map_err(|e| e.to_string())? {
         Some(path) => Ok(Some(path.to_string())),
         None => Ok(None),
@@ -202,6 +214,10 @@ async fn open_folder_dialog(app_handle: tauri::AppHandle, title: String, default
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            Some(vec!["--minimized"]) // Arguments à passer au launcher lors du démarrage automatique
+        ))
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_upload::init())
@@ -214,11 +230,11 @@ pub fn run() {
                 .set_focus();
         }))
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())        
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_os::init())        
+        .plugin(tauri_plugin_os::init())
         .invoke_handler(tauri::generate_handler![
             handle_download_progress,
             handle_download_complete,
@@ -242,7 +258,7 @@ pub fn run() {
             if let Err(e) = initialize_launcher_structure(app.handle()) {
                 eprintln!("Failed to initialize launcher structure: {}", e);
             }
-            
+
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()

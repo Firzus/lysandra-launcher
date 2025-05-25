@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LazyStore } from '@tauri-apps/plugin-store'
+
 import { useSystemLanguage } from './use-system-locale'
 
 const LANGUAGE_KEY = 'language'
@@ -46,6 +47,7 @@ export function useLanguagePreference() {
         console.warn('Failed to load language preference:', error)
         // En cas d'erreur, utiliser la langue système ou fallback
         const fallbackLang = systemLanguage || 'en'
+
         if (fallbackLang !== i18n.language) {
           await i18n.changeLanguage(fallbackLang)
           setSelectedLanguage(fallbackLang)

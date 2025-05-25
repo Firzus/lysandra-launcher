@@ -27,7 +27,16 @@
     "language_client": "Client language",
     "language_game": "Game language",
     "startup_option": "Startup option",
-    "close_client": "Close client"
+    "close_client": "Close client",
+    "autostart": {
+      "title": "Auto-start",
+      "description": "Automatically launch the launcher when the system starts",
+      "enable": "Enable auto-start",
+      "error": "Autostart error",
+      "enabled_success": "Auto-start enabled",
+      "disabled_success": "Auto-start disabled",
+      "toggle_error": "Error changing auto-start setting"
+    }
   },
   "update": {
     "refresh_launcher": "Refresh launcher",

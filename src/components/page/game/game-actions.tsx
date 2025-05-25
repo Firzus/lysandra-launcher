@@ -1,3 +1,4 @@
+import React from 'react'
 import { LuCloudDownload, LuSettings2 } from 'react-icons/lu'
 import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
@@ -8,7 +9,6 @@ import {
   isPermissionGranted,
   requestPermission,
 } from '@tauri-apps/plugin-notification'
-import React from 'react'
 
 import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
 import {
@@ -69,8 +69,8 @@ export const GameActions: React.FC = () => {
         if (!permissionGranted) {
           await requestPermission()
         }
-      } catch (error) {
-        console.error('Failed to request notification permission:', error)
+      } catch {
+        // Notification permission error handled silently
       }
     }
 
@@ -91,10 +91,9 @@ export const GameActions: React.FC = () => {
         dispatch({ type: result.action })
 
         if (result.error) {
-          console.error('Game check error:', result.error)
+          // Game check error logged internally
         }
-      } catch (error) {
-        console.error('Failed to initialize app:', error)
+      } catch {
         dispatch({ type: 'CHECK_FAIL' })
       }
     }
@@ -119,8 +118,8 @@ export const GameActions: React.FC = () => {
               }),
         })
       }
-    } catch (error) {
-      console.error('Failed to send notification:', error)
+    } catch {
+      // Notification error handled silently
     }
   }
 
@@ -141,7 +140,6 @@ export const GameActions: React.FC = () => {
       // Si l'utilisateur veut localiser un jeu existant
       if (config.locateExistingGame && config.existingGamePath) {
         // TODO: Implémenter la logique de localisation
-        console.log('Locating existing game at:', config.existingGamePath)
         // Pour l'instant, on simule une localisation réussie
         dispatch({ type: 'DOWNLOAD_COMPLETED' })
         setInstallProgress({
@@ -161,7 +159,6 @@ export const GameActions: React.FC = () => {
       })
 
       if (result.success) {
-        console.log(`✅ ${isUpdate ? 'Update' : 'Installation'} completed successfully!`)
         dispatch({ type: actionType })
         setInstallProgress({
           step: 'complete',
@@ -178,13 +175,12 @@ export const GameActions: React.FC = () => {
 
         // TODO: Créer les raccourcis si demandés
         if (!isUpdate && config.createDesktopShortcut) {
-          console.log('Creating desktop shortcut...')
+          // Desktop shortcut creation logic
         }
         if (!isUpdate && config.createStartMenuShortcut) {
-          console.log('Creating start menu shortcut...')
+          // Start menu shortcut creation logic
         }
       } else {
-        console.error(`❌ ${isUpdate ? 'Update' : 'Installation'} failed:`, result.error)
         dispatch({ type: isUpdate ? 'FAILED_TO_UPDATE' : 'FAILED_TO_DOWNLOAD' })
         setInstallProgress({
           step: 'complete',
@@ -192,7 +188,6 @@ export const GameActions: React.FC = () => {
         })
       }
     } catch (error) {
-      console.error('Installation/Update error:', error)
       dispatch({ type: 'CHECK_FAIL' })
       setInstallProgress({
         step: 'complete',

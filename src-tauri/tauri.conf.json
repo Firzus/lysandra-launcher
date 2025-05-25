@@ -37,7 +37,8 @@
         "store",
         "upload",
         "file-system",
-        "notification"
+        "notification",
+        "desktop"
       ]
     }
   },

@@ -27,7 +27,16 @@
         "language_client": "Client-Sprache",
         "language_game": "Spiel-Sprache",
         "startup_option": "Startoption",
-        "close_client": "Client schließen"
+        "close_client": "Client schließen",
+        "autostart": {
+            "title": "Autostart",
+            "description": "Launcher automatisch beim Systemstart starten",
+            "enable": "Autostart aktivieren",
+            "error": "Autostart-Fehler",
+            "enabled_success": "Autostart aktiviert",
+            "disabled_success": "Autostart deaktiviert",
+            "toggle_error": "Fehler beim Ändern der Autostart-Einstellung"
+        }
     },
     "update": {
         "refresh_launcher": "Launcher aktualisieren",

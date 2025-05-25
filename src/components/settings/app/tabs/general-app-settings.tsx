@@ -2,6 +2,7 @@ import { Card, CardBody } from '@heroui/card'
 import { useTranslation } from 'react-i18next'
 
 import { LanguageSwitcher } from '../features/language-switcher'
+import { AutostartToggle } from '../features/autostart-toggle'
 import { DebugLauncherStructure } from '../features/debug-launcher-structure'
 import { DebugShowLauncherPath } from '../features/debug-show-launcher-path'
 
@@ -27,6 +28,18 @@ export const GeneralAppSettings: React.FC = () => {
         <CardBody className="flex-row justify-between">
           <p>{t('language.desciption')}</p>
           <LanguageSwitcher className="ml-6" />
+        </CardBody>
+      </Card>
+
+      <p className="text-muted-foreground mb-2 mt-4">{t('settings.autostart.title')}</p>
+      {/* Autostart Option */}
+      <Card shadow="none">
+        <CardBody className="flex-row justify-between">
+          <div>
+            <p className="font-medium">{t('settings.autostart.title')}</p>
+            <p className="text-muted-foreground text-xs">{t('settings.autostart.description')}</p>
+          </div>
+          <AutostartToggle className="ml-6" />
         </CardBody>
       </Card>
 

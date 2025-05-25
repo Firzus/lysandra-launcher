@@ -20,9 +20,8 @@ export const DebugShowLauncherPath: React.FC<Props> = ({ className }) => {
       const launcherPath = await getLauncherRootPath()
 
       setPath(launcherPath)
-      console.log('📁 Launcher path:', launcherPath)
-    } catch (error) {
-      console.error('Failed to get launcher path:', error)
+    } catch {
+      // Error getting launcher path
     }
   }
 
@@ -36,8 +35,8 @@ export const DebugShowLauncherPath: React.FC<Props> = ({ className }) => {
 
       // Ouvrir le dossier dans l'explorateur
       await invoke('open_folder', { path })
-    } catch (error) {
-      console.error('Failed to open folder:', error)
+    } catch {
+      // Error opening folder
     }
   }
 
@@ -53,8 +52,8 @@ export const DebugShowLauncherPath: React.FC<Props> = ({ className }) => {
       setCopied(true)
 
       setTimeout(() => setCopied(false), 2000)
-    } catch (error) {
-      console.error('Failed to copy path:', error)
+    } catch {
+      // Error copying path
     }
   }
 

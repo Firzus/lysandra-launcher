@@ -27,7 +27,16 @@
         "language_client": "Idioma del cliente",
         "language_game": "Idioma del juego",
         "startup_option": "Opción de inicio",
-        "close_client": "Cerrar cliente"
+        "close_client": "Cerrar cliente",
+        "autostart": {
+            "title": "Inicio automático",
+            "description": "Iniciar automáticamente el launcher al arrancar el sistema",
+            "enable": "Activar inicio automático",
+            "error": "Error de inicio automático",
+            "enabled_success": "Inicio automático activado",
+            "disabled_success": "Inicio automático desactivado",
+            "toggle_error": "Error al cambiar la configuración de inicio automático"
+        }
     },
     "update": {
         "refresh_launcher": "Actualizar launcher",

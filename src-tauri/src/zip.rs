@@ -8,7 +8,10 @@ use ::zip::ZipArchive;
 /// Sanitize ZIP file entries to avoid path traversal attacks
 fn sanitize_zip_path(entry: &str) -> Option<PathBuf> {
     let path = Path::new(entry);
-    if path.components().any(|c| matches!(c, std::path::Component::ParentDir)) {
+    if path
+        .components()
+        .any(|c| matches!(c, std::path::Component::ParentDir))
+    {
         None
     } else {
         Some(path.to_path_buf())
@@ -19,12 +22,16 @@ fn sanitize_zip_path(entry: &str) -> Option<PathBuf> {
 #[tauri::command]
 pub fn extract_zip_file(file_path: String, extract_to: String) -> Result<(), String> {
     let zip_file = File::open(&file_path).map_err(|e| format!("❌ Failed to open zip: {}", e))?;
-    let mut archive = ZipArchive::new(zip_file).map_err(|e| format!("❌ Invalid zip archive: {}", e))?;
+    let mut archive =
+        ZipArchive::new(zip_file).map_err(|e| format!("❌ Invalid zip archive: {}", e))?;
 
-    fs::create_dir_all(&extract_to).map_err(|e| format!("❌ Failed to create output dir: {}", e))?;
+    fs::create_dir_all(&extract_to)
+        .map_err(|e| format!("❌ Failed to create output dir: {}", e))?;
 
     for i in 0..archive.len() {
-        let mut file = archive.by_index(i).map_err(|e| format!("❌ Cannot access entry: {}", e))?;
+        let mut file = archive
+            .by_index(i)
+            .map_err(|e| format!("❌ Cannot access entry: {}", e))?;
         let entry_name = file.name();
 
         let relative_path = match sanitize_zip_path(entry_name) {

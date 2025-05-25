@@ -37,7 +37,6 @@ export const DebugLauncherStructure: React.FC<Props> = ({ className }) => {
         setMessage('')
       }, 3000)
     } catch (error) {
-      console.error('Failed to create launcher structure:', error)
       setStatus('error')
       setMessage(error instanceof Error ? error.message : t('debug.error'))
 

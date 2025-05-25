@@ -16,11 +16,13 @@ export function useSystemLocale() {
       setError(null)
 
       const detectedLocale = await locale()
+
       setSystemLocale(detectedLocale)
 
       console.log('System locale detected:', detectedLocale)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to detect system locale'
+
       setError(errorMessage)
       console.error('Error detecting system locale:', err)
     } finally {
@@ -62,5 +64,6 @@ export function useSystemLocale() {
  */
 export function useSystemLanguage() {
   const { languageCode, isLoading, error } = useSystemLocale()
+
   return { languageCode, isLoading, error }
 }
