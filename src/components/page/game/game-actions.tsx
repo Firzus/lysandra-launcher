@@ -3,11 +3,18 @@ import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 import { useTranslation } from 'react-i18next'
 import { listen } from '@tauri-apps/api/event'
-import { sendNotification, isPermissionGranted, requestPermission } from '@tauri-apps/plugin-notification'
+import {
+  sendNotification,
+  isPermissionGranted,
+  requestPermission,
+} from '@tauri-apps/plugin-notification'
 import React from 'react'
 
 import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
-import { InstallGameModal, type InstallConfig } from '@/components/settings/game/features/install-game-modal'
+import {
+  InstallGameModal,
+  type InstallConfig,
+} from '@/components/settings/game/features/install-game-modal'
 
 // State Machine & Utils
 import reducer from '@/utils/game-action-sm'
@@ -21,7 +28,7 @@ export const GameActions: React.FC = () => {
   const {
     isOpen: isInstallModalOpen,
     onOpen: onInstallModalOpen,
-    onOpenChange: onInstallModalOpenChange
+    onOpenChange: onInstallModalOpenChange,
   } = useDisclosure()
 
   // State Machine
@@ -58,6 +65,7 @@ export const GameActions: React.FC = () => {
     const requestNotificationPermission = async () => {
       try {
         const permissionGranted = await isPermissionGranted()
+
         if (!permissionGranted) {
           await requestPermission()
         }
@@ -97,12 +105,18 @@ export const GameActions: React.FC = () => {
   const sendDownloadCompleteNotification = async (isUpdate: boolean, version?: string) => {
     try {
       const permissionGranted = await isPermissionGranted()
+
       if (permissionGranted) {
         await sendNotification({
-          title: isUpdate ? t('notification.update_complete.title') : t('notification.download_complete.title'),
+          title: isUpdate
+            ? t('notification.update_complete.title')
+            : t('notification.download_complete.title'),
           body: isUpdate
             ? t('notification.update_complete.body', { version: version || 'unknown' })
-            : t('notification.download_complete.body', { game: 'Lysandra', version: version || 'unknown' }),
+            : t('notification.download_complete.body', {
+                game: 'Lysandra',
+                version: version || 'unknown',
+              }),
         })
       }
     } catch (error) {
@@ -134,6 +148,7 @@ export const GameActions: React.FC = () => {
           step: 'complete',
           message: t('game.install_modal.locate_confirm') + ' : ' + config.existingGamePath,
         })
+
         return
       }
 
@@ -152,9 +167,9 @@ export const GameActions: React.FC = () => {
           step: 'complete',
           message: isUpdate
             ? t('game.install.updated_from_to', {
-              oldVersion: 'current',
-              newVersion: result.version,
-            })
+                oldVersion: 'current',
+                newVersion: result.version,
+              })
             : t('game.install.complete', { game: 'Lysandra', version: result.version }),
         })
 
@@ -225,10 +240,11 @@ export const GameActions: React.FC = () => {
       {installProgress && (
         <div className="mb-4 w-full max-w-md">
           <div
-            className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
-              ? 'animate-pulse'
-              : ''
-              }`}
+            className={`text-muted-foreground mb-1 text-sm ${
+              installProgress.step !== 'downloading' && installProgress.step !== 'complete'
+                ? 'animate-pulse'
+                : ''
+            }`}
           >
             {installProgress.message}
           </div>
@@ -284,11 +300,11 @@ export const GameActions: React.FC = () => {
         />
 
         <InstallGameModal
-          isOpen={isInstallModalOpen}
-          onOpenChange={onInstallModalOpenChange}
-          onInstallConfirm={handleInstallConfirm}
           gameId="lysandra"
+          isOpen={isInstallModalOpen}
           isUpdate={gameState === 'ready' || gameState === 'checking'}
+          onInstallConfirm={handleInstallConfirm}
+          onOpenChange={onInstallModalOpenChange}
         />
       </div>
     </div>

@@ -1,53 +1,98 @@
-import React from 'react'
+import { useCallback, useMemo, useState, useEffect } from 'react'
 import { check, type DownloadEvent } from '@tauri-apps/plugin-updater'
 import { relaunch } from '@tauri-apps/plugin-process'
 
 type Status = 'idle' | 'checking' | 'downloading' | 'installing' | 'ready' | 'error'
 
+type UpdateState = {
+  status: Status
+  progress: number
+  error?: string
+}
+
 export function useAutoAppUpdate() {
-  const [status, setStatus] = React.useState<Status>('idle')
-  const [progress, setProgress] = React.useState(0)
-  const [error, setError] = React.useState<string>()
+  const [state, setState] = useState<UpdateState>({
+    status: 'idle',
+    progress: 0,
+  })
 
-  React.useEffect(() => {
-    ;(async () => {
-      setStatus('checking')
-      try {
-        const update = await check() // retourne Update | null :contentReference[oaicite:0]{index=0}
-
-        if (!update) {
-          setStatus('ready')
-
-          return
-        }
-        setStatus('downloading')
-
-        let total = 0
-
-        // downloadAndInstall prend un callback (DownloadEvent) :contentReference[oaicite:1]{index=1}
-        await update.downloadAndInstall((event: DownloadEvent) => {
-          switch (event.event) {
-            case 'Started':
-              // reçoit la taille totale (en octets)
-              total = event.data.contentLength ?? 0
-              break
-            case 'Progress':
-              // event.data.chunkLength = octets reçus depuis le dernier appel
-              setProgress(Math.round((event.data.chunkLength / total) * 100))
-              break
-            // on peut aussi gérer 'Cancelled' ou 'Completed' si besoin
-          }
-        })
-
-        setStatus('installing')
-        // relance l'app une fois l'installation terminée
-        await relaunch() // nécessite @tauri-apps/plugin-process :contentReference[oaicite:2]{index=2}
-      } catch (e) {
-        setError((e as Error).message)
-        setStatus('error')
-      }
-    })()
+  const updateStatus = useCallback((newStatus: Status) => {
+    setState((prev: UpdateState) => ({ ...prev, status: newStatus }))
   }, [])
 
-  return { status, progress, error }
+  const updateProgress = useCallback((progress: number) => {
+    setState((prev: UpdateState) => ({ ...prev, progress }))
+  }, [])
+
+  const setError = useCallback((error: string) => {
+    setState((prev: UpdateState) => ({ ...prev, error, status: 'error' }))
+  }, [])
+
+  const handleDownloadProgress = useCallback(
+    (event: DownloadEvent, total: number) => {
+      switch (event.event) {
+        case 'Progress':
+          const progress = total > 0 ? Math.round((event.data.chunkLength / total) * 100) : 0
+
+          updateProgress(progress)
+          break
+      }
+    },
+    [updateProgress],
+  )
+
+  const checkForUpdates = useCallback(async () => {
+    try {
+      updateStatus('checking')
+
+      const update = await check()
+
+      if (!update) {
+        updateStatus('ready')
+
+        return
+      }
+
+      updateStatus('downloading')
+      let total = 0
+
+      await update.downloadAndInstall((event: DownloadEvent) => {
+        switch (event.event) {
+          case 'Started':
+            total = event.data.contentLength ?? 0
+            break
+          case 'Progress':
+            handleDownloadProgress(event, total)
+            break
+        }
+      })
+
+      updateStatus('installing')
+      await relaunch()
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error'
+
+      setError(errorMessage)
+    }
+  }, [updateStatus, handleDownloadProgress, setError])
+
+  useEffect(() => {
+    checkForUpdates()
+  }, [checkForUpdates])
+
+  // Mémorisation du résultat pour éviter les re-renders inutiles
+  return useMemo(
+    () => ({
+      status: state.status,
+      progress: state.progress,
+      error: state.error,
+      isLoading:
+        state.status === 'checking' ||
+        state.status === 'downloading' ||
+        state.status === 'installing',
+      isReady: state.status === 'ready',
+      hasError: state.status === 'error',
+    }),
+    [state],
+  )
 }
