@@ -14,5 +14,5 @@ pub fn compute_sha256(path: &str) -> Result<String, std::io::Error> {
         }
         hasher.update(&buffer[..n]);
     }
-    format!("{:x}", hasher.finalize())
+    Ok(format!("{:x}", hasher.finalize()))
 }

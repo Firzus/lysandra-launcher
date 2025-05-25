@@ -45,7 +45,10 @@ fn handle_download_complete(app_handle: tauri::AppHandle, version: String) {
 #[tauri::command]
 fn verify_file_integrity(file_path: String) -> Result<String, String> {
     match std::panic::catch_unwind(|| hash::compute_sha256(&file_path)) {
-        Ok(hash) => Ok(hash),
+        Ok(hash_result) => match hash_result {
+            Ok(hash) => Ok(hash),
+            Err(e) => Err(format!("IO error computing hash for file {}: {}", file_path, e)),
+        },
         Err(_) => Err(format!("Failed to compute hash for file: {}", file_path)),
     }
 }
