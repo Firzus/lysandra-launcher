@@ -32,15 +32,11 @@ export function useLauncherIntegrity() {
       setStatus('checking')
       setError(null)
 
-      // Vérifier et recréer la structure si nécessaire
       await ensureLauncherDirectories()
-
-      console.log('✅ Launcher structure verified/created')
       setStatus('ready')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-
-      console.error('❌ Failed to verify launcher structure:', errorMessage)
+      console.error('Failed to verify launcher structure:', errorMessage, err)
       setError(errorMessage)
     }
   }, [setStatus, setError])

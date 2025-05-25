@@ -5,8 +5,8 @@
   "identifier": "com.lysandra.dev",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "vite",
     "beforeBuildCommand": "npm run build"
   },
   "app": {
@@ -20,10 +20,8 @@
         "resizable": false,
         "decorations": false,
         "backgroundColor": "#0C0A09",
-        "zoomHotkeysEnabled": false,
         "center": true,
-        "theme": "Dark",
-        "browserExtensionsEnabled": false
+        "theme": "Dark"
       }
     ],
     "security": {
@@ -56,36 +54,11 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ],
-    "windows": {
-      "certificateThumbprint": null,
-      "webviewInstallMode": {
-        "silent": true,
-        "type": "downloadBootstrapper"
-      },
-      "nsis": {
-        "installerIcon": "icons/icon.ico"
-      }
-    },
-    "linux": {
-      "appimage": {
-        "bundleMediaFramework": false,
-        "files": {}
-      }
-    },
-    "macOS": {
-      "hardenedRuntime": true,
-      "minimumSystemVersion": "10.13"
-    }
+    ]
   },
   "plugins": {
     "updater": {
-      "active": false,
-      "dialog": false,
-      "endpoints": [
-        "https://github.com/Firzus/lysandra-launcher/releases/latest/download/latest.json"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkxRjgyNzU4MkVEODY3QTkKUldTcFo5Z3VXQ2Y0a1hDbTdlZkNUL0ZEenVCT1ErRzNtTVg5eEl4b2dwVllSR05pUjhhM3lZcXAK"
+      "active": false
     }
   }
 }

@@ -12,6 +12,8 @@ const LysandraGame = lazy(() =>
 )
 
 const ContentComponent: React.FC = () => {
+  console.log('📄 Content: Component rendering...')
+  
   return (
     <>
       {/* Navigation */}

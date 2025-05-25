@@ -4,17 +4,12 @@
   "version": "0.0.4",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "tauri dev",
     "build": "tsc && vite build",
-    "build:analyze": "tsc && vite build --mode analyze",
     "build:local": "tauri build",
     "build:prod": "cross-env TAURI_CONFIG_PLUGINS_UPDATER_ACTIVE=true TAURI_CONFIG_BUNDLE_CREATEUPDATERARTIFACTS=true tauri build",
     "lint": "eslint --fix",
-    "lint:performance": "eslint --ext .ts,.tsx src/ --rule 'react-hooks/exhaustive-deps: error'",
-    "preview": "vite preview",
-    "tauri": "tauri",
-    "perf:dev": "vite --mode development --profile",
-    "perf:build": "npm run build && npm run preview"
+    "tauri": "tauri"
   },
   "dependencies": {
     "@heroui/alert": "^2.2.19",

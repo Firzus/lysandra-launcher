@@ -6,5 +6,4 @@ alwaysApply: true
 - use Type instead of Interface for Typescript declarations
 - use context7 for framework's documentation
 - propose une traduction pour chaque mot sauf les noms propre dans l'application avec i18n.
-
 - N'execute pas de commandes pour lancer le serveur comme "npx tauri dev"

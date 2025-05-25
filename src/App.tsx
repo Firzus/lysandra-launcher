@@ -33,20 +33,19 @@ export default function App() {
       installing: t('loader.installing'),
       error: t('loader.error'),
     }
-
     return messages[status]
   }, [status, progress, t])
 
   // Attendre que tous les systèmes soient prêts
   const isLoading = useMemo(() => {
-    return (
-      isLanguageLoading || (status !== 'ready' && status !== 'error') || !launcherIntegrity.isReady
-    )
-  }, [isLanguageLoading, status, launcherIntegrity.isReady])
+    // En cas d'erreur d'intégrité, on continue quand même le chargement
+    return isLanguageLoading || (status !== 'ready' && status !== 'error')
+  }, [isLanguageLoading, status])
 
-  // Afficher l'erreur de structure si elle existe
+  // Afficher l'erreur de structure si elle existe mais ne pas bloquer
   if (launcherIntegrity.hasError) {
-    console.error('Launcher integrity error:', launcherIntegrity.error)
+    // Garder un avertissement discret peut être utile ici
+    console.warn('Launcher integrity warning:', launcherIntegrity.error)
   }
 
   return (
@@ -54,6 +53,9 @@ export default function App() {
       {/* System */}
       <DragZone />
       <WindowControls />
+
+      {/* Debug Tools - Supprimé */}
+      {/* <DevToolsToggle className="absolute bottom-2 right-2 z-50" /> */}
 
       {/* Content */}
       {isLoading ? (
