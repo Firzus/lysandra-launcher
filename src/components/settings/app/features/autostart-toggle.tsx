@@ -1,4 +1,4 @@
-import { Checkbox } from '@heroui/checkbox'
+import { Switch } from '@heroui/switch'
 import { Spinner } from '@heroui/spinner'
 import { useTranslation } from 'react-i18next'
 
@@ -27,14 +27,14 @@ export const AutostartToggle: React.FC<Props> = ({ className }) => {
   return (
     <div className={`${className} flex items-center gap-2`}>
       {isLoading && <Spinner size="sm" />}
-      <Checkbox
+      <Switch
         isDisabled={isLoading}
         isSelected={isAutostartEnabled}
         size="sm"
         onValueChange={handleToggle}
       >
         {t('settings.autostart.enable')}
-      </Checkbox>
+      </Switch>
     </div>
   )
 }
