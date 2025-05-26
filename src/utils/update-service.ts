@@ -53,7 +53,8 @@ export async function downloadOperation(
     console.log(`📥 Starting download: ${url} -> ${fullPath}`)
 
     await download(url, fullPath, ({ progress, total }) => {
-      const progressPercentage = Math.floor((progress * 100) / total)
+      // Calcul plus précis du pourcentage basé sur les bytes
+      const progressPercentage = total > 0 ? Math.round((progress * 100) / total) : 0
 
       invoke('handle_download_progress', {
         progressPercentage,

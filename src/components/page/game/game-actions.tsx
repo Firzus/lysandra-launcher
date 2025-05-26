@@ -48,8 +48,10 @@ export const GameActions: React.FC = () => {
   React.useEffect(() => {
     const setupProgressListener = async () => {
       const unlisten = await listen('download-progress', (event: any) => {
-        const { progress_percentage } = event.payload
-        setDownloadProgress(progress_percentage)
+        const { progress, total } = event.payload
+        // Recalculer le pourcentage directement à partir des bytes pour plus de précision
+        const calculatedProgress = total > 0 ? Math.round((progress * 100) / total) : 0
+        setDownloadProgress(calculatedProgress)
       })
       return unlisten
     }
@@ -280,9 +282,9 @@ export const GameActions: React.FC = () => {
 
       case 'downloading':
         return {
-          text: installProgress?.step === 'downloading'
+          text: downloadProgress > 0
             ? `${downloadProgress}%`
-            : t(`game.install.${installProgress?.step || 'processing'}`),
+            : installProgress?.message || t('game.states.downloading'),
           icon: LuCloudDownload,
           disabled: true,
           loading: true,
@@ -298,9 +300,9 @@ export const GameActions: React.FC = () => {
 
       case 'updating':
         return {
-          text: installProgress?.step === 'downloading'
+          text: downloadProgress > 0
             ? `${downloadProgress}%`
-            : t(`game.install.${installProgress?.step || 'processing'}`),
+            : installProgress?.message || t('game.states.downloading'),
           icon: LuCloudDownload,
           disabled: true,
           loading: true,
@@ -368,10 +370,7 @@ export const GameActions: React.FC = () => {
 
   return (
     <div className="flex flex-col items-start">
-      {/* Debug: Affichage de l'état actuel */}
-      <div className="mb-4 text-sm text-gray-500">
-        État actuel: <span className="font-mono">{gameState}</span>
-      </div>
+
 
       {/* Affichage des erreurs */}
       {errorMessage && gameState === 'error' && (
@@ -449,7 +448,7 @@ export const GameActions: React.FC = () => {
         )}
 
         <Button
-          className={buttonConfig.loading ? 'animate-pulse' : ''}
+          className={`${buttonConfig.loading ? 'animate-pulse' : ''} min-w-40`}
           color="primary"
           isDisabled={buttonConfig.disabled}
           radius="lg"
@@ -457,22 +456,31 @@ export const GameActions: React.FC = () => {
           startContent={<buttonConfig.icon size={24} />}
           onPress={handlePrimaryAction}
         >
-          <span className="w-24 text-end">{buttonConfig.text}</span>
+          <span className="w-32 text-center">{buttonConfig.text}</span>
         </Button>
 
         <GameSettingsModal
           isOpen={isOpen}
           onGameUninstalled={async () => {
-            dispatch({ type: 'SELECT_GAME' })
+            // 1. Réinitialiser les états locaux
+            setInstallProgress(null)
+            setRepairProgress(null)
+            setDownloadProgress(0)
+            setErrorMessage(null)
+            setIsProcessing(false)
 
-            // Mettre à jour l'état d'installation après désinstallation
+            // 2. Mettre à jour l'état d'installation
             const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
             setGameInstalled(installed)
 
+            // 3. Relancer la vérification complète du jeu
+            dispatch({ type: 'SELECT_GAME' })
+
+            // Attendre un court délai pour s'assurer que les fichiers sont bien supprimés
             setTimeout(async () => {
               const result = await initializeGameCheck()
               dispatch({ type: result.action })
-            }, 500)
+            }, 300)
           }}
           onOpenChange={onOpenChange}
         />

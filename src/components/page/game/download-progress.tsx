@@ -3,9 +3,9 @@ import { listen } from '@tauri-apps/api/event'
 import { useTranslation } from 'react-i18next'
 
 type ProgressEvent = {
-  progress_percentage: number
-  progress: number
-  total: number
+  progress_percentage: number // Gardé pour compatibilité backend
+  progress: number // Bytes téléchargés
+  total: number // Taille totale en bytes
   version: string
 }
 
@@ -22,7 +22,13 @@ export const DownloadProgress: React.FC = () => {
     // Écouter les événements de progression
     const unlisten1 = listen<ProgressEvent>('download-progress', (event) => {
       setIsDownloading(true)
-      setProgress(event.payload.progress_percentage)
+
+      // Recalculer le pourcentage directement à partir des bytes pour plus de précision
+      const calculatedProgress = event.payload.total > 0
+        ? Math.round((event.payload.progress * 100) / event.payload.total)
+        : 0
+
+      setProgress(calculatedProgress)
       setVersion(event.payload.version)
 
       // Convertir bytes en MB pour un affichage plus convivial

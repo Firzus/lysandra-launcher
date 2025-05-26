@@ -169,10 +169,10 @@ async function findGameExecutable(installPath: string, gameId: string): Promise<
  */
 async function checkUnityProcessRunning(): Promise<boolean> {
   try {
-    // TODO: Implémenter la détection de processus Unity spécifique
-    // Pour l'instant, on retourne false par défaut
-    // Dans une version future, on pourrait chercher des processus avec "Unity" dans le nom
-    return false
+    console.log('🔍 Checking for Unity/game processes...')
+    const isRunning = await invoke<boolean>('check_unity_process_running')
+    console.log(`🎮 Unity process running: ${isRunning}`)
+    return isRunning
   } catch (error) {
     console.error('Failed to check Unity process:', error)
     return false

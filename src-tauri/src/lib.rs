@@ -150,6 +150,77 @@ fn check_process_running(pid: u32) -> Result<bool, String> {
 }
 
 #[tauri::command]
+fn check_unity_process_running() -> Result<bool, String> {
+    use std::process::Command;
+    
+    // Sur Windows, utiliser tasklist pour chercher des processus Unity
+    #[cfg(target_os = "windows")]
+    {
+        let output = Command::new("tasklist")
+            .args(&["/FO", "CSV"])
+            .output()
+            .map_err(|e| format!("Failed to list processes: {}", e))?;
+        
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        
+        // Chercher des processus qui pourraient être des jeux Unity
+        let unity_indicators = [
+            "Unity",
+            "UnityPlayer",
+            "Lysandra",
+            "lysandra",
+            "Game.exe",
+            "game.exe"
+        ];
+        
+        for line in output_str.lines() {
+            let line_lower = line.to_lowercase();
+            for indicator in &unity_indicators {
+                if line_lower.contains(&indicator.to_lowercase()) {
+                    println!("🎮 Found potential game process: {}", line);
+                    return Ok(true);
+                }
+            }
+        }
+        
+        Ok(false)
+    }
+    
+    // Sur Unix, utiliser ps
+    #[cfg(not(target_os = "windows"))]
+    {
+        let output = Command::new("ps")
+            .args(&["aux"])
+            .output()
+            .map_err(|e| format!("Failed to list processes: {}", e))?;
+        
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        
+        // Chercher des processus qui pourraient être des jeux Unity
+        let unity_indicators = [
+            "Unity",
+            "UnityPlayer",
+            "Lysandra",
+            "lysandra",
+            "Game",
+            "game"
+        ];
+        
+        for line in output_str.lines() {
+            let line_lower = line.to_lowercase();
+            for indicator in &unity_indicators {
+                if line_lower.contains(&indicator.to_lowercase()) {
+                    println!("🎮 Found potential game process: {}", line);
+                    return Ok(true);
+                }
+            }
+        }
+        
+        Ok(false)
+    }
+}
+
+#[tauri::command]
 fn get_directory_size(path: String) -> Result<u64, String> {
     use std::fs;
     use std::path::Path;
@@ -338,6 +409,7 @@ pub fn run() {
             check_file_exists,
             launch_game_executable,
             check_process_running,
+            check_unity_process_running,
             get_directory_size,
             delete_file,
             delete_directory,
