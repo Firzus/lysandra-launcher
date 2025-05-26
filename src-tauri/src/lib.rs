@@ -15,6 +15,15 @@ pub struct ProgressEvent {
     pub version: String,
 }
 
+// Structure pour les événements de désinstallation
+#[derive(Clone, Serialize, Deserialize)]
+pub struct UninstallEvent {
+    pub game_id: String,
+    pub step: String,
+    pub message: String,
+    pub success: bool,
+}
+
 // Commandes Tauri
 #[tauri::command]
 fn handle_download_progress(
@@ -41,6 +50,26 @@ fn handle_download_progress(
 fn handle_download_complete(app_handle: tauri::AppHandle, version: String) {
     if let Err(e) = app_handle.emit("download-complete", version) {
         eprintln!("Failed to emit download-complete event: {}", e);
+    }
+}
+
+#[tauri::command]
+fn emit_uninstall_event(
+    app_handle: tauri::AppHandle,
+    game_id: String,
+    step: String,
+    message: String,
+    success: bool,
+) {
+    let event = UninstallEvent {
+        game_id,
+        step,
+        message,
+        success,
+    };
+    
+    if let Err(e) = app_handle.emit("game-uninstall", event) {
+        eprintln!("Failed to emit game-uninstall event: {}", e);
     }
 }
 
@@ -399,6 +428,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             handle_download_progress,
             handle_download_complete,
+            emit_uninstall_event,
             verify_file_integrity,
             fetch_manifest_from_github,
             read_version_file,

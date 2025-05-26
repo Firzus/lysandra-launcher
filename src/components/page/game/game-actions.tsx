@@ -22,6 +22,8 @@ import { repairGame, type GameRepairProgress } from '@/utils/game-repair'
 import { launchGame, startGameProcessMonitoring } from '@/utils/game-launcher'
 import { isGameInstalled } from '@/utils/game-uninstaller'
 import { GAME_IDS } from '@/utils/paths'
+import type { UninstallEvent } from '@/types/uninstall'
+import { syncDebugger } from '@/utils/debug-sync'
 
 export const GameActions: React.FC = () => {
   const { t } = useTranslation() as any
@@ -43,6 +45,7 @@ export const GameActions: React.FC = () => {
   const [downloadProgress, setDownloadProgress] = React.useState<number>(0)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [gameInstalled, setGameInstalled] = React.useState<boolean>(false)
+  const [uninstallProgress, setUninstallProgress] = React.useState<string | null>(null)
 
   // Écouter les événements de progression du téléchargement
   React.useEffect(() => {
@@ -63,6 +66,71 @@ export const GameActions: React.FC = () => {
 
     return () => {
       if (unlisten) unlisten()
+    }
+  }, [])
+
+  // Écouter les événements de désinstallation
+  React.useEffect(() => {
+    const setupUninstallListener = async () => {
+      const unlisten = await listen<UninstallEvent>('game-uninstall', (event) => {
+        const { game_id, step, message, success } = event.payload
+
+        if (game_id === GAME_IDS.LYSANDRA) {
+          console.log(`🗑️ Uninstall event: ${step} - ${message}`)
+
+          if (step === 'started') {
+            // Désinstallation commencée - passer à l'état uninstalling
+            dispatch({ type: 'START_UNINSTALL' })
+            setUninstallProgress(message)
+          } else if (step === 'completed' && success) {
+            // Désinstallation réussie - déclencher la transition et re-vérifier
+            setUninstallProgress(null)
+            setGameInstalled(false)
+            dispatch({ type: 'UNINSTALL_COMPLETED' })
+
+            // Re-vérifier après un court délai pour s'assurer que tous les fichiers sont supprimés
+            setTimeout(() => {
+              forceGameStateRefresh()
+            }, 200)
+          } else if (step === 'error' && !success) {
+            // Erreur de désinstallation
+            setUninstallProgress(null)
+            setErrorMessage(message)
+            dispatch({ type: 'FAILED_TO_UNINSTALL' })
+          } else {
+            // Mise à jour du progrès pour les autres étapes
+            setUninstallProgress(message)
+          }
+        }
+      })
+      return unlisten
+    }
+
+    let unlisten: (() => void) | null = null
+    setupUninstallListener().then((fn) => {
+      unlisten = fn
+    })
+
+    return () => {
+      if (unlisten) unlisten()
+    }
+  }, [])
+
+  // Debug sync en mode développement
+  React.useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('🐛 Sync debugger initialized in development mode')
+
+        // Ajouter une fonction globale pour tester la sync
+        ; (window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
+      console.log('🔧 Use window.forceSyncCheck() to manually check synchronization')
+    }
+
+    return () => {
+      if (import.meta.env.DEV) {
+        syncDebugger.cleanup()
+        delete (window as any).forceSyncCheck
+      }
     }
   }, [])
 
@@ -241,6 +309,20 @@ export const GameActions: React.FC = () => {
     dispatch({ type: 'CLOSE_ERROR_MESSAGE' })
   }
 
+  const forceGameStateRefresh = React.useCallback(async () => {
+    console.log('🔄 Force refreshing game state...')
+
+    // Vérifier si le jeu est installé
+    const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
+    setGameInstalled(installed)
+
+    // Relancer la vérification complète
+    const result = await initializeGameCheck()
+    dispatch({ type: result.action })
+
+    console.log(`✅ Game state refreshed: installed=${installed}, action=${result.action}`)
+  }, [])
+
   const sendDownloadCompleteNotification = async (isUpdate: boolean, version?: string) => {
     try {
       const permissionGranted = await isPermissionGranted()
@@ -348,6 +430,14 @@ export const GameActions: React.FC = () => {
           loading: false,
         }
 
+      case 'uninstalling':
+        return {
+          text: t('game.states.uninstalling') || 'Désinstallation...',
+          icon: LuWrench,
+          disabled: true,
+          loading: true,
+        }
+
       case 'error':
         return {
           text: t('game.states.error'),
@@ -439,6 +529,18 @@ export const GameActions: React.FC = () => {
         </div>
       )}
 
+      {/* Affichage du progrès de désinstallation */}
+      {(uninstallProgress || gameState === 'uninstalling') && (
+        <div className="mb-4 w-full max-w-md">
+          <div className="text-muted-foreground mb-1 text-sm animate-pulse">
+            {uninstallProgress || t('game.uninstall.in_progress')}
+          </div>
+          <div className="text-muted-foreground mb-2 text-xs">
+            Étape: <span className="font-mono">uninstalling</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2">
         {/* Bouton des paramètres du jeu - masqué si le jeu n'est pas installé */}
         {gameInstalled && (
@@ -461,26 +563,14 @@ export const GameActions: React.FC = () => {
 
         <GameSettingsModal
           isOpen={isOpen}
-          onGameUninstalled={async () => {
-            // 1. Réinitialiser les états locaux
+          onGameUninstalled={() => {
+            // Nettoyage des états locaux seulement
+            // Les événements Tauri gèrent la state machine
             setInstallProgress(null)
             setRepairProgress(null)
             setDownloadProgress(0)
             setErrorMessage(null)
             setIsProcessing(false)
-
-            // 2. Mettre à jour l'état d'installation
-            const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
-            setGameInstalled(installed)
-
-            // 3. Relancer la vérification complète du jeu
-            dispatch({ type: 'SELECT_GAME' })
-
-            // Attendre un court délai pour s'assurer que les fichiers sont bien supprimés
-            setTimeout(async () => {
-              const result = await initializeGameCheck()
-              dispatch({ type: result.action })
-            }, 300)
           }}
           onOpenChange={onOpenChange}
         />

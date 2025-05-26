@@ -132,6 +132,15 @@
       "uninstall_game": "Désinstaller le jeu",
       "uninstall_game_desc": "Supprimer Lysandra de votre ordinateur"
     },
+    "uninstall": {
+      "starting": "Démarrage de la désinstallation...",
+      "removing_files": "Suppression des fichiers du jeu...",
+      "removing_version": "Suppression du fichier de version...",
+      "removing_logs": "Suppression des logs...",
+      "removing_all": "Suppression de tous les fichiers du jeu...",
+      "completed": "Désinstallation terminée avec succès",
+      "in_progress": "Désinstallation en cours..."
+    },
     "states": {
       "checking": "Vérification...",
       "downloading": "Téléchargement...",
@@ -146,6 +155,7 @@
       "play": "Jouer",
       "launching": "Lancement...",
       "playing": "En jeu",
+      "uninstalling": "Désinstallation...",
       "error": "Erreur",
       "unknown": "Inconnu"
     }

@@ -11,6 +11,7 @@ type State =
   | 'ready'
   | 'launching'
   | 'playing'
+  | 'uninstalling'
 
 type Action =
   | { type: 'SELECT_GAME' }
@@ -31,6 +32,9 @@ type Action =
   | { type: 'OPEN_UNITY' }
   | { type: 'CLOSE_UNITY' }
   | { type: 'CLOSE_ERROR_MESSAGE' }
+  | { type: 'START_UNINSTALL' }
+  | { type: 'UNINSTALL_COMPLETED' }
+  | { type: 'FAILED_TO_UNINSTALL' }
 
 export default function reducer(state: State, action: Action): State {
   switch (state) {
@@ -67,6 +71,7 @@ export default function reducer(state: State, action: Action): State {
     case 'ready':
       if (action.type === 'CLICK_PLAY_BUTTON') return 'launching'
       if (action.type === 'CHECK_PASS') return 'ready' // Re-check après réparation
+      if (action.type === 'START_UNINSTALL') return 'uninstalling'
       break
 
     case 'launching':
@@ -89,6 +94,11 @@ export default function reducer(state: State, action: Action): State {
 
     case 'error':
       if (action.type === 'CLOSE_ERROR_MESSAGE') return 'idle'
+      break
+
+    case 'uninstalling':
+      if (action.type === 'UNINSTALL_COMPLETED') return 'checking'
+      if (action.type === 'FAILED_TO_UNINSTALL') return 'error'
       break
   }
 

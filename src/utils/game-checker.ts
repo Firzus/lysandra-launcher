@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core'
 
 import { fetchManifest } from './update-service'
 import { getGamePaths, GAME_IDS } from './paths'
-import { checkGameIntegrity, initializeGameStructure } from './game-integrity'
+import { checkGameIntegrity } from './game-integrity'
 
 export type GameCheckResult = {
   action: 'CHECK_PASS' | 'FIND_UPDATE' | 'GAME_NOT_INSTALLED' | 'CHECK_FAIL' | 'SUCCESS_REPAIR'
