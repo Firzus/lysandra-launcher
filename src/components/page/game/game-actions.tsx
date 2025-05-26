@@ -441,6 +441,13 @@ export const GameActions: React.FC = () => {
       )}
 
       <div className="flex gap-2">
+        {/* Bouton des paramètres du jeu - masqué si le jeu n'est pas installé */}
+        {gameInstalled && (
+          <Button isIconOnly radius="lg" size="lg" aria-label={t('game.settings_title')} onPress={onOpen}>
+            <LuSettings2 className="text-muted-foreground" size={24} />
+          </Button>
+        )}
+
         <Button
           className={buttonConfig.loading ? 'animate-pulse' : ''}
           color="primary"
@@ -452,13 +459,6 @@ export const GameActions: React.FC = () => {
         >
           <span className="w-24 text-end">{buttonConfig.text}</span>
         </Button>
-
-        {/* Bouton des paramètres du jeu - masqué si le jeu n'est pas installé */}
-        {gameInstalled && (
-          <Button isIconOnly radius="lg" size="lg" onPress={onOpen}>
-            <LuSettings2 className="text-muted-foreground" size={24} />
-          </Button>
-        )}
 
         <GameSettingsModal
           isOpen={isOpen}

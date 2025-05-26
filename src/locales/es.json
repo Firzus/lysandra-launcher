@@ -116,7 +116,9 @@
             "cancel": "Cancelar",
             "install_confirm": "Lanzar",
             "update_confirm": "Actualizar",
-            "locate_confirm": "Localizar juego"
+            "locate_confirm": "Localizar juego",
+            "browse_install_path": "Explorar carpeta de instalación",
+            "browse_existing_game": "Explorar juego existente"
         },
         "actions": {
             "title": "Acciones",

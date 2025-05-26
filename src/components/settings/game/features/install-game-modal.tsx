@@ -166,6 +166,7 @@ export const InstallGameModal: React.FC<Props> = ({
                           isLoading={isLoadingPath}
                           size="sm"
                           variant="light"
+                          aria-label={t('game.install_modal.browse_existing_game')}
                           onPress={handleBrowseExistingGame}
                         >
                           <LuFolderOpen size={16} />
@@ -191,15 +192,16 @@ export const InstallGameModal: React.FC<Props> = ({
 
                   <Input
                     endContent={
-                      <Button
-                        isIconOnly
-                        isLoading={isLoadingPath}
-                        size="sm"
-                        variant="light"
-                        onPress={handleBrowseInstallPath}
-                      >
-                        <LuFolder size={16} />
-                      </Button>
+                                          <Button
+                      isIconOnly
+                      isLoading={isLoadingPath}
+                      size="sm"
+                      variant="light"
+                      aria-label={t('game.install_modal.browse_install_path')}
+                      onPress={handleBrowseInstallPath}
+                    >
+                      <LuFolder size={16} />
+                    </Button>
                     }
                     label={t('game.install_modal.install_path')}
                     placeholder={t('game.install_modal.install_path_placeholder')}

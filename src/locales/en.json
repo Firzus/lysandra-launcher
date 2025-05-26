@@ -116,7 +116,9 @@
       "cancel": "Cancel",
       "install_confirm": "Launch",
       "update_confirm": "Update",
-      "locate_confirm": "Locate Game"
+      "locate_confirm": "Locate Game",
+      "browse_install_path": "Browse install folder",
+      "browse_existing_game": "Browse existing game"
     },
     "actions": {
       "title": "Actions",

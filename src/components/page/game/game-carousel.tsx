@@ -44,6 +44,7 @@ export const GameCarousel: React.FC<Props> = () => {
           radius="full"
           size="sm"
           variant="flat"
+          aria-label="Previous slide"
           onPress={prevSlide}
         >
           <LuChevronLeft size={16} />
@@ -55,6 +56,7 @@ export const GameCarousel: React.FC<Props> = () => {
           radius="full"
           size="sm"
           variant="flat"
+          aria-label="Next slide"
           onPress={nextSlide}
         >
           <LuChevronRight size={16} />

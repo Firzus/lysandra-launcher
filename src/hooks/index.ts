@@ -1,5 +1,5 @@
 // Performance Hooks
-export { usePerformance, useWhyDidYouUpdate, useRenderPerformance } from './use-performance'
+export { useRenderPerformance } from './use-performance'
 export { useSystemLocale, useSystemLanguage } from './use-system-locale'
 
 // Application Hooks

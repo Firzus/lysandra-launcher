@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tauri dev",
-    "build": "tsc && vite build",
-    "build:local": "tauri build",
-    "build:prod": "cross-env TAURI_CONFIG_PLUGINS_UPDATER_ACTIVE=true TAURI_CONFIG_BUNDLE_CREATEUPDATERARTIFACTS=true tauri build",
+    "build": "tauri build",
     "lint": "eslint --fix",
     "tauri": "tauri"
   },
