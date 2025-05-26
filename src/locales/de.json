@@ -47,7 +47,9 @@
         "error": "Update-Fehler",
         "error_desc": "Ein Fehler ist beim Prüfen auf Updates aufgetreten.",
         "available": "Update verfügbar",
-        "will_restart": "Ihr Launcher wird neu gestartet, um das Update anzuwenden."
+        "will_restart": "Ihr Launcher wird neu gestartet, um das Update anzuwenden.",
+        "disabled": "Entwicklungsmodus",
+        "disabled_desc": "Auto-Update ist im Entwicklungsmodus deaktiviert."
     },
     "language": {
         "desciption": "Sprachauswahl",

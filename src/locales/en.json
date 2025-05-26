@@ -47,7 +47,9 @@
     "error": "Update error",
     "error_desc": "An error occurred while checking for updates.",
     "available": "Update available",
-    "will_restart": "Your launcher will restart to apply the update."
+    "will_restart": "Your launcher will restart to apply the update.",
+    "disabled": "Development mode",
+    "disabled_desc": "Auto-update is disabled in development mode."
   },
   "language": {
     "desciption": "Language selection",

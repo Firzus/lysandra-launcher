@@ -32,6 +32,7 @@ export default function App() {
       ready: t('loader.ready'),
       installing: t('loader.installing'),
       error: t('loader.error'),
+      disabled: t('loader.ready'), // En mode dev, on considère comme "prêt"
     }
 
     return messages[status]
@@ -40,13 +41,18 @@ export default function App() {
   // Attendre que tous les systèmes soient prêts
   const isLoading = useMemo(() => {
     // En cas d'erreur d'intégrité, on continue quand même le chargement
-    return isLanguageLoading || (status !== 'ready' && status !== 'error')
+    return isLanguageLoading || (status !== 'ready' && status !== 'error' && status !== 'disabled')
   }, [isLanguageLoading, status])
 
   // Afficher l'erreur de structure si elle existe mais ne pas bloquer
   if (launcherIntegrity.hasError) {
     // Garder un avertissement discret peut être utile ici
     console.warn('Launcher integrity warning:', launcherIntegrity.error)
+  }
+
+  // Log informatif pour le mode développement
+  if (status === 'disabled') {
+    console.log('🔧 Mode développement détecté - Auto-update désactivé')
   }
 
   return (

@@ -2,12 +2,13 @@ import { useCallback, useMemo, useState, useEffect } from 'react'
 import { check, type DownloadEvent } from '@tauri-apps/plugin-updater'
 import { relaunch } from '@tauri-apps/plugin-process'
 
-type Status = 'idle' | 'checking' | 'downloading' | 'installing' | 'ready' | 'error'
+type Status = 'idle' | 'checking' | 'downloading' | 'installing' | 'ready' | 'error' | 'disabled'
 
 type UpdateState = {
   status: Status
   progress: number
   error?: string
+  isDevMode?: boolean
 }
 
 export function useAutoAppUpdate() {
@@ -28,6 +29,14 @@ export function useAutoAppUpdate() {
     setState((prev: UpdateState) => ({ ...prev, error, status: 'error' }))
   }, [])
 
+  const clearError = useCallback(() => {
+    setState((prev: UpdateState) => ({ ...prev, error: undefined }))
+  }, [])
+
+  const setDevMode = useCallback((isDevMode: boolean) => {
+    setState((prev: UpdateState) => ({ ...prev, isDevMode, status: 'disabled' }))
+  }, [])
+
   const handleDownloadProgress = useCallback(
     (event: DownloadEvent, total: number) => {
       switch (event.event) {
@@ -44,6 +53,7 @@ export function useAutoAppUpdate() {
   const checkForUpdates = useCallback(async () => {
     try {
       updateStatus('checking')
+      clearError()
 
       const update = await check()
 
@@ -72,10 +82,29 @@ export function useAutoAppUpdate() {
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Unknown error'
 
+      // Détecter si l'updater est désactivé (erreur typique en développement)
+      if (errorMessage.includes('updater') && errorMessage.includes('disabled')) {
+        console.log('🔧 Updater désactivé - Mode développement détecté')
+        setDevMode(true)
+        return
+      }
+
+      // Autres erreurs liées à l'updater en développement
+      if (
+        errorMessage.includes('No such file or directory') ||
+        errorMessage.includes('updater not configured') ||
+        errorMessage.includes('endpoint')
+      ) {
+        console.log('🔧 Updater non configuré - Mode développement')
+        setDevMode(true)
+        return
+      }
+
       setError(errorMessage)
     }
-  }, [updateStatus, handleDownloadProgress, setError])
+  }, [updateStatus, handleDownloadProgress, setError, clearError, setDevMode])
 
+  // Vérification automatique au démarrage
   useEffect(() => {
     checkForUpdates()
   }, [checkForUpdates])
@@ -86,13 +115,16 @@ export function useAutoAppUpdate() {
       status: state.status,
       progress: state.progress,
       error: state.error,
+      isDevMode: state.isDevMode,
       isLoading:
         state.status === 'checking' ||
         state.status === 'downloading' ||
         state.status === 'installing',
       isReady: state.status === 'ready',
       hasError: state.status === 'error',
+      isDisabled: state.status === 'disabled',
+      checkForUpdates, // Exposer la fonction pour vérification manuelle
     }),
-    [state],
+    [state, checkForUpdates],
   )
 }

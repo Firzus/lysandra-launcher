@@ -47,7 +47,9 @@
     "error": "Erreur de mise à jour",
     "error_desc": "Une erreur est survenue lors de la vérification des mises à jour.",
     "available": "Mise à jour disponible",
-    "will_restart": "Votre launcher va être redémarré pour appliquer la mise à jour."
+    "will_restart": "Votre launcher va être redémarré pour appliquer la mise à jour.",
+    "disabled": "Mode développement",
+    "disabled_desc": "L'auto-update est désactivé en mode développement."
   },
   "language": {
     "desciption": "Sélection de la langue",

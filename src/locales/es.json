@@ -47,7 +47,9 @@
         "error": "Error de actualización",
         "error_desc": "Ocurrió un error al verificar las actualizaciones.",
         "available": "Actualización disponible",
-        "will_restart": "Tu launcher se reiniciará para aplicar la actualización."
+        "will_restart": "Tu launcher se reiniciará para aplicar la actualización.",
+        "disabled": "Modo desarrollo",
+        "disabled_desc": "La actualización automática está desactivada en modo desarrollo."
     },
     "language": {
         "desciption": "Selección de idioma",
