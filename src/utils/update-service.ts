@@ -4,21 +4,39 @@ import { invoke } from '@tauri-apps/api/core'
 import { getPlatform } from '@/hooks/use-get-platform'
 
 export async function fetchManifest(owner: string, repo: string) {
-  const latestUrl = `https://github.com/${owner}/${repo}/releases/latest/download/latest.json`
+  try {
+    const latestUrl = `https://github.com/${owner}/${repo}/releases/latest/download/latest.json`
+    console.log(`📋 Fetching manifest from: ${latestUrl}`)
 
-  const manifestStr = await invoke<string>('fetch_manifest_from_github', { url: latestUrl })
-  const manifest = JSON.parse(manifestStr)
+    const manifestStr = await invoke<string>('fetch_manifest_from_github', { url: latestUrl })
+    console.log(`📋 Raw manifest:`, manifestStr)
 
-  const platformZip = manifest.zip[getPlatform()]
+    const manifest = JSON.parse(manifestStr)
+    console.log(`📋 Parsed manifest:`, manifest)
 
-  if (!platformZip) {
-    throw new Error(`No ZIP available for platform: ${getPlatform()}`)
-  }
+    const platform = getPlatform()
+    console.log(`🖥️ Current platform: ${platform}`)
 
-  return {
-    version: manifest.version,
-    url: platformZip.url,
-    hash: platformZip.sha256,
+    const platformZip = manifest.zip[platform]
+
+    if (!platformZip) {
+      console.error(`❌ No ZIP available for platform: ${platform}`)
+      console.error(`📋 Available platforms:`, Object.keys(manifest.zip))
+      throw new Error(`No ZIP available for platform: ${platform}`)
+    }
+
+    console.log(`✅ Platform ZIP found:`, platformZip)
+
+    return {
+      version: manifest.version,
+      url: platformZip.url,
+      hash: platformZip.sha256,
+    }
+  } catch (error) {
+    console.error(`❌ Failed to fetch manifest:`, error)
+    throw new Error(
+      `Failed to fetch manifest: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 }
 
@@ -28,21 +46,29 @@ export async function downloadOperation(
   localPath: string,
   fileName?: string,
 ) {
-  const finalFileName = fileName || `game-${version}.zip`
-  const fullPath = `${localPath}/${finalFileName}`
+  try {
+    const finalFileName = fileName || `game-${version}.zip`
+    const fullPath = `${localPath}/${finalFileName}`
 
-  await download(url, fullPath, ({ progress, total }) => {
-    const progressPercentage = Math.floor((progress * 100) / total)
+    console.log(`📥 Starting download: ${url} -> ${fullPath}`)
 
-    invoke('handle_download_progress', {
-      progressPercentage,
-      progress,
-      total,
-      version,
+    await download(url, fullPath, ({ progress, total }) => {
+      const progressPercentage = Math.floor((progress * 100) / total)
+
+      invoke('handle_download_progress', {
+        progressPercentage,
+        progress,
+        total,
+        version,
+      })
     })
-  })
 
-  invoke('handle_download_complete', { version })
+    console.log(`✅ Download completed: ${fullPath}`)
+    invoke('handle_download_complete', { version })
+  } catch (error) {
+    console.error(`❌ Download failed:`, error)
+    throw new Error(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 }
 
 export async function isGameUpdate(owner: string, repo: string): Promise<boolean> {

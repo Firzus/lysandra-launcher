@@ -124,6 +124,7 @@
             "open_folder_desc": "Den Ordner mit den Spiel-Dateien öffnen",
             "game_size": "Spiel-Größe",
             "game_size_desc": "Verwendeter Speicherplatz",
+            "game_size_not_installed": "Nicht installiert",
             "uninstall_game": "Spiel deinstallieren",
             "uninstall_game_desc": "Lysandra von Ihrem Computer entfernen"
         },
@@ -137,7 +138,12 @@
             "processing": "Verarbeiten...",
             "update": "Aktualisieren",
             "repair": "Reparieren",
-            "download": "Herunterladen"
+            "download": "Herunterladen",
+            "play": "Spielen",
+            "launching": "Starten...",
+            "playing": "Läuft",
+            "error": "Fehler",
+            "unknown": "Unbekannt"
         }
     },
     "debug": {

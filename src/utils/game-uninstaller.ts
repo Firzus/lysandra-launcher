@@ -116,9 +116,20 @@ export async function uninstallLysandraCompletely(): Promise<GameUninstallResult
 export async function getGameSize(gameId: string): Promise<string> {
   try {
     const gamePaths = await getGamePaths(gameId)
+
+    // Vérifier si le dossier du jeu existe
+    const directoryExists = await invoke<boolean>('check_directory_exists', {
+      path: gamePaths.root,
+    })
+
+    if (!directoryExists) {
+      return '0 B' // Jeu pas installé
+    }
+
     const size = await invoke<number>('get_directory_size', { path: gamePaths.root })
 
     // Convertir en unités lisibles
+    if (size === 0) return '0 B'
     if (size < 1024) return `${size} B`
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
     if (size < 1024 * 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`
@@ -126,7 +137,37 @@ export async function getGameSize(gameId: string): Promise<string> {
     return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`
   } catch (error) {
     console.error('Failed to get game size:', error)
-
     return 'Inconnu'
+  }
+}
+
+/**
+ * Vérifie si un jeu est installé en vérifiant l'existence de son dossier
+ */
+export async function isGameInstalled(gameId: string): Promise<boolean> {
+  try {
+    const gamePaths = await getGamePaths(gameId)
+
+    // Vérifier si le dossier d'installation existe et contient des fichiers
+    const installDirExists = await invoke<boolean>('check_directory_exists', {
+      path: gamePaths.install,
+    })
+
+    if (!installDirExists) {
+      return false
+    }
+
+    // Vérifier si le fichier version existe et n'est pas vide
+    try {
+      const versionContent = await invoke<string>('read_text_file', {
+        path: gamePaths.versionFile,
+      })
+      return versionContent.trim().length > 0
+    } catch {
+      return false
+    }
+  } catch (error) {
+    console.error('Failed to check if game is installed:', error)
+    return false
   }
 }

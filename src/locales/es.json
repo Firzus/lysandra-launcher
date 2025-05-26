@@ -124,6 +124,7 @@
             "open_folder_desc": "Abrir la carpeta que contiene los archivos del juego",
             "game_size": "Tamaño del juego",
             "game_size_desc": "Espacio utilizado en el disco",
+            "game_size_not_installed": "No instalado",
             "uninstall_game": "Desinstalar juego",
             "uninstall_game_desc": "Eliminar Lysandra de tu computadora"
         },
@@ -137,7 +138,12 @@
             "processing": "Procesando...",
             "update": "Actualizar",
             "repair": "Reparar",
-            "download": "Descargar"
+            "download": "Descargar",
+            "play": "Jugar",
+            "launching": "Iniciando...",
+            "playing": "Jugando",
+            "error": "Error",
+            "unknown": "Desconocido"
         }
     },
     "debug": {

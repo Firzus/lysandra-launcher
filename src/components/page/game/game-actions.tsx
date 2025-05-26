@@ -1,5 +1,5 @@
 import React from 'react'
-import { LuCloudDownload, LuSettings2 } from 'react-icons/lu'
+import { LuCloudDownload, LuSettings2, LuPlay, LuWrench, LuRotateCcw } from 'react-icons/lu'
 import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +18,10 @@ import {
 import reducer from '@/utils/game-action-sm'
 import { initializeGameCheck } from '@/utils/game-checker'
 import { installLysandra, updateLysandra, type GameInstallProgress } from '@/utils/game-installer'
+import { repairGame, type GameRepairProgress } from '@/utils/game-repair'
+import { launchGame, startGameProcessMonitoring } from '@/utils/game-launcher'
+import { isGameInstalled } from '@/utils/game-uninstaller'
+import { GAME_IDS } from '@/utils/paths'
 
 export const GameActions: React.FC = () => {
   const { t } = useTranslation() as any
@@ -31,24 +35,26 @@ export const GameActions: React.FC = () => {
 
   // State Machine
   const [gameState, dispatch] = React.useReducer(reducer, 'idle')
-  const [isDownloading, setIsDownloading] = React.useState(false)
+
+  // Progress states
+  const [isProcessing, setIsProcessing] = React.useState(false)
   const [installProgress, setInstallProgress] = React.useState<GameInstallProgress | null>(null)
+  const [repairProgress, setRepairProgress] = React.useState<GameRepairProgress | null>(null)
   const [downloadProgress, setDownloadProgress] = React.useState<number>(0)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [gameInstalled, setGameInstalled] = React.useState<boolean>(false)
 
   // Écouter les événements de progression du téléchargement
   React.useEffect(() => {
     const setupProgressListener = async () => {
       const unlisten = await listen('download-progress', (event: any) => {
         const { progress_percentage } = event.payload
-
         setDownloadProgress(progress_percentage)
       })
-
       return unlisten
     }
 
     let unlisten: (() => void) | null = null
-
     setupProgressListener().then((fn) => {
       unlisten = fn
     })
@@ -63,7 +69,6 @@ export const GameActions: React.FC = () => {
     const requestNotificationPermission = async () => {
       try {
         const permissionGranted = await isPermissionGranted()
-
         if (!permissionGranted) {
           await requestPermission()
         }
@@ -71,38 +76,172 @@ export const GameActions: React.FC = () => {
         // Notification permission error handled silently
       }
     }
-
     requestNotificationPermission()
   }, [])
+
+  // Surveillance du processus de jeu pour les transitions Playing ↔ Ready
+  React.useEffect(() => {
+    if (gameState === 'launching' || gameState === 'playing') {
+      const stopMonitoring = startGameProcessMonitoring(
+        GAME_IDS.LYSANDRA,
+        () => dispatch({ type: 'OPEN_UNITY' }),
+        () => dispatch({ type: 'CLOSE_UNITY' })
+      )
+
+      return stopMonitoring
+    }
+  }, [gameState])
 
   // Déclencher la vérification au chargement de la page
   React.useEffect(() => {
     const initializeApp = async () => {
       try {
-        // 1. Transition Idle → Checking
         dispatch({ type: 'SELECT_GAME' })
-
-        // 2. Vérifier l'état du jeu (qui va initialiser sa structure)
         const result = await initializeGameCheck()
-
-        // 3. Dispatcher l'action selon le résultat
         dispatch({ type: result.action })
 
-        if (result.error) {
-          // Game check error logged internally
+        // Vérifier si le jeu est installé pour afficher/masquer le bouton des paramètres
+        const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
+        setGameInstalled(installed)
+
+        if (result.error && result.action === 'CHECK_FAIL') {
+          setErrorMessage(result.error)
         }
-      } catch {
+      } catch (error) {
         dispatch({ type: 'CHECK_FAIL' })
+        setErrorMessage(`Initialization failed: ${error}`)
       }
     }
-
     initializeApp()
   }, [])
+
+  // Gestion des actions selon l'état
+  const handlePrimaryAction = async () => {
+    switch (gameState) {
+      case 'waitingForDownload':
+        onInstallModalOpen()
+        break
+
+      case 'waitingForUpdate':
+        onInstallModalOpen()
+        break
+
+      case 'waitingForRepair':
+        await handleRepair()
+        break
+
+      case 'ready':
+        await handlePlay()
+        break
+
+      default:
+        console.log(`No action defined for state: ${gameState}`)
+    }
+  }
+
+  const handleInstallConfirm = async (config: InstallConfig) => {
+    try {
+      setIsProcessing(true)
+      setInstallProgress(null)
+      setDownloadProgress(0)
+
+      const isUpdate = gameState === 'waitingForUpdate'
+      dispatch({ type: isUpdate ? 'CLICK_UPDATE_BUTTON' : 'CLICK_DOWNLOAD_BUTTON' })
+
+      if (config.locateExistingGame && config.existingGamePath) {
+        // TODO: Implémenter la logique de localisation
+        setInstallProgress({
+          step: 'complete',
+          message: t('game.install_modal.locate_confirm') + ' : ' + config.existingGamePath,
+        })
+        dispatch({ type: isUpdate ? 'UPDATE_COMPLETED' : 'DOWNLOAD_COMPLETED' })
+        return
+      }
+
+      const installFunction = isUpdate ? updateLysandra : installLysandra
+      const completedAction = isUpdate ? 'UPDATE_COMPLETED' : 'DOWNLOAD_COMPLETED'
+      const failedAction = isUpdate ? 'FAILED_TO_UPDATE' : 'FAILED_TO_DOWNLOAD'
+
+      const result = await installFunction((progress) => {
+        setInstallProgress(progress)
+      })
+
+      if (result.success) {
+        dispatch({ type: completedAction })
+        await sendDownloadCompleteNotification(isUpdate, result.version)
+
+        // Mettre à jour l'état d'installation après succès
+        const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
+        setGameInstalled(installed)
+      } else {
+        dispatch({ type: failedAction })
+        setErrorMessage(result.error || 'Installation failed')
+      }
+    } catch (error) {
+      const failedAction = gameState === 'updating' ? 'FAILED_TO_UPDATE' : 'FAILED_TO_DOWNLOAD'
+      dispatch({ type: failedAction })
+      setErrorMessage(`Installation error: ${error}`)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleRepair = async () => {
+    try {
+      setIsProcessing(true)
+      setRepairProgress(null)
+      dispatch({ type: 'CLICK_REPAIR_BUTTON' })
+
+      const result = await repairGame(GAME_IDS.LYSANDRA, (progress) => {
+        setRepairProgress(progress)
+      })
+
+      if (result.success) {
+        dispatch({ type: 'SUCCESS_REPAIR' })
+        // Re-vérifier le jeu après réparation
+        setTimeout(async () => {
+          const checkResult = await initializeGameCheck()
+          dispatch({ type: checkResult.action })
+        }, 1000)
+      } else {
+        dispatch({ type: 'CHECK_FAIL' })
+        setErrorMessage(result.error || 'Repair failed')
+      }
+    } catch (error) {
+      dispatch({ type: 'CHECK_FAIL' })
+      setErrorMessage(`Repair error: ${error}`)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handlePlay = async () => {
+    try {
+      dispatch({ type: 'CLICK_PLAY_BUTTON' })
+
+      const result = await launchGame(GAME_IDS.LYSANDRA)
+
+      if (result.success) {
+        // La transition vers 'playing' sera gérée par le monitoring des processus
+        console.log('Game launch initiated, waiting for process detection...')
+      } else {
+        dispatch({ type: 'FAILED_TO_LAUNCH' })
+        setErrorMessage(result.error || 'Failed to launch game')
+      }
+    } catch (error) {
+      dispatch({ type: 'FAILED_TO_LAUNCH' })
+      setErrorMessage(`Launch error: ${error}`)
+    }
+  }
+
+  const handleCloseError = () => {
+    setErrorMessage(null)
+    dispatch({ type: 'CLOSE_ERROR_MESSAGE' })
+  }
 
   const sendDownloadCompleteNotification = async (isUpdate: boolean, version?: string) => {
     try {
       const permissionGranted = await isPermissionGranted()
-
       if (permissionGranted) {
         await sendNotification({
           title: isUpdate
@@ -111,9 +250,9 @@ export const GameActions: React.FC = () => {
           body: isUpdate
             ? t('notification.update_complete.body', { version: version || 'unknown' })
             : t('notification.download_complete.body', {
-                game: 'Lysandra',
-                version: version || 'unknown',
-              }),
+              game: 'Lysandra',
+              version: version || 'unknown',
+            }),
         })
       }
     } catch {
@@ -121,106 +260,111 @@ export const GameActions: React.FC = () => {
     }
   }
 
-  const handleDownloadClick = () => {
-    // Ouvrir le modal d'installation/configuration
-    onInstallModalOpen()
-  }
-
-  const handleInstallConfirm = async (config: InstallConfig) => {
-    try {
-      setIsDownloading(true)
-      setInstallProgress(null)
-      setDownloadProgress(0)
-
-      // Déterminer si c'est une installation ou une mise à jour
-      const isUpdate = gameState === 'ready' || gameState === 'checking'
-
-      // Si l'utilisateur veut localiser un jeu existant
-      if (config.locateExistingGame && config.existingGamePath) {
-        // TODO: Implémenter la logique de localisation
-        // Pour l'instant, on simule une localisation réussie
-        dispatch({ type: 'DOWNLOAD_COMPLETED' })
-        setInstallProgress({
-          step: 'complete',
-          message: t('game.install_modal.locate_confirm') + ' : ' + config.existingGamePath,
-        })
-
-        return
-      }
-
-      const installFunction = isUpdate ? updateLysandra : installLysandra
-      const actionType = isUpdate ? 'UPDATE_COMPLETED' : 'DOWNLOAD_COMPLETED'
-
-      // Lancer l'installation/mise à jour avec suivi du progrès
-      const result = await installFunction((progress) => {
-        setInstallProgress(progress)
-      })
-
-      if (result.success) {
-        dispatch({ type: actionType })
-        setInstallProgress({
-          step: 'complete',
-          message: isUpdate
-            ? t('game.install.updated_from_to', {
-                oldVersion: 'current',
-                newVersion: result.version,
-              })
-            : t('game.install.complete', { game: 'Lysandra', version: result.version }),
-        })
-
-        // Envoyer une notification de fin de téléchargement/mise à jour
-        await sendDownloadCompleteNotification(isUpdate, result.version)
-
-        // TODO: Créer les raccourcis si demandés
-        if (!isUpdate && config.createDesktopShortcut) {
-          // Desktop shortcut creation logic
+  const getButtonConfig = () => {
+    switch (gameState) {
+      case 'checking':
+        return {
+          text: t('game.states.checking'),
+          icon: LuRotateCcw,
+          disabled: true,
+          loading: true,
         }
-        if (!isUpdate && config.createStartMenuShortcut) {
-          // Start menu shortcut creation logic
+
+      case 'waitingForDownload':
+        return {
+          text: t('game.states.download'),
+          icon: LuCloudDownload,
+          disabled: isProcessing,
+          loading: false,
         }
-      } else {
-        dispatch({ type: isUpdate ? 'FAILED_TO_UPDATE' : 'FAILED_TO_DOWNLOAD' })
-        setInstallProgress({
-          step: 'complete',
-          message: `${t('debug.error')}: ${result.error}`,
-        })
-      }
-    } catch (error) {
-      dispatch({ type: 'CHECK_FAIL' })
-      setInstallProgress({
-        step: 'complete',
-        message: `${t('debug.error')}: ${error}`,
-      })
-    } finally {
-      setIsDownloading(false)
-      setDownloadProgress(0)
-      // Nettoyer le message après 5 secondes
-      setTimeout(() => setInstallProgress(null), 5000)
+
+      case 'downloading':
+        return {
+          text: installProgress?.step === 'downloading'
+            ? `${downloadProgress}%`
+            : t(`game.install.${installProgress?.step || 'processing'}`),
+          icon: LuCloudDownload,
+          disabled: true,
+          loading: true,
+        }
+
+      case 'waitingForUpdate':
+        return {
+          text: t('game.states.update'),
+          icon: LuCloudDownload,
+          disabled: isProcessing,
+          loading: false,
+        }
+
+      case 'updating':
+        return {
+          text: installProgress?.step === 'downloading'
+            ? `${downloadProgress}%`
+            : t(`game.install.${installProgress?.step || 'processing'}`),
+          icon: LuCloudDownload,
+          disabled: true,
+          loading: true,
+        }
+
+      case 'waitingForRepair':
+        return {
+          text: t('game.states.repair'),
+          icon: LuWrench,
+          disabled: isProcessing,
+          loading: false,
+        }
+
+      case 'repairing':
+        return {
+          text: repairProgress?.message || t('game.states.repair'),
+          icon: LuWrench,
+          disabled: true,
+          loading: true,
+        }
+
+      case 'ready':
+        return {
+          text: t('game.states.play'),
+          icon: LuPlay,
+          disabled: isProcessing,
+          loading: false,
+        }
+
+      case 'launching':
+        return {
+          text: t('game.states.launching'),
+          icon: LuPlay,
+          disabled: true,
+          loading: true,
+        }
+
+      case 'playing':
+        return {
+          text: t('game.states.playing'),
+          icon: LuPlay,
+          disabled: true,
+          loading: false,
+        }
+
+      case 'error':
+        return {
+          text: t('game.states.error'),
+          icon: LuWrench,
+          disabled: false,
+          loading: false,
+        }
+
+      default:
+        return {
+          text: t('game.states.unknown'),
+          icon: LuCloudDownload,
+          disabled: true,
+          loading: false,
+        }
     }
   }
 
-  const getButtonText = () => {
-    if (gameState === 'checking') return t('game.states.checking')
-    if (isDownloading) {
-      if (installProgress?.step === 'downloading') {
-        return `${downloadProgress}%`
-      }
-
-      return installProgress?.step === 'extracting'
-        ? t('game.states.extracting')
-        : installProgress?.step === 'verifying'
-          ? t('game.states.verifying')
-          : installProgress?.step === 'installing'
-            ? t('game.states.installing')
-            : installProgress?.step === 'cleaning'
-              ? t('game.states.cleaning')
-              : t('game.states.processing')
-    }
-    if (gameState === 'ready') return t('game.states.update')
-    if (gameState === 'error' || gameState === 'waitingForRepair') return t('game.states.repair')
-
-    return t('game.states.download')
-  }
+  const buttonConfig = getButtonConfig()
 
   return (
     <div className="flex flex-col items-start">
@@ -229,23 +373,39 @@ export const GameActions: React.FC = () => {
         État actuel: <span className="font-mono">{gameState}</span>
       </div>
 
-      {/* Affichage du progrès d'installation */}
-      {installProgress && (
+      {/* Affichage des erreurs */}
+      {errorMessage && gameState === 'error' && (
         <div className="mb-4 w-full max-w-md">
-          <div
-            className={`text-muted-foreground mb-1 text-sm ${
-              installProgress.step !== 'downloading' && installProgress.step !== 'complete'
-                ? 'animate-pulse'
-                : ''
-            }`}
-          >
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div className="flex justify-between items-start">
+              <div>
+                <strong className="font-bold">Erreur:</strong>
+                <span className="block sm:inline"> {errorMessage}</span>
+              </div>
+              <button
+                className="text-red-700 hover:text-red-900"
+                onClick={handleCloseError}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Affichage du progrès d'installation */}
+      {installProgress && (gameState === 'downloading' || gameState === 'updating') && (
+        <div className="mb-4 w-full max-w-md">
+          <div className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
+            ? 'animate-pulse'
+            : ''
+            }`}>
             {installProgress.message}
           </div>
           <div className="text-muted-foreground mb-2 text-xs">
             Étape: <span className="font-mono">{installProgress.step}</span>
           </div>
 
-          {/* Barre de progression pour le téléchargement */}
           {installProgress.step === 'downloading' && (
             <div className="h-2 w-full rounded-full bg-gray-200">
               <div
@@ -257,35 +417,60 @@ export const GameActions: React.FC = () => {
         </div>
       )}
 
-      <div className="space-x-3">
+      {/* Affichage du progrès de réparation */}
+      {repairProgress && gameState === 'repairing' && (
+        <div className="mb-4 w-full max-w-md">
+          <div className={`text-muted-foreground mb-1 text-sm ${repairProgress.step !== 'complete' ? 'animate-pulse' : ''
+            }`}>
+            {repairProgress.message}
+          </div>
+          {repairProgress.details && (
+            <div className="text-muted-foreground mb-2 text-xs">
+              {repairProgress.details}
+            </div>
+          )}
+          {repairProgress.progress && (
+            <div className="h-2 w-full rounded-full bg-gray-200">
+              <div
+                className="h-2 rounded-full bg-primary transition-all duration-300 ease-out"
+                style={{ width: `${repairProgress.progress}%` }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="flex gap-2">
         <Button
-          className={
-            (isDownloading && installProgress?.step !== 'downloading') || gameState === 'checking'
-              ? 'animate-pulse'
-              : ''
-          }
+          className={buttonConfig.loading ? 'animate-pulse' : ''}
           color="primary"
-          isDisabled={isDownloading || gameState === 'checking'}
+          isDisabled={buttonConfig.disabled}
           radius="lg"
           size="lg"
-          startContent={<LuCloudDownload size={24} />}
-          onPress={handleDownloadClick}
+          startContent={<buttonConfig.icon size={24} />}
+          onPress={handlePrimaryAction}
         >
-          <span className="w-24 text-end">{getButtonText()}</span>
+          <span className="w-24 text-end">{buttonConfig.text}</span>
         </Button>
 
-        <Button isIconOnly radius="lg" size="lg" onPress={onOpen}>
-          <LuSettings2 className="text-muted-foreground" size={24} />
-        </Button>
+        {/* Bouton des paramètres du jeu - masqué si le jeu n'est pas installé */}
+        {gameInstalled && (
+          <Button isIconOnly radius="lg" size="lg" onPress={onOpen}>
+            <LuSettings2 className="text-muted-foreground" size={24} />
+          </Button>
+        )}
 
         <GameSettingsModal
           isOpen={isOpen}
-          onGameUninstalled={() => {
-            // Relancer la vérification du jeu après désinstallation
+          onGameUninstalled={async () => {
             dispatch({ type: 'SELECT_GAME' })
+
+            // Mettre à jour l'état d'installation après désinstallation
+            const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
+            setGameInstalled(installed)
+
             setTimeout(async () => {
               const result = await initializeGameCheck()
-
               dispatch({ type: result.action })
             }, 500)
           }}
@@ -295,7 +480,7 @@ export const GameActions: React.FC = () => {
         <InstallGameModal
           gameId="lysandra"
           isOpen={isInstallModalOpen}
-          isUpdate={gameState === 'ready' || gameState === 'checking'}
+          isUpdate={gameState === 'waitingForUpdate'}
           onInstallConfirm={handleInstallConfirm}
           onOpenChange={onInstallModalOpenChange}
         />

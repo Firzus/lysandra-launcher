@@ -98,6 +98,171 @@ fn check_directory_exists(path: String) -> Result<bool, String> {
 }
 
 #[tauri::command]
+fn check_file_exists(path: String) -> Result<bool, String> {
+    Ok(std::path::Path::new(&path).is_file())
+}
+
+#[tauri::command]
+async fn launch_game_executable(executable_path: String) -> Result<u32, String> {
+    use std::process::Command;
+    
+    println!("🚀 Launching game executable: {}", executable_path);
+    
+    let mut command = Command::new(&executable_path);
+    
+    // Lancer le processus en arrière-plan
+    let child = command
+        .spawn()
+        .map_err(|e| format!("Failed to launch game: {}", e))?;
+    
+    let pid = child.id();
+    println!("✅ Game launched with PID: {}", pid);
+    
+    Ok(pid)
+}
+
+#[tauri::command]
+fn check_process_running(pid: u32) -> Result<bool, String> {
+    use std::process::Command;
+    
+    // Sur Windows, utiliser tasklist pour vérifier si le processus existe
+    #[cfg(target_os = "windows")]
+    {
+        let output = Command::new("tasklist")
+            .args(&["/FI", &format!("PID eq {}", pid)])
+            .output()
+            .map_err(|e| format!("Failed to check process: {}", e))?;
+        
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        Ok(output_str.contains(&pid.to_string()))
+    }
+    
+    // Sur Unix, utiliser ps
+    #[cfg(not(target_os = "windows"))]
+    {
+        let output = Command::new("ps")
+            .args(&["-p", &pid.to_string()])
+            .output()
+            .map_err(|e| format!("Failed to check process: {}", e))?;
+        
+        Ok(output.status.success())
+    }
+}
+
+#[tauri::command]
+fn get_directory_size(path: String) -> Result<u64, String> {
+    use std::fs;
+    use std::path::Path;
+    
+    fn calculate_dir_size(dir: &Path) -> Result<u64, std::io::Error> {
+        let mut size = 0;
+        
+        if dir.is_dir() {
+            for entry in fs::read_dir(dir)? {
+                let entry = entry?;
+                let path = entry.path();
+                
+                if path.is_dir() {
+                    size += calculate_dir_size(&path)?;
+                } else {
+                    size += entry.metadata()?.len();
+                }
+            }
+        }
+        
+        Ok(size)
+    }
+    
+    let dir_path = Path::new(&path);
+    
+    if !dir_path.exists() {
+        return Ok(0); // Si le dossier n'existe pas, retourner 0
+    }
+    
+    calculate_dir_size(dir_path)
+        .map_err(|e| format!("Failed to calculate directory size: {}", e))
+}
+
+#[tauri::command]
+fn delete_file(path: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+    
+    let file_path = Path::new(&path);
+    
+    if !file_path.exists() {
+        return Ok(()); // Si le fichier n'existe pas, considérer comme succès
+    }
+    
+    if file_path.is_file() {
+        fs::remove_file(file_path)
+            .map_err(|e| format!("Failed to delete file {}: {}", path, e))
+    } else {
+        Err(format!("Path {} is not a file", path))
+    }
+}
+
+#[tauri::command]
+fn delete_directory(path: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+    
+    let dir_path = Path::new(&path);
+    
+    if !dir_path.exists() {
+        return Ok(()); // Si le dossier n'existe pas, considérer comme succès
+    }
+    
+    if dir_path.is_dir() {
+        fs::remove_dir_all(dir_path)
+            .map_err(|e| format!("Failed to delete directory {}: {}", path, e))
+    } else {
+        Err(format!("Path {} is not a directory", path))
+    }
+}
+
+#[tauri::command]
+fn list_directory_contents(path: String) -> Result<Vec<String>, String> {
+    use std::fs;
+    use std::path::Path;
+    
+    let dir_path = Path::new(&path);
+    
+    if !dir_path.exists() {
+        return Err(format!("Directory does not exist: {}", path));
+    }
+    
+    if !dir_path.is_dir() {
+        return Err(format!("Path is not a directory: {}", path));
+    }
+    
+    let mut contents = Vec::new();
+    
+    match fs::read_dir(dir_path) {
+        Ok(entries) => {
+            for entry in entries {
+                match entry {
+                    Ok(entry) => {
+                        let file_name = entry.file_name().to_string_lossy().to_string();
+                        let is_dir = entry.path().is_dir();
+                        let prefix = if is_dir { "[DIR] " } else { "[FILE] " };
+                        contents.push(format!("{}{}", prefix, file_name));
+                    }
+                    Err(e) => {
+                        contents.push(format!("[ERROR] Failed to read entry: {}", e));
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            return Err(format!("Failed to read directory {}: {}", path, e));
+        }
+    }
+    
+    Ok(contents)
+}
+
+#[tauri::command]
 fn write_text_file(path: String, content: String) -> Result<(), String> {
     std::fs::write(&path, content).map_err(|e| e.to_string())
 }
@@ -170,6 +335,13 @@ pub fn run() {
             write_text_file,
             create_dir_all,
             check_directory_exists,
+            check_file_exists,
+            launch_game_executable,
+            check_process_running,
+            get_directory_size,
+            delete_file,
+            delete_directory,
+            list_directory_contents,
             zip::extract_zip_file
         ])
         .setup(|app| {

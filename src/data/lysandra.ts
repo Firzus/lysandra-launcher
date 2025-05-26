@@ -13,6 +13,7 @@ const globalInfos: GlobalInfosProps = {
   owner: 'Firzus',
   repositoryName: 'lysandra-launcher',
   repositoryUrl: 'https://github.com/Firzus/lysandra-launcher',
+  gameExecutable: 'StandaloneWindows64.exe',
 }
 
 const carouselEvents: CarouselEventsProps[] = [

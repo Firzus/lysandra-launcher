@@ -5,7 +5,7 @@ import { getGamePaths, GAME_IDS } from './paths'
 import { checkGameIntegrity, initializeGameStructure } from './game-integrity'
 
 export type GameCheckResult = {
-  action: 'CHECK_PASS' | 'FIND_UPDATE' | 'GAME_NOT_INSTALLED' | 'CHECK_FAIL' | 'CLICK_REPAIR'
+  action: 'CHECK_PASS' | 'FIND_UPDATE' | 'GAME_NOT_INSTALLED' | 'CHECK_FAIL' | 'SUCCESS_REPAIR'
   currentVersion?: string
   latestVersion?: string
   error?: string
@@ -33,7 +33,7 @@ export async function checkGameStatus(
       console.log('🔧 Game integrity issues detected, repair needed')
 
       return {
-        action: 'CLICK_REPAIR',
+        action: 'SUCCESS_REPAIR',
         needsRepair: true,
         error: `Missing: ${integrityCheck.missingDirectories.length} dirs, ${integrityCheck.missingFiles.length} files`,
       }
