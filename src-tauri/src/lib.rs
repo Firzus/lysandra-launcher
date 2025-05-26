@@ -444,7 +444,8 @@ pub fn run() {
             delete_file,
             delete_directory,
             list_directory_contents,
-            zip::extract_zip_file
+            zip::extract_zip_file,
+            zip::extract_zip_file_async
         ])
         .setup(|app| {
             println!("🚀 Tauri application starting...");

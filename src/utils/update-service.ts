@@ -6,15 +6,19 @@ import { getPlatform } from '@/hooks/use-get-platform'
 export async function fetchManifest(owner: string, repo: string) {
   try {
     const latestUrl = `https://github.com/${owner}/${repo}/releases/latest/download/latest.json`
+
     console.log(`📋 Fetching manifest from: ${latestUrl}`)
 
     const manifestStr = await invoke<string>('fetch_manifest_from_github', { url: latestUrl })
+
     console.log(`📋 Raw manifest:`, manifestStr)
 
     const manifest = JSON.parse(manifestStr)
+
     console.log(`📋 Parsed manifest:`, manifest)
 
     const platform = getPlatform()
+
     console.log(`🖥️ Current platform: ${platform}`)
 
     const platformZip = manifest.zip[platform]

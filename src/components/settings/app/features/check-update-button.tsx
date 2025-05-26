@@ -22,6 +22,7 @@ export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
         title: t('update.disabled'),
         description: t('update.disabled_desc'),
       })
+
       return
     }
 
@@ -38,6 +39,7 @@ export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
       setTimeout(async () => {
         await relaunch()
       }, 5000)
+
       return
     }
 
@@ -48,6 +50,7 @@ export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
         title: t('update.ready'),
         description: t('update.already_latest'),
       })
+
       return
     }
 

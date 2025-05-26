@@ -40,11 +40,11 @@ export const GameCarousel: React.FC<Props> = () => {
 
         <Button
           isIconOnly
+          aria-label="Previous slide"
           className="absolute left-4 top-1/2 z-10 -translate-y-1/2"
           radius="full"
           size="sm"
           variant="flat"
-          aria-label="Previous slide"
           onPress={prevSlide}
         >
           <LuChevronLeft size={16} />
@@ -52,11 +52,11 @@ export const GameCarousel: React.FC<Props> = () => {
 
         <Button
           isIconOnly
+          aria-label="Next slide"
           className="absolute right-4 top-1/2 z-10 -translate-y-1/2"
           radius="full"
           size="sm"
           variant="flat"
-          aria-label="Next slide"
           onPress={nextSlide}
         >
           <LuChevronRight size={16} />

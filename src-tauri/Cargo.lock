@@ -124,6 +124,7 @@ dependencies = [
  "tauri-plugin-store",
  "tauri-plugin-updater",
  "tauri-plugin-upload",
+ "tokio",
  "zip 3.0.0",
 ]
 

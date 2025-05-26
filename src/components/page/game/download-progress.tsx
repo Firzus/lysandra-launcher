@@ -24,9 +24,10 @@ export const DownloadProgress: React.FC = () => {
       setIsDownloading(true)
 
       // Recalculer le pourcentage directement à partir des bytes pour plus de précision
-      const calculatedProgress = event.payload.total > 0
-        ? Math.round((event.payload.progress * 100) / event.payload.total)
-        : 0
+      const calculatedProgress =
+        event.payload.total > 0
+          ? Math.round((event.payload.progress * 100) / event.payload.total)
+          : 0
 
       setProgress(calculatedProgress)
       setVersion(event.payload.version)

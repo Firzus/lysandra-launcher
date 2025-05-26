@@ -76,10 +76,12 @@
     "download_complete": "Téléchargement terminé",
     "download_complete_message": "Le fichier a été téléchargé avec succès",
     "install": {
+      "initializing_structure": "Initialisation de la structure des dossiers...",
       "fetching": "Récupération des informations du jeu...",
       "downloading": "Téléchargement de {{game}} v{{version}}...",
       "verifying": "Vérification de l'intégrité du fichier...",
       "extracting": "Extraction des fichiers du jeu...",
+      "extracting_file": "Extraction: {{file}} ({{current}}/{{total}})",
       "installing": "Finalisation de l'installation...",
       "cleaning": "Nettoyage des fichiers temporaires...",
       "complete": "{{game}} v{{version}} installé avec succès !",

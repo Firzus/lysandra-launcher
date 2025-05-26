@@ -86,6 +86,7 @@ export function useAutoAppUpdate() {
       if (errorMessage.includes('updater') && errorMessage.includes('disabled')) {
         console.log('🔧 Updater désactivé - Mode développement détecté')
         setDevMode(true)
+
         return
       }
 
@@ -97,6 +98,7 @@ export function useAutoAppUpdate() {
       ) {
         console.log('🔧 Updater non configuré - Mode développement')
         setDevMode(true)
+
         return
       }
 

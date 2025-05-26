@@ -220,9 +220,11 @@ async function repairGameFiles(
 export async function checkIfRepairNeeded(gameId: string): Promise<boolean> {
   try {
     const integrityCheck = await checkGameIntegrity(gameId)
+
     return integrityCheck.needsRepair
   } catch (error) {
     console.error(`Failed to check repair status for ${gameId}:`, error)
+
     return true // En cas d'erreur, on assume qu'une réparation est nécessaire
   }
 }

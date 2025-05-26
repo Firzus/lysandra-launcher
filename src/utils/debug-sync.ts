@@ -1,10 +1,11 @@
+import type { UninstallEvent } from '@/types/uninstall'
+
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 
 import { GAME_IDS } from './paths'
 import { isGameInstalled } from './game-uninstaller'
 import { initializeGameCheck } from './game-checker'
-import type { UninstallEvent } from '@/types/uninstall'
 
 /**
  * Utilitaire de debug pour tester la synchronisation lors de la désinstallation

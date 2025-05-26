@@ -115,9 +115,11 @@ export function testStateMachine() {
 
   if (passedTests === totalTests) {
     console.log('🎉 All state machine tests passed!')
+
     return true
   } else {
     console.log('⚠️ Some state machine tests failed!')
+
     return false
   }
 }

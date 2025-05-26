@@ -5,8 +5,12 @@ import i18n from './i18n'
 import { getGamePaths, GAME_IDS } from './paths'
 import { downloadOperation, fetchManifest } from './update-service'
 import { checkFileHash } from './hash-verification'
-import { extractZip } from './zip'
+import { extractZipAsync, ExtractionProgressEvent } from './zip'
 import { getGameRepository } from './game-data'
+import {
+  initializeGameDirectoryStructure,
+  checkGameDirectoryStructure,
+} from './game-directory-manager'
 
 export type GameInstallProgress = {
   step:
@@ -39,6 +43,15 @@ export async function downloadAndInstallGame(
 ): Promise<GameInstallResult> {
   try {
     console.log(`🎮 Starting installation of ${gameId} from ${owner}/${repo}`)
+
+    // 0. Initialiser la structure des dossiers AVANT tout
+    console.log(`📁 Initializing game directory structure...`)
+    onProgress?.({ step: 'fetching', message: i18n.t('game.install.initializing_structure') })
+    const initResult = await initializeGameDirectoryStructure(gameId)
+    if (!initResult.success) {
+      throw new Error(`Failed to initialize directory structure: ${initResult.errors.join(', ')}`)
+    }
+
     const gamePaths = await getGamePaths(gameId)
     console.log(`📁 Game paths:`, gamePaths)
 
@@ -81,8 +94,23 @@ export async function downloadAndInstallGame(
     // 5. Extraire dans le dossier d'installation
     console.log(`📦 Extracting to: ${gamePaths.install}`)
     onProgress?.({ step: 'extracting', message: i18n.t('game.install.extracting') })
+
+    // S'assurer que le dossier d'installation existe (double vérification)
     await invoke('create_dir_all', { path: gamePaths.install })
-    await extractZip(zipFilePath, gamePaths.install)
+
+    // Extraction asynchrone avec progression
+    await extractZipAsync(zipFilePath, gamePaths.install, (progress: ExtractionProgressEvent) => {
+      console.log(`📄 Extracting: ${progress.current_file_name} (${progress.progress_percentage}%)`)
+      onProgress?.({
+        step: 'extracting',
+        progress: progress.progress_percentage,
+        message: i18n.t('game.install.extracting_file', {
+          file: progress.current_file_name,
+          current: progress.current_file,
+          total: progress.total_files,
+        }),
+      })
+    })
     console.log(`✅ Extraction completed`)
 
     // 6. Sauvegarder la version
@@ -94,7 +122,19 @@ export async function downloadAndInstallGame(
     })
     console.log(`✅ Version file saved: ${version}`)
 
-    // 7. Nettoyer le fichier ZIP
+    // 7. Vérifier la structure finale
+    console.log(`🔍 Verifying final directory structure...`)
+    const finalCheck = await checkGameDirectoryStructure(gameId)
+    if (!finalCheck.isValid) {
+      console.warn(`⚠️ Directory structure verification failed:`, finalCheck.missingDirectories)
+      // Tenter de corriger les problèmes
+      const repairResult = await initializeGameDirectoryStructure(gameId)
+      if (!repairResult.success) {
+        console.warn(`⚠️ Failed to repair directory structure: ${repairResult.errors.join(', ')}`)
+      }
+    }
+
+    // 8. Nettoyer le fichier ZIP
     console.log(`🧹 Cleaning up...`)
     onProgress?.({ step: 'cleaning', message: i18n.t('game.install.cleaning') })
     try {
@@ -104,7 +144,7 @@ export async function downloadAndInstallGame(
       console.warn(`⚠️ Cleanup failed (non-critical):`, cleanupError)
     }
 
-    // 8. Terminé
+    // 9. Terminé
     console.log(`🎉 Installation completed successfully!`)
     onProgress?.({
       step: 'complete',
@@ -181,6 +221,7 @@ export async function installLysandra(
   onProgress?: (progress: GameInstallProgress) => void,
 ): Promise<GameInstallResult> {
   const { owner, repo } = getGameRepository(GAME_IDS.LYSANDRA)
+
   return await downloadAndInstallGame(GAME_IDS.LYSANDRA, owner, repo, onProgress)
 }
 
@@ -191,5 +232,6 @@ export async function updateLysandra(
   onProgress?: (progress: GameInstallProgress) => void,
 ): Promise<GameInstallResult> {
   const { owner, repo } = getGameRepository(GAME_IDS.LYSANDRA)
+
   return await updateGame(GAME_IDS.LYSANDRA, owner, repo, onProgress)
 }

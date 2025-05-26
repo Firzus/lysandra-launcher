@@ -168,6 +168,7 @@ export async function getGameSize(gameId: string): Promise<string> {
     return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`
   } catch (error) {
     console.error('Failed to get game size:', error)
+
     return 'Inconnu'
   }
 }
@@ -193,12 +194,14 @@ export async function isGameInstalled(gameId: string): Promise<boolean> {
       const versionContent = await invoke<string>('read_text_file', {
         path: gamePaths.versionFile,
       })
+
       return versionContent.trim().length > 0
     } catch {
       return false
     }
   } catch (error) {
     console.error('Failed to check if game is installed:', error)
+
     return false
   }
 }

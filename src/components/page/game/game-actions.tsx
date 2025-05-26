@@ -1,3 +1,5 @@
+import type { UninstallEvent } from '@/types/uninstall'
+
 import React from 'react'
 import { LuCloudDownload, LuSettings2, LuPlay, LuWrench, LuRotateCcw } from 'react-icons/lu'
 import { Button } from '@heroui/button'
@@ -22,7 +24,6 @@ import { repairGame, type GameRepairProgress } from '@/utils/game-repair'
 import { launchGame, startGameProcessMonitoring } from '@/utils/game-launcher'
 import { isGameInstalled } from '@/utils/game-uninstaller'
 import { GAME_IDS } from '@/utils/paths'
-import type { UninstallEvent } from '@/types/uninstall'
 import { syncDebugger } from '@/utils/debug-sync'
 
 export const GameActions: React.FC = () => {
@@ -54,12 +55,15 @@ export const GameActions: React.FC = () => {
         const { progress, total } = event.payload
         // Recalculer le pourcentage directement à partir des bytes pour plus de précision
         const calculatedProgress = total > 0 ? Math.round((progress * 100) / total) : 0
+
         setDownloadProgress(calculatedProgress)
       })
+
       return unlisten
     }
 
     let unlisten: (() => void) | null = null
+
     setupProgressListener().then((fn) => {
       unlisten = fn
     })
@@ -103,10 +107,12 @@ export const GameActions: React.FC = () => {
           }
         }
       })
+
       return unlisten
     }
 
     let unlisten: (() => void) | null = null
+
     setupUninstallListener().then((fn) => {
       unlisten = fn
     })
@@ -121,8 +127,8 @@ export const GameActions: React.FC = () => {
     if (import.meta.env.DEV) {
       console.log('🐛 Sync debugger initialized in development mode')
 
-        // Ajouter une fonction globale pour tester la sync
-        ; (window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
+      // Ajouter une fonction globale pour tester la sync
+      ;(window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
       console.log('🔧 Use window.forceSyncCheck() to manually check synchronization')
     }
 
@@ -139,6 +145,7 @@ export const GameActions: React.FC = () => {
     const requestNotificationPermission = async () => {
       try {
         const permissionGranted = await isPermissionGranted()
+
         if (!permissionGranted) {
           await requestPermission()
         }
@@ -146,6 +153,7 @@ export const GameActions: React.FC = () => {
         // Notification permission error handled silently
       }
     }
+
     requestNotificationPermission()
   }, [])
 
@@ -155,7 +163,7 @@ export const GameActions: React.FC = () => {
       const stopMonitoring = startGameProcessMonitoring(
         GAME_IDS.LYSANDRA,
         () => dispatch({ type: 'OPEN_UNITY' }),
-        () => dispatch({ type: 'CLOSE_UNITY' })
+        () => dispatch({ type: 'CLOSE_UNITY' }),
       )
 
       return stopMonitoring
@@ -168,10 +176,12 @@ export const GameActions: React.FC = () => {
       try {
         dispatch({ type: 'SELECT_GAME' })
         const result = await initializeGameCheck()
+
         dispatch({ type: result.action })
 
         // Vérifier si le jeu est installé pour afficher/masquer le bouton des paramètres
         const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
+
         setGameInstalled(installed)
 
         if (result.error && result.action === 'CHECK_FAIL') {
@@ -182,6 +192,7 @@ export const GameActions: React.FC = () => {
         setErrorMessage(`Initialization failed: ${error}`)
       }
     }
+
     initializeApp()
   }, [])
 
@@ -216,6 +227,7 @@ export const GameActions: React.FC = () => {
       setDownloadProgress(0)
 
       const isUpdate = gameState === 'waitingForUpdate'
+
       dispatch({ type: isUpdate ? 'CLICK_UPDATE_BUTTON' : 'CLICK_DOWNLOAD_BUTTON' })
 
       if (config.locateExistingGame && config.existingGamePath) {
@@ -225,6 +237,7 @@ export const GameActions: React.FC = () => {
           message: t('game.install_modal.locate_confirm') + ' : ' + config.existingGamePath,
         })
         dispatch({ type: isUpdate ? 'UPDATE_COMPLETED' : 'DOWNLOAD_COMPLETED' })
+
         return
       }
 
@@ -242,6 +255,7 @@ export const GameActions: React.FC = () => {
 
         // Mettre à jour l'état d'installation après succès
         const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
+
         setGameInstalled(installed)
       } else {
         dispatch({ type: failedAction })
@@ -249,6 +263,7 @@ export const GameActions: React.FC = () => {
       }
     } catch (error) {
       const failedAction = gameState === 'updating' ? 'FAILED_TO_UPDATE' : 'FAILED_TO_DOWNLOAD'
+
       dispatch({ type: failedAction })
       setErrorMessage(`Installation error: ${error}`)
     } finally {
@@ -271,6 +286,7 @@ export const GameActions: React.FC = () => {
         // Re-vérifier le jeu après réparation
         setTimeout(async () => {
           const checkResult = await initializeGameCheck()
+
           dispatch({ type: checkResult.action })
         }, 1000)
       } else {
@@ -314,10 +330,12 @@ export const GameActions: React.FC = () => {
 
     // Vérifier si le jeu est installé
     const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
+
     setGameInstalled(installed)
 
     // Relancer la vérification complète
     const result = await initializeGameCheck()
+
     dispatch({ type: result.action })
 
     console.log(`✅ Game state refreshed: installed=${installed}, action=${result.action}`)
@@ -326,6 +344,7 @@ export const GameActions: React.FC = () => {
   const sendDownloadCompleteNotification = async (isUpdate: boolean, version?: string) => {
     try {
       const permissionGranted = await isPermissionGranted()
+
       if (permissionGranted) {
         await sendNotification({
           title: isUpdate
@@ -334,9 +353,9 @@ export const GameActions: React.FC = () => {
           body: isUpdate
             ? t('notification.update_complete.body', { version: version || 'unknown' })
             : t('notification.download_complete.body', {
-              game: 'Lysandra',
-              version: version || 'unknown',
-            }),
+                game: 'Lysandra',
+                version: version || 'unknown',
+              }),
         })
       }
     } catch {
@@ -364,9 +383,10 @@ export const GameActions: React.FC = () => {
 
       case 'downloading':
         return {
-          text: downloadProgress > 0
-            ? `${downloadProgress}%`
-            : installProgress?.message || t('game.states.downloading'),
+          text:
+            downloadProgress > 0
+              ? `${downloadProgress}%`
+              : installProgress?.message || t('game.states.downloading'),
           icon: LuCloudDownload,
           disabled: true,
           loading: true,
@@ -382,9 +402,10 @@ export const GameActions: React.FC = () => {
 
       case 'updating':
         return {
-          text: downloadProgress > 0
-            ? `${downloadProgress}%`
-            : installProgress?.message || t('game.states.downloading'),
+          text:
+            downloadProgress > 0
+              ? `${downloadProgress}%`
+              : installProgress?.message || t('game.states.downloading'),
           icon: LuCloudDownload,
           disabled: true,
           loading: true,
@@ -460,21 +481,16 @@ export const GameActions: React.FC = () => {
 
   return (
     <div className="flex flex-col items-start">
-
-
       {/* Affichage des erreurs */}
       {errorMessage && gameState === 'error' && (
         <div className="mb-4 w-full max-w-md">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            <div className="flex justify-between items-start">
+          <div className="rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
+            <div className="flex items-start justify-between">
               <div>
                 <strong className="font-bold">Erreur:</strong>
                 <span className="block sm:inline"> {errorMessage}</span>
               </div>
-              <button
-                className="text-red-700 hover:text-red-900"
-                onClick={handleCloseError}
-              >
+              <button className="text-red-700 hover:text-red-900" onClick={handleCloseError}>
                 ×
               </button>
             </div>
@@ -485,10 +501,13 @@ export const GameActions: React.FC = () => {
       {/* Affichage du progrès d'installation */}
       {installProgress && (gameState === 'downloading' || gameState === 'updating') && (
         <div className="mb-4 w-full max-w-md">
-          <div className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
-            ? 'animate-pulse'
-            : ''
-            }`}>
+          <div
+            className={`text-muted-foreground mb-1 text-sm ${
+              installProgress.step !== 'downloading' && installProgress.step !== 'complete'
+                ? 'animate-pulse'
+                : ''
+            }`}
+          >
             {installProgress.message}
           </div>
           <div className="text-muted-foreground mb-2 text-xs">
@@ -509,14 +528,15 @@ export const GameActions: React.FC = () => {
       {/* Affichage du progrès de réparation */}
       {repairProgress && gameState === 'repairing' && (
         <div className="mb-4 w-full max-w-md">
-          <div className={`text-muted-foreground mb-1 text-sm ${repairProgress.step !== 'complete' ? 'animate-pulse' : ''
-            }`}>
+          <div
+            className={`text-muted-foreground mb-1 text-sm ${
+              repairProgress.step !== 'complete' ? 'animate-pulse' : ''
+            }`}
+          >
             {repairProgress.message}
           </div>
           {repairProgress.details && (
-            <div className="text-muted-foreground mb-2 text-xs">
-              {repairProgress.details}
-            </div>
+            <div className="text-muted-foreground mb-2 text-xs">{repairProgress.details}</div>
           )}
           {repairProgress.progress && (
             <div className="h-2 w-full rounded-full bg-gray-200">
@@ -532,7 +552,7 @@ export const GameActions: React.FC = () => {
       {/* Affichage du progrès de désinstallation */}
       {(uninstallProgress || gameState === 'uninstalling') && (
         <div className="mb-4 w-full max-w-md">
-          <div className="text-muted-foreground mb-1 text-sm animate-pulse">
+          <div className="text-muted-foreground mb-1 animate-pulse text-sm">
             {uninstallProgress || t('game.uninstall.in_progress')}
           </div>
           <div className="text-muted-foreground mb-2 text-xs">
@@ -544,7 +564,13 @@ export const GameActions: React.FC = () => {
       <div className="flex gap-2">
         {/* Bouton des paramètres du jeu - masqué si le jeu n'est pas installé */}
         {gameInstalled && (
-          <Button isIconOnly radius="lg" size="lg" aria-label={t('game.settings_title')} onPress={onOpen}>
+          <Button
+            isIconOnly
+            aria-label={t('game.settings_title')}
+            radius="lg"
+            size="lg"
+            onPress={onOpen}
+          >
             <LuSettings2 className="text-muted-foreground" size={24} />
           </Button>
         )}

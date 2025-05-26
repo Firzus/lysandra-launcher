@@ -19,6 +19,7 @@ export const GameSizeDisplay: React.FC<Props> = ({ className }) => {
       try {
         setIsLoading(true)
         const gameSize = await getGameSize(GAME_IDS.LYSANDRA)
+
         setSize(gameSize)
       } catch (error) {
         console.error('Failed to get game size:', error)
@@ -37,8 +38,11 @@ export const GameSizeDisplay: React.FC<Props> = ({ className }) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <LuHardDrive className="text-muted-foreground" size={16} />
-      <span className={`text-sm ${isLoading ? 'animate-pulse' : ''} ${size === '0 B' ? 'text-muted-foreground italic' : ''
-        }`}>
+      <span
+        className={`text-sm ${isLoading ? 'animate-pulse' : ''} ${
+          size === '0 B' ? 'text-muted-foreground italic' : ''
+        }`}
+      >
         {displaySize}
       </span>
     </div>

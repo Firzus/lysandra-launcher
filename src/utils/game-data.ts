@@ -1,5 +1,6 @@
-import { globalInfos } from '@/data/lysandra'
 import { GAME_IDS } from './paths'
+
+import { globalInfos } from '@/data/lysandra'
 
 /**
  * Obtient les informations d'un jeu par son ID
@@ -18,6 +19,7 @@ export function getGameData(gameId: string) {
  */
 export function getGameExecutable(gameId: string): string {
   const gameData = getGameData(gameId)
+
   return gameData.gameExecutable
 }
 
@@ -26,6 +28,7 @@ export function getGameExecutable(gameId: string): string {
  */
 export function getGameRepository(gameId: string) {
   const gameData = getGameData(gameId)
+
   return {
     owner: gameData.owner,
     repo: gameData.repositoryName,

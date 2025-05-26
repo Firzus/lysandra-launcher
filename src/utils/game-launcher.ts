@@ -99,6 +99,7 @@ async function findGameExecutable(installPath: string, gameId: string): Promise<
 
     if (exists) {
       console.log(`✅ Found primary game executable: ${executablePath}`)
+
       return executablePath
     }
 
@@ -110,12 +111,14 @@ async function findGameExecutable(installPath: string, gameId: string): Promise<
     for (const executableName of fallbackExecutables) {
       try {
         const fallbackPath = `${installPath}/${executableName}`
+
         console.log(`🔍 Checking fallback: ${fallbackPath}`)
 
         const fallbackExists = await invoke<boolean>('check_file_exists', { path: fallbackPath })
 
         if (fallbackExists) {
           console.log(`✅ Found fallback executable: ${fallbackPath}`)
+
           return fallbackPath
         }
       } catch (error) {
@@ -128,13 +131,16 @@ async function findGameExecutable(installPath: string, gameId: string): Promise<
 
     // Vérifier si le dossier d'installation existe
     const dirExists = await invoke<boolean>('check_directory_exists', { path: installPath })
+
     if (!dirExists) {
       console.error(`❌ Install directory does not exist: ${installPath}`)
+
       return null
     }
 
     try {
       const contents = await invoke<string[]>('list_directory_contents', { path: installPath })
+
       console.log(`📁 Directory contents:`, contents)
 
       // Chercher des fichiers .exe dans la liste
@@ -147,7 +153,9 @@ async function findGameExecutable(installPath: string, gameId: string): Promise<
         // Prendre le premier fichier .exe trouvé
         const firstExe = exeFiles[0].replace('[FILE] ', '')
         const executablePath = `${installPath}/${firstExe}`
+
         console.log(`🎮 Using executable: ${executablePath}`)
+
         return executablePath
       } else {
         console.error(`❌ No .exe files found in directory`)
@@ -159,6 +167,7 @@ async function findGameExecutable(installPath: string, gameId: string): Promise<
     return null
   } catch (error) {
     console.error('❌ Failed to find game executable:', error)
+
     return null
   }
 }
@@ -171,10 +180,13 @@ async function checkUnityProcessRunning(): Promise<boolean> {
   try {
     console.log('🔍 Checking for Unity/game processes...')
     const isRunning = await invoke<boolean>('check_unity_process_running')
+
     console.log(`🎮 Unity process running: ${isRunning}`)
+
     return isRunning
   } catch (error) {
     console.error('Failed to check Unity process:', error)
+
     return false
   }
 }
