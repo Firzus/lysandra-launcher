@@ -1,6 +1,6 @@
 import { Button } from '@heroui/button'
 import { LuFolderOpen } from 'react-icons/lu'
-import { invoke } from '@tauri-apps/api/core'
+import { openPath } from '@tauri-apps/plugin-opener'
 
 import { getGamePaths, GAME_IDS } from '@/utils/paths'
 
@@ -13,7 +13,7 @@ export const OpenGameFolderButton: React.FC<Props> = ({ className }) => {
     try {
       const gamePaths = await getGamePaths(GAME_IDS.LYSANDRA)
 
-      await invoke('open_folder', { path: gamePaths.install })
+      await openPath(gamePaths.install)
     } catch (error) {
       console.error('Failed to open game folder:', error)
     }

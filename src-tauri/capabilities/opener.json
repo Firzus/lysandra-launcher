@@ -1,12 +1,25 @@
 {
   "identifier": "opener",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     {
       "identifier": "opener:allow-open-url",
       "allow": [
         {
           "url": "https://tauri.app"
+        }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        {
+          "path": "$APPLOCALDATA"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
         }
       ]
     }
