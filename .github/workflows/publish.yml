@@ -3,7 +3,6 @@ name: Publish
 on:
   push:
     tags: ['v*']
-  workflow_dispatch:
 
 jobs:
   release:
@@ -79,5 +78,5 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'Lysandra Launcher ${{ github.ref_name }}'
           releaseBody: 'See the assets below to download and install this version.'
-          releaseDraft: false
+          releaseDraft: true
           prerelease: false
