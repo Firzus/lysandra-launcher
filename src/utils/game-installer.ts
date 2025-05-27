@@ -3,9 +3,9 @@ import { join } from '@tauri-apps/api/path'
 
 import i18n from './i18n'
 import { getGamePaths, GAME_IDS } from './paths'
-import { downloadOperation, fetchManifest } from './update-service'
+import { fetchManifest } from './update-service'
 import { checkFileHash } from './hash-verification'
-import { extractZipAsync, ExtractionProgressEvent } from './zip'
+import { extractZip } from './zip'
 import { getGameRepository } from './game-data'
 import {
   initializeGameDirectoryStructure,
@@ -74,46 +74,149 @@ export async function downloadAndInstallGame(
     console.log(`📁 Creating cache directory...`)
     await invoke('create_dir_all', { path: cacheDir })
 
-    // 3. Télécharger le jeu
-    console.log(`⬇️ Starting download...`)
+    // 3. Télécharger le jeu avec le nouveau système
+    console.log(`⬇️ Starting download with new download manager...`)
     onProgress?.({
       step: 'downloading',
-      message: i18n.t('game.install.downloading', { game: gameId, version }),
+      message: i18n.t('game.install.downloading', { progress: 0 }),
     })
-    await downloadOperation(version, url, cacheDir, zipFileName)
-    console.log(`✅ Download completed`)
 
-    // 4. Vérifier l'intégrité
+    // Démarrer le téléchargement avec le nouveau gestionnaire
+    const downloadId = await invoke<string>('start_download', {
+      url,
+      filePath: zipFilePath,
+    })
+
+    console.log(`📥 Download started with ID: ${downloadId}`)
+
+    // Attendre que le téléchargement soit terminé avec gestion des événements
+    await new Promise<void>((resolve, reject) => {
+      let completed = false
+
+      const checkDownloadStatus = async () => {
+        try {
+          const downloadProgress = await invoke<any>('get_download_progress', { downloadId })
+
+          if (!downloadProgress) {
+            if (!completed) {
+              reject(new Error('Download not found'))
+            }
+            return
+          }
+
+          const progressPercentage = Math.round(downloadProgress.percentage || 0)
+
+          console.log(`📊 Download status: ${downloadProgress.status} (${progressPercentage}%)`)
+
+          // Mettre à jour la progression
+          if (downloadProgress.status === 'Downloading' || downloadProgress.status === 'Pending') {
+            onProgress?.({
+              step: 'downloading',
+              progress: progressPercentage,
+              message: i18n.t('game.install.downloading', { progress: progressPercentage }),
+            })
+          }
+
+          if (downloadProgress.status === 'Completed') {
+            if (!completed) {
+              completed = true
+              console.log(`✅ Download completed - waiting for file sync...`)
+
+              // Attendre un court délai pour que le fichier soit complètement synchronisé sur le disque
+              setTimeout(async () => {
+                try {
+                  // Vérifier que le fichier existe et a une taille > 0
+                  const fileExists = await invoke<boolean>('check_file_exists', {
+                    path: zipFilePath,
+                  })
+                  if (fileExists) {
+                    const fileSize = await invoke<number>('get_file_size', { path: zipFilePath })
+                    console.log(`📦 Downloaded file size: ${fileSize} bytes`)
+
+                    if (fileSize > 0) {
+                      resolve()
+                    } else {
+                      reject(new Error('Downloaded file is empty'))
+                    }
+                  } else {
+                    reject(new Error('Downloaded file not found'))
+                  }
+                } catch (error) {
+                  reject(new Error(`File verification failed: ${error}`))
+                }
+              }, 2000) // Attendre 2 secondes pour la synchronisation
+            }
+          } else if (downloadProgress.status === 'Failed') {
+            if (!completed) {
+              completed = true
+              reject(new Error(downloadProgress.error || 'Download failed'))
+            }
+          } else if (downloadProgress.status === 'Cancelled') {
+            if (!completed) {
+              completed = true
+              reject(new Error('Download was cancelled'))
+            }
+          } else {
+            // Continuer à vérifier
+            if (!completed) {
+              setTimeout(checkDownloadStatus, 1000)
+            }
+          }
+        } catch (error) {
+          if (!completed) {
+            completed = true
+            reject(error)
+          }
+        }
+      }
+
+      // Commencer la vérification après un court délai
+      setTimeout(checkDownloadStatus, 500)
+    })
+
+    // 4. Attendre un délai supplémentaire pour s'assurer que le fichier est complètement écrit
+    console.log(`⏳ Waiting for file to be fully written to disk...`)
+    await new Promise((resolve) => setTimeout(resolve, 3000)) // 3 secondes d'attente
+
+    // 5. Vérifier l'intégrité
     console.log(`🔍 Verifying file integrity...`)
     onProgress?.({ step: 'verifying', message: i18n.t('game.install.verifying') })
+
+    // Vérifier la taille avant la vérification d'intégrité
+    try {
+      const fileExists = await invoke<boolean>('check_file_exists', { path: zipFilePath })
+      if (!fileExists) {
+        throw new Error(`Downloaded file not found: ${zipFilePath}`)
+      }
+
+      const fileSize = await invoke<number>('get_file_size', { path: zipFilePath })
+      console.log(`📦 File size before hash verification: ${fileSize} bytes`)
+
+      if (fileSize === 0) {
+        throw new Error('Downloaded file is empty')
+      }
+    } catch (error) {
+      console.error(`❌ File verification before hash check failed:`, error)
+      throw new Error(`File verification failed: ${error}`)
+    }
+
     if (!(await checkFileHash(zipFilePath, hash))) {
       throw new Error("La vérification d'intégrité a échoué")
     }
     console.log(`✅ File integrity verified`)
 
-    // 5. Extraire dans le dossier d'installation
+    // 6. Extraire dans le dossier d'installation
     console.log(`📦 Extracting to: ${gamePaths.install}`)
     onProgress?.({ step: 'extracting', message: i18n.t('game.install.extracting') })
 
     // S'assurer que le dossier d'installation existe (double vérification)
     await invoke('create_dir_all', { path: gamePaths.install })
 
-    // Extraction asynchrone avec progression
-    await extractZipAsync(zipFilePath, gamePaths.install, (progress: ExtractionProgressEvent) => {
-      console.log(`📄 Extracting: ${progress.current_file_name} (${progress.progress_percentage}%)`)
-      onProgress?.({
-        step: 'extracting',
-        progress: progress.progress_percentage,
-        message: i18n.t('game.install.extracting_file', {
-          file: progress.current_file_name,
-          current: progress.current_file,
-          total: progress.total_files,
-        }),
-      })
-    })
+    // Extraction simple
+    await extractZip(zipFilePath, gamePaths.install)
     console.log(`✅ Extraction completed`)
 
-    // 6. Sauvegarder la version
+    // 7. Sauvegarder la version
     console.log(`💾 Saving version file...`)
     onProgress?.({ step: 'installing', message: i18n.t('game.install.installing') })
     await invoke('write_text_file', {
@@ -122,7 +225,7 @@ export async function downloadAndInstallGame(
     })
     console.log(`✅ Version file saved: ${version}`)
 
-    // 7. Vérifier la structure finale
+    // 8. Vérifier la structure finale
     console.log(`🔍 Verifying final directory structure...`)
     const finalCheck = await checkGameDirectoryStructure(gameId)
     if (!finalCheck.isValid) {
@@ -134,7 +237,7 @@ export async function downloadAndInstallGame(
       }
     }
 
-    // 8. Nettoyer le fichier ZIP
+    // 9. Nettoyer le fichier ZIP
     console.log(`🧹 Cleaning up...`)
     onProgress?.({ step: 'cleaning', message: i18n.t('game.install.cleaning') })
     try {
@@ -144,7 +247,7 @@ export async function downloadAndInstallGame(
       console.warn(`⚠️ Cleanup failed (non-critical):`, cleanupError)
     }
 
-    // 9. Terminé
+    // 10. Terminé
     console.log(`🎉 Installation completed successfully!`)
     onProgress?.({
       step: 'complete',

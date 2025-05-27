@@ -2,7 +2,7 @@
     "loader": {
         "initializing": "Initialisierung",
         "checking": "Suche nach Updates",
-        "downloading": "Herunterladen: {{progress}}%",
+        "downloading": "{{progress}}%",
         "ready": "Laden abgeschlossen",
         "installing": "Installieren",
         "error": "Unbekannter Fehler"
@@ -72,16 +72,15 @@
         "locate": "Spiel lokalisieren",
         "uninstall": "Deinstallieren",
         "download": "Herunterladen",
-        "downloading": "Herunterladen: {{progress}}%",
+        "downloading": "{{progress}}%",
         "download_complete": "Download abgeschlossen",
         "download_complete_message": "Die Datei wurde erfolgreich heruntergeladen",
         "install": {
             "initializing_structure": "Ordner-Struktur initialisieren...",
             "fetching": "Spiel-Informationen abrufen...",
-            "downloading": "{{game}} v{{version}} herunterladen...",
+            "downloading": "{{progress}}%",
             "verifying": "Datei-Integrität überprüfen...",
             "extracting": "Spiel-Dateien extrahieren...",
-            "extracting_file": "Extrahieren: {{file}} ({{current}}/{{total}})",
             "installing": "Installation abschließen...",
             "cleaning": "Temporäre Dateien bereinigen...",
             "complete": "{{game}} v{{version}} erfolgreich installiert!",

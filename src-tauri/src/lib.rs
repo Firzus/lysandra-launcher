@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
 use tauri_plugin_http::reqwest;
 
-// Module pour la vérification d'intégrité SHA-256
+// Modules
 pub mod hash;
 pub mod zip;
+pub mod download_manager;
 
 // Structure pour les événements de progression
 #[derive(Clone, Serialize, Deserialize)]
@@ -129,6 +130,26 @@ fn check_directory_exists(path: String) -> Result<bool, String> {
 #[tauri::command]
 fn check_file_exists(path: String) -> Result<bool, String> {
     Ok(std::path::Path::new(&path).is_file())
+}
+
+#[tauri::command]
+fn get_file_size(path: String) -> Result<u64, String> {
+    use std::fs;
+    use std::path::Path;
+    
+    let file_path = Path::new(&path);
+    
+    if !file_path.exists() {
+        return Err(format!("File does not exist: {}", path));
+    }
+    
+    if !file_path.is_file() {
+        return Err(format!("Path is not a file: {}", path));
+    }
+    
+    fs::metadata(file_path)
+        .map(|metadata| metadata.len())
+        .map_err(|e| format!("Failed to get file size for {}: {}", path, e))
 }
 
 #[tauri::command]
@@ -437,6 +458,7 @@ pub fn run() {
             create_dir_all,
             check_directory_exists,
             check_file_exists,
+            get_file_size,
             launch_game_executable,
             check_process_running,
             check_unity_process_running,
@@ -445,7 +467,16 @@ pub fn run() {
             delete_directory,
             list_directory_contents,
             zip::extract_zip_file,
-            zip::extract_zip_file_async
+            // Commandes du download manager
+            download_manager::start_download,
+            download_manager::pause_download,
+            download_manager::resume_download,
+            download_manager::cancel_download,
+            download_manager::remove_download,
+            download_manager::get_download_progress,
+            download_manager::get_all_downloads,
+            download_manager::cleanup_completed_downloads,
+            download_manager::get_download_stats
         ])
         .setup(|app| {
             println!("🚀 Tauri application starting...");
@@ -457,6 +488,12 @@ pub fn run() {
                 return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, e)));
             }
             println!("✅ Launcher structure initialized successfully");
+
+            // Initialiser le gestionnaire de téléchargements
+            println!("⬇️ Initializing download manager...");
+            let download_manager = download_manager::init_download_manager();
+            app.manage(download_manager);
+            println!("✅ Download manager initialized successfully");
 
             println!("🌐 Tauri setup completed successfully");
             Ok(())

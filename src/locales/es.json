@@ -2,7 +2,7 @@
     "loader": {
         "initializing": "Inicializando",
         "checking": "Verificando actualizaciones",
-        "downloading": "Descargando: {{progress}}%",
+        "downloading": "{{progress}}%",
         "ready": "Carga completa",
         "installing": "Instalando",
         "error": "Error desconocido"
@@ -72,22 +72,21 @@
         "locate": "Localizar juego",
         "uninstall": "Desinstalar",
         "download": "Descargar",
-        "downloading": "Descargando: {{progress}}%",
+        "downloading": "{{progress}}%",
         "download_complete": "Descarga completa",
         "download_complete_message": "El archivo se ha descargado exitosamente",
-            "install": {
-      "initializing_structure": "Inicializando estructura de directorios...",
-      "fetching": "Obteniendo información del juego...",
-      "downloading": "Descargando {{game}} v{{version}}...",
-      "verifying": "Verificando integridad del archivo...",
-      "extracting": "Extrayendo archivos del juego...",
-      "extracting_file": "Extrayendo: {{file}} ({{current}}/{{total}})",
-      "installing": "Finalizando instalación...",
-      "cleaning": "Limpiando archivos temporales...",
-      "complete": "{{game}} v{{version}} instalado exitosamente!",
-      "update_preparing": "Preparando actualización...",
-      "updated_from_to": "Juego actualizado de {{oldVersion}} a {{newVersion}}"
-    },
+        "install": {
+            "initializing_structure": "Inicializando estructura de directorios...",
+            "fetching": "Obteniendo información del juego...",
+            "downloading": "{{progress}}%",
+            "verifying": "Verificando integridad del archivo...",
+            "extracting": "Extrayendo archivos del juego...",
+            "installing": "Finalizando instalación...",
+            "cleaning": "Limpiando archivos temporales...",
+            "complete": "{{game}} v{{version}} instalado exitosamente!",
+            "update_preparing": "Preparando actualización...",
+            "updated_from_to": "Juego actualizado de {{oldVersion}} a {{newVersion}}"
+        },
         "uninstall_modal": {
             "title": "Desinstalar Lysandra",
             "description": "Esta acción eliminará los archivos del juego de tu computadora.",
