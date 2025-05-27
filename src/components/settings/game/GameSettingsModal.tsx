@@ -3,9 +3,9 @@ import { Tabs, Tab } from '@heroui/tabs'
 import { Card, CardBody } from '@heroui/card'
 import { useTranslation } from 'react-i18next'
 
-import { UninstallGameButton } from './features/uninstall-game-button'
-import { GameSizeDisplay } from './features/game-size-display'
-import { OpenGameFolderButton } from './features/open-game-folder-button'
+import { UninstallGameButton } from './features/UninstallGameButton'
+import { GameSizeDisplay } from './features/GameSizeDisplay'
+import { OpenGameFolderButton } from './features/OpenGameFolderButton'
 
 type Props = {
   isOpen: boolean

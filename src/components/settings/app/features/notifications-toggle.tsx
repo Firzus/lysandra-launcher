@@ -2,7 +2,7 @@ import { Switch } from '@heroui/switch'
 import { Spinner } from '@heroui/spinner'
 import { useTranslation } from 'react-i18next'
 
-import { useNotifications } from '@/hooks/use-notifications'
+import { useNotifications } from '@/hooks/useNotifications'
 
 type Props = {
   className?: string

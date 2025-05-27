@@ -1,9 +1,9 @@
 import { Suspense, memo, useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { ErrorFallback } from '@/components/ui/error-fallback'
-import { useRenderPerformance } from '@/hooks/use-performance'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { ErrorFallback } from '@/components/ui/ErrorFallback'
+import { useRenderPerformance } from '@/hooks/usePerformance'
 
 type MainLayoutProps = {
   children: React.ReactNode

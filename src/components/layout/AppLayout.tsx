@@ -2,9 +2,9 @@ import { Suspense, memo } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Divider } from '@heroui/divider'
 
-import { Sidebar } from '@/components/page/sidebar'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { ErrorFallback } from '@/components/ui/error-fallback'
+import { Sidebar } from '@/components/page/Sidebar'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { ErrorFallback } from '@/components/ui/ErrorFallback'
 
 type AppLayoutProps = {
   children: React.ReactNode

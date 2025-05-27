@@ -1,7 +1,7 @@
 import { download } from '@tauri-apps/plugin-upload'
 import { invoke } from '@tauri-apps/api/core'
 
-import { getPlatform } from '@/hooks/use-get-platform'
+import { getPlatform } from '@/hooks/useGetPlatform'
 
 export async function fetchManifest(owner: string, repo: string) {
   try {

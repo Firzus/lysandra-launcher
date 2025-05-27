@@ -1,14 +1,14 @@
 import { Suspense, lazy, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useAutoAppUpdate } from './hooks/use-auto-app-update'
+import { useAutoAppUpdate } from './hooks/useAutoAppUpdate'
 import { Loader } from './pages/loader'
 
-import { useLanguagePreference } from '@/hooks/use-language-preference'
-import { useLauncherIntegrity } from '@/hooks/use-launcher-integrity'
-import { WindowControls } from '@/components/system/window-controls'
-import { DragZone } from '@/components/system/drag-zone'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { useLanguagePreference } from '@/hooks/useLanguagePreference'
+import { useLauncherIntegrity } from '@/hooks/useLauncherIntegrity'
+import { WindowControls } from '@/components/system/WindowControls'
+import { DragZone } from '@/components/system/DragZone'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 // Lazy loading du contenu principal
 const Content = lazy(() => import('./content').then((module) => ({ default: module.Content })))

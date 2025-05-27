@@ -1,4 +1,4 @@
-import { GameCarousel } from './game-carousel'
+import { GameCarousel } from './GameCarousel'
 
 import { patchInfos } from '@/data/lysandra'
 

@@ -2,7 +2,7 @@ import { useCallback, useMemo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LazyStore } from '@tauri-apps/plugin-store'
 
-import { useSystemLanguage } from './use-system-locale'
+import { useSystemLanguage } from './useSystemLocale'
 
 const LANGUAGE_KEY = 'language'
 const store = new LazyStore('settings.json')

@@ -4,7 +4,7 @@ import { addToast } from '@heroui/toast'
 import { useTranslation } from 'react-i18next'
 import { LuRefreshCw, LuCheck, LuX, LuCode } from 'react-icons/lu'
 
-import { useAutoAppUpdate } from '@/hooks/use-auto-app-update'
+import { useAutoAppUpdate } from '@/hooks/useAutoAppUpdate'
 
 type Props = {
   className?: string

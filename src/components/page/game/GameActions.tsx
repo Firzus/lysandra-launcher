@@ -13,11 +13,11 @@ import {
 } from '@tauri-apps/plugin-notification'
 
 import { useGameDownload } from '@/hooks/useGameDownload'
-import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
+import { GameSettingsModal } from '@/components/settings/game/GameSettingsModal'
 import {
   InstallGameModal,
   type InstallConfig,
-} from '@/components/settings/game/features/install-game-modal'
+} from '@/components/settings/game/features/InstallGameModal'
 import reducer from '@/utils/game-action-sm'
 import { initializeGameCheck } from '@/utils/game-checker'
 import { installLysandra, updateLysandra, type GameInstallProgress } from '@/utils/game-installer'

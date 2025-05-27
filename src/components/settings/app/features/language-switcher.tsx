@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Select, SelectItem } from '@heroui/select'
 
-import { useLanguagePreference } from '@/hooks/use-language-preference'
+import { useLanguagePreference } from '@/hooks/useLanguagePreference'
 
 type Props = {
   className?: string

@@ -325,10 +325,14 @@ const DownloadManager: React.FC = () => {
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="download-url"
+                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 URL du fichier
               </label>
               <input
+                id="download-url"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 placeholder="https://example.com/file.zip"
                 type="url"
@@ -337,10 +341,14 @@ const DownloadManager: React.FC = () => {
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="download-path"
+                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Chemin de destination
               </label>
               <input
+                id="download-path"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 placeholder="/path/to/save/file.zip"
                 type="text"
@@ -378,7 +386,7 @@ const DownloadManager: React.FC = () => {
         <div className="rounded-lg border border-gray-200 bg-white py-12 text-center shadow dark:border-gray-700 dark:bg-gray-800">
           <p className="text-lg text-gray-500 dark:text-gray-400">Aucun téléchargement en cours</p>
           <p className="mt-2 text-gray-400 dark:text-gray-500">
-            Cliquez sur "Nouveau téléchargement" pour commencer
+            Cliquez sur &ldquo;Nouveau téléchargement&rdquo; pour commencer
           </p>
         </div>
       ) : (

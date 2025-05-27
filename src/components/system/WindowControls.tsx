@@ -3,7 +3,7 @@ import { Button } from '@heroui/button'
 import { LuMinus, LuX } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
 
-import { handleMinimize, handleClose } from '@/utils/window-controls'
+import { handleMinimize, handleClose } from '@/utils/windowControls'
 
 export const WindowControls: React.FC = () => {
   const { t } = useTranslation()

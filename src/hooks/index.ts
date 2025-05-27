@@ -1,11 +1,11 @@
 // Performance Hooks
-export { useRenderPerformance } from './use-performance'
-export { useSystemLocale, useSystemLanguage } from './use-system-locale'
+export { useRenderPerformance } from './usePerformance'
+export { useSystemLocale, useSystemLanguage } from './useSystemLocale'
 
 // Application Hooks
-export { useAutoAppUpdate } from './use-auto-app-update'
-export { useLauncherIntegrity } from './use-launcher-integrity'
-export { useLanguagePreference } from './use-language-preference'
+export { useAutoAppUpdate } from './useAutoAppUpdate'
+export { useLauncherIntegrity } from './useLauncherIntegrity'
+export { useLanguagePreference } from './useLanguagePreference'
 
 // Platform Hook
-export { getPlatform } from './use-get-platform'
+export { getPlatform } from './useGetPlatform'
