@@ -79,10 +79,10 @@
       "initializing_structure": "Initialisation de la structure des dossiers...",
       "fetching": "Récupération des informations du jeu...",
       "downloading": "{{progress}}%",
-      "verifying": "Vérification de l'intégrité du fichier...",
-      "extracting": "Extraction des fichiers du jeu...",
-      "installing": "Finalisation de l'installation...",
-      "cleaning": "Nettoyage des fichiers temporaires...",
+      "verifying": "Vérification ...",
+      "extracting": "Extraction ...",
+      "installing": "Finalisation ...",
+      "cleaning": "Nettoyage ...",
       "complete": "{{game}} v{{version}} installé avec succès !",
       "update_preparing": "Préparation de la mise à jour...",
       "updated_from_to": "Jeu mis à jour de {{oldVersion}} vers {{newVersion}}"
@@ -133,7 +133,7 @@
       "uninstall_game": "Désinstaller le jeu",
       "uninstall_game_desc": "Supprimer Lysandra de votre ordinateur"
     },
-    "uninstall": {
+    "uninstall_progress": {
       "starting": "Démarrage de la désinstallation...",
       "removing_files": "Suppression des fichiers du jeu...",
       "removing_version": "Suppression du fichier de version...",

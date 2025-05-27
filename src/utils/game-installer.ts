@@ -48,11 +48,13 @@ export async function downloadAndInstallGame(
     console.log(`📁 Initializing game directory structure...`)
     onProgress?.({ step: 'fetching', message: i18n.t('game.install.initializing_structure') })
     const initResult = await initializeGameDirectoryStructure(gameId)
+
     if (!initResult.success) {
       throw new Error(`Failed to initialize directory structure: ${initResult.errors.join(', ')}`)
     }
 
     const gamePaths = await getGamePaths(gameId)
+
     console.log(`📁 Game paths:`, gamePaths)
 
     // 1. Récupérer le manifeste
@@ -60,6 +62,7 @@ export async function downloadAndInstallGame(
     onProgress?.({ step: 'fetching', message: i18n.t('game.install.fetching') })
     const manifest = await fetchManifest(owner, repo)
     const { version, url, hash } = manifest
+
     console.log(`✅ Manifest fetched: version=${version}, url=${url}`)
 
     // 2. Préparer les chemins
@@ -67,6 +70,7 @@ export async function downloadAndInstallGame(
     const cacheDir = await join(await gamePaths.root, '..', '..', 'cache') // Dossier cache du launcher
     const zipFileName = `${gameId}-${version}.zip`
     const zipFilePath = await join(cacheDir, zipFileName)
+
     console.log(`📦 Cache dir: ${cacheDir}`)
     console.log(`📦 Zip file path: ${zipFilePath}`)
 
@@ -101,6 +105,7 @@ export async function downloadAndInstallGame(
             if (!completed) {
               reject(new Error('Download not found'))
             }
+
             return
           }
 
@@ -129,8 +134,10 @@ export async function downloadAndInstallGame(
                   const fileExists = await invoke<boolean>('check_file_exists', {
                     path: zipFilePath,
                   })
+
                   if (fileExists) {
                     const fileSize = await invoke<number>('get_file_size', { path: zipFilePath })
+
                     console.log(`📦 Downloaded file size: ${fileSize} bytes`)
 
                     if (fileSize > 0) {
@@ -185,11 +192,13 @@ export async function downloadAndInstallGame(
     // Vérifier la taille avant la vérification d'intégrité
     try {
       const fileExists = await invoke<boolean>('check_file_exists', { path: zipFilePath })
+
       if (!fileExists) {
         throw new Error(`Downloaded file not found: ${zipFilePath}`)
       }
 
       const fileSize = await invoke<number>('get_file_size', { path: zipFilePath })
+
       console.log(`📦 File size before hash verification: ${fileSize} bytes`)
 
       if (fileSize === 0) {
@@ -228,10 +237,12 @@ export async function downloadAndInstallGame(
     // 8. Vérifier la structure finale
     console.log(`🔍 Verifying final directory structure...`)
     const finalCheck = await checkGameDirectoryStructure(gameId)
+
     if (!finalCheck.isValid) {
       console.warn(`⚠️ Directory structure verification failed:`, finalCheck.missingDirectories)
       // Tenter de corriger les problèmes
       const repairResult = await initializeGameDirectoryStructure(gameId)
+
       if (!repairResult.success) {
         console.warn(`⚠️ Failed to repair directory structure: ${repairResult.errors.join(', ')}`)
       }

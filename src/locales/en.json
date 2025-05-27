@@ -133,7 +133,7 @@
       "uninstall_game": "Uninstall game",
       "uninstall_game_desc": "Remove Lysandra from your computer"
     },
-    "uninstall": {
+    "uninstall_progress": {
       "starting": "Starting uninstallation...",
       "removing_files": "Removing game files...",
       "removing_version": "Removing version file...",

@@ -11,8 +11,8 @@ import {
   isPermissionGranted,
   requestPermission,
 } from '@tauri-apps/plugin-notification'
-import { useGameDownload } from '@/hooks/useGameDownload'
 
+import { useGameDownload } from '@/hooks/useGameDownload'
 import { GameSettingsModal } from '@/components/settings/game/game-settings-modal'
 import {
   InstallGameModal,
@@ -392,6 +392,7 @@ export const GameActions: React.FC = () => {
       case 'downloading':
         // Utiliser la progression du nouveau système si disponible
         const currentProgress = activeDownload?.percentage || downloadProgress
+
         return {
           text:
             hasActiveDownload && activeDownload && activeDownload.percentage > 0
@@ -415,6 +416,7 @@ export const GameActions: React.FC = () => {
       case 'updating':
         // Utiliser la progression du nouveau système si disponible
         const updateProgress = activeDownload?.percentage || downloadProgress
+
         return {
           text:
             hasActiveDownload && activeDownload && activeDownload.percentage > 0
@@ -519,8 +521,8 @@ export const GameActions: React.FC = () => {
         <div className="mb-4 w-full max-w-md">
           <div
             className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
-              ? 'animate-pulse'
-              : ''
+                ? 'animate-pulse'
+                : ''
               }`}
           >
             {installProgress.message}
@@ -567,7 +569,7 @@ export const GameActions: React.FC = () => {
       {(uninstallProgress || gameState === 'uninstalling') && (
         <div className="mb-4 w-full max-w-md">
           <div className="text-muted-foreground mb-1 animate-pulse text-sm">
-            {uninstallProgress || t('game.uninstall.in_progress')}
+            {uninstallProgress || t('game.uninstall_progress.in_progress')}
           </div>
           <div className="text-muted-foreground mb-2 text-xs">
             Étape: <span className="font-mono">uninstalling</span>

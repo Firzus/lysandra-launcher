@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
+
 import { getGamePaths, ensureGameDirectories } from './paths'
 
 export type DirectoryStructureCheck = {
@@ -37,6 +38,7 @@ export async function checkGameDirectoryStructure(
     for (const dir of requiredDirectories) {
       try {
         const exists = await invoke<boolean>('check_directory_exists', { path: dir.path })
+
         if (!exists) {
           console.warn(`❌ Missing ${dir.name} directory: ${dir.path}`)
           result.missingDirectories.push(dir.path)
@@ -74,6 +76,7 @@ export async function checkGameDirectoryStructure(
     return result
   } catch (error) {
     console.error(`❌ Failed to check directory structure for ${gameId}:`, error)
+
     return {
       isValid: false,
       missingDirectories: [],
@@ -102,6 +105,7 @@ export async function repairGameDirectoryStructure(gameId: string): Promise<{
 
     if (check.isValid) {
       console.log(`✅ Directory structure is already valid for: ${gameId}`)
+
       return {
         success: true,
         repairActions: ['Directory structure was already valid'],
@@ -115,6 +119,7 @@ export async function repairGameDirectoryStructure(gameId: string): Promise<{
       repairActions.push('Recreated complete directory structure')
     } catch (error) {
       const errorMsg = `Failed to create directory structure: ${error}`
+
       console.error(`❌ ${errorMsg}`)
       errors.push(errorMsg)
     }
@@ -136,6 +141,7 @@ export async function repairGameDirectoryStructure(gameId: string): Promise<{
         console.log(`✅ Created version file: ${gamePaths.versionFile}`)
       } catch (error) {
         const errorMsg = `Failed to create version file: ${error}`
+
         console.error(`❌ ${errorMsg}`)
         errors.push(errorMsg)
       }
@@ -146,6 +152,7 @@ export async function repairGameDirectoryStructure(gameId: string): Promise<{
 
     if (finalCheck.isValid) {
       console.log(`✅ Directory structure repair completed successfully for: ${gameId}`)
+
       return {
         success: true,
         repairActions,
@@ -153,6 +160,7 @@ export async function repairGameDirectoryStructure(gameId: string): Promise<{
       }
     } else {
       console.error(`❌ Directory structure repair failed for: ${gameId}`)
+
       return {
         success: false,
         repairActions,
@@ -161,7 +169,9 @@ export async function repairGameDirectoryStructure(gameId: string): Promise<{
     }
   } catch (error) {
     const errorMsg = `Failed to repair directory structure: ${error}`
+
     console.error(`❌ ${errorMsg}`)
+
     return {
       success: false,
       repairActions,
@@ -190,6 +200,7 @@ export async function initializeGameDirectoryStructure(gameId: string): Promise<
 
     if (initialCheck.isValid) {
       console.log(`✅ Directory structure already exists and is valid for: ${gameId}`)
+
       return {
         success: true,
         actions: ['Directory structure was already valid'],
@@ -203,8 +214,10 @@ export async function initializeGameDirectoryStructure(gameId: string): Promise<
       actions.push('Created game directory structure')
     } catch (error) {
       const errorMsg = `Failed to create directories: ${error}`
+
       console.error(`❌ ${errorMsg}`)
       errors.push(errorMsg)
+
       return { success: false, actions, errors }
     }
 
@@ -224,6 +237,7 @@ export async function initializeGameDirectoryStructure(gameId: string): Promise<
         console.log(`✅ Created version file: ${gamePaths.versionFile}`)
       } catch (error) {
         const errorMsg = `Failed to create version file: ${error}`
+
         console.error(`❌ ${errorMsg}`)
         errors.push(errorMsg)
       }
@@ -234,6 +248,7 @@ export async function initializeGameDirectoryStructure(gameId: string): Promise<
 
     if (finalCheck.isValid) {
       console.log(`✅ Directory structure initialization completed successfully for: ${gameId}`)
+
       return {
         success: true,
         actions,
@@ -241,6 +256,7 @@ export async function initializeGameDirectoryStructure(gameId: string): Promise<
       }
     } else {
       console.error(`❌ Directory structure initialization failed for: ${gameId}`)
+
       return {
         success: false,
         actions,
@@ -249,7 +265,9 @@ export async function initializeGameDirectoryStructure(gameId: string): Promise<
     }
   } catch (error) {
     const errorMsg = `Failed to initialize directory structure: ${error}`
+
     console.error(`❌ ${errorMsg}`)
+
     return {
       success: false,
       actions,

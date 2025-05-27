@@ -1,9 +1,11 @@
+import type { DownloadProgress, DownloadStatus } from '@/types/download'
+
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { listen, UnlistenFn } from '@tauri-apps/api/event'
 import { join } from '@tauri-apps/api/path'
+
 import { getGamePaths } from '@/utils/paths'
-import type { DownloadProgress, DownloadStatus } from '@/types/download'
 
 export type GameDownloadProgress = {
   gameId: string
@@ -47,6 +49,7 @@ export const useGameDownload = () => {
 
             setActiveDownloads((prev) => {
               const updated = new Map(prev)
+
               updated.set(gameId, {
                 gameId,
                 version,
@@ -58,6 +61,7 @@ export const useGameDownload = () => {
                 totalBytes: download.total_size,
                 error: download.error,
               })
+
               return updated
             })
           }
@@ -74,6 +78,7 @@ export const useGameDownload = () => {
 
             setActiveDownloads((prev) => {
               const updated = new Map(prev)
+
               updated.set(gameId, {
                 gameId,
                 version,
@@ -84,6 +89,7 @@ export const useGameDownload = () => {
                 downloadedBytes: download.total_size,
                 totalBytes: download.total_size,
               })
+
               return updated
             })
           }
@@ -100,6 +106,7 @@ export const useGameDownload = () => {
 
             setActiveDownloads((prev) => {
               const updated = new Map(prev)
+
               updated.set(gameId, {
                 gameId,
                 version,
@@ -111,6 +118,7 @@ export const useGameDownload = () => {
                 totalBytes: download.total_size,
                 error: download.error,
               })
+
               return updated
             })
           }
@@ -155,6 +163,7 @@ export const useGameDownload = () => {
         // Initialiser l'état dans notre Map
         setActiveDownloads((prev) => {
           const updated = new Map(prev)
+
           updated.set(gameId, {
             gameId,
             version,
@@ -165,6 +174,7 @@ export const useGameDownload = () => {
             downloadedBytes: 0,
             totalBytes: 0,
           })
+
           return updated
         })
 
@@ -175,6 +185,7 @@ export const useGameDownload = () => {
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error)
+
         console.error('Failed to start game download:', errorMessage)
 
         return {
@@ -190,6 +201,7 @@ export const useGameDownload = () => {
   const pauseGameDownload = useCallback(
     async (gameId: string): Promise<void> => {
       const download = activeDownloads.get(gameId)
+
       if (download?.downloadId) {
         try {
           await invoke('pause_download', { downloadId: download.downloadId })
@@ -206,6 +218,7 @@ export const useGameDownload = () => {
   const resumeGameDownload = useCallback(
     async (gameId: string): Promise<void> => {
       const download = activeDownloads.get(gameId)
+
       if (download?.downloadId) {
         try {
           await invoke('resume_download', { downloadId: download.downloadId })
@@ -222,6 +235,7 @@ export const useGameDownload = () => {
   const cancelGameDownload = useCallback(
     async (gameId: string): Promise<void> => {
       const download = activeDownloads.get(gameId)
+
       if (download?.downloadId) {
         try {
           await invoke('cancel_download', { downloadId: download.downloadId })
@@ -229,7 +243,9 @@ export const useGameDownload = () => {
           // Supprimer de notre état local
           setActiveDownloads((prev) => {
             const updated = new Map(prev)
+
             updated.delete(gameId)
+
             return updated
           })
         } catch (error) {
@@ -253,6 +269,7 @@ export const useGameDownload = () => {
   const isGameDownloading = useCallback(
     (gameId: string): boolean => {
       const download = activeDownloads.get(gameId)
+
       return download?.status === 'Downloading' || download?.status === 'Pending'
     },
     [activeDownloads],
@@ -267,7 +284,9 @@ export const useGameDownload = () => {
   const clearGameDownload = useCallback((gameId: string): void => {
     setActiveDownloads((prev) => {
       const updated = new Map(prev)
+
       updated.delete(gameId)
+
       return updated
     })
   }, [])

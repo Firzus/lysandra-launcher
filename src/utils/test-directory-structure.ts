@@ -16,16 +16,19 @@ export async function testDirectoryStructure(): Promise<void> {
     // 1. Vérifier l'état initial
     console.log('\n1. Checking initial state...')
     const initialCheck = await checkGameDirectoryStructure(gameId)
+
     console.log('Initial check result:', initialCheck)
 
     // 2. Initialiser la structure
     console.log('\n2. Initializing directory structure...')
     const initResult = await initializeGameDirectoryStructure(gameId)
+
     console.log('Initialization result:', initResult)
 
     // 3. Vérifier l'état final
     console.log('\n3. Checking final state...')
     const finalCheck = await checkGameDirectoryStructure(gameId)
+
     console.log('Final check result:', finalCheck)
 
     // 4. Résumé

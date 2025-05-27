@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { listen, UnlistenFn } from '@tauri-apps/api/event'
+
 import {
   DownloadProgress,
   DownloadStats,
@@ -30,9 +31,11 @@ export const useDownloadManager = (): DownloadManagerAPI & {
     try {
       setError(null)
       const allDownloads = await invoke<DownloadProgress[]>('get_all_downloads')
+
       setDownloads(allDownloads)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
+
       console.error('Failed to fetch downloads:', errorMessage)
       setError(errorMessage)
     }
@@ -42,6 +45,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
   const refreshStats = useCallback(async () => {
     try {
       const downloadStats = await invoke<DownloadStats>('get_download_stats')
+
       setStats(downloadStats)
     } catch (err) {
       console.error('Failed to fetch download stats:', err)
@@ -129,6 +133,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
         return downloadId
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err)
+
         setError(errorMessage)
         throw err
       }
@@ -143,6 +148,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
       // La progression sera mise à jour via l'événement
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
+
       setError(errorMessage)
       throw err
     }
@@ -155,6 +161,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
       // La progression sera mise à jour via l'événement
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
+
       setError(errorMessage)
       throw err
     }
@@ -167,6 +174,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
       // La progression sera mise à jour via l'événement
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
+
       setError(errorMessage)
       throw err
     }
@@ -181,6 +189,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
         refreshStats()
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err)
+
         setError(errorMessage)
         throw err
       }
@@ -194,6 +203,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
         return await invoke<DownloadProgress | null>('get_download_progress', { downloadId })
       } catch (err) {
         console.error('Failed to get download progress:', err)
+
         return null
       }
     },
@@ -205,6 +215,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
       return await invoke<DownloadProgress[]>('get_all_downloads')
     } catch (err) {
       console.error('Failed to get all downloads:', err)
+
       return []
     }
   }, [])
@@ -217,6 +228,7 @@ export const useDownloadManager = (): DownloadManagerAPI & {
       refreshStats()
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
+
       setError(errorMessage)
       throw err
     }
@@ -266,6 +278,7 @@ export const useDownload = (downloadId: string) => {
         const progress = await invoke<DownloadProgress | null>('get_download_progress', {
           downloadId,
         })
+
         setDownload(progress)
       } catch (err) {
         console.error('Failed to load download:', err)
@@ -288,6 +301,7 @@ export const useDownload = (downloadId: string) => {
     }
 
     let unlisten: UnlistenFn | null = null
+
     setupListener().then((fn) => {
       unlisten = fn
     })

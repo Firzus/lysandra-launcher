@@ -3,7 +3,6 @@ import { GameBackground } from '@/components/page/game/game-background'
 import { GameInfos } from '@/components/page/game/game-infos'
 import { GameLinks } from '@/components/page/game/game-links'
 
-
 import Artwork from '/images/artwork.png'
 
 export const LysandraGame: React.FC = () => {
@@ -13,8 +12,6 @@ export const LysandraGame: React.FC = () => {
       <GameBackground imgPath={Artwork} />
       <GameInfos />
       <GameActions />
-
-
     </section>
   )
 }
