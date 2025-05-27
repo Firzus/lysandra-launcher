@@ -36,6 +36,22 @@
       "enabled_success": "Auto-start enabled",
       "disabled_success": "Auto-start disabled",
       "toggle_error": "Error changing auto-start setting"
+    },
+    "notifications_settings": {
+      "title": "Windows Notifications",
+      "description": "Receive desktop notifications for important events",
+      "enable": "Enable notifications",
+      "error": "Notifications error",
+      "enabled_success": "Notifications enabled",
+      "disabled_success": "Notifications disabled",
+      "permission_required": "System permission required",
+      "test_title": "Test notifications",
+      "test_description": "Send a test notification to verify functionality",
+      "test_button": "Test",
+      "info_title": "Notification types:",
+      "info_download": "• Game download completion",
+      "info_update": "• Available updates",
+      "info_error": "• Important errors"
     }
   },
   "update": {

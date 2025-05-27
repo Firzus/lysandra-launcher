@@ -7,6 +7,7 @@ import { fetchManifest } from './update-service'
 import { checkFileHash } from './hash-verification'
 import { extractZipAsync } from './zip'
 import { getGameRepository } from './game-data'
+import { sendDownloadCompleteNotification } from './notifications'
 import {
   initializeGameDirectoryStructure,
   checkGameDirectoryStructure,
@@ -287,6 +288,13 @@ export async function downloadAndInstallGame(
       step: 'complete',
       message: i18n.t('game.install.complete', { game: gameId, version }),
     })
+
+    // 11. Envoyer une notification de succès
+    try {
+      await sendDownloadCompleteNotification(gameId, version)
+    } catch (notificationError) {
+      console.warn('Failed to send completion notification:', notificationError)
+    }
 
     return {
       success: true,

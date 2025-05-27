@@ -36,6 +36,22 @@
       "enabled_success": "Démarrage automatique activé",
       "disabled_success": "Démarrage automatique désactivé",
       "toggle_error": "Erreur lors du changement du démarrage automatique"
+    },
+    "notifications_settings": {
+      "title": "Notifications Windows",
+      "description": "Recevoir des notifications sur le bureau pour les événements importants",
+      "enable": "Activer les notifications",
+      "error": "Erreur notifications",
+      "enabled_success": "Notifications activées",
+      "disabled_success": "Notifications désactivées",
+      "permission_required": "Permission système requise",
+      "test_title": "Tester les notifications",
+      "test_description": "Envoyer une notification de test pour vérifier le fonctionnement",
+      "test_button": "Tester",
+      "info_title": "Types de notifications :",
+      "info_download": "• Fin de téléchargement de jeux",
+      "info_update": "• Mises à jour disponibles",
+      "info_error": "• Erreurs importantes"
     }
   },
   "update": {

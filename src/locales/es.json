@@ -36,6 +36,22 @@
             "enabled_success": "Inicio automático activado",
             "disabled_success": "Inicio automático desactivado",
             "toggle_error": "Error al cambiar la configuración de inicio automático"
+        },
+        "notifications_settings": {
+            "title": "Notificaciones de Windows",
+            "description": "Recibir notificaciones de escritorio para eventos importantes",
+            "enable": "Activar notificaciones",
+            "error": "Error de notificaciones",
+            "enabled_success": "Notificaciones activadas",
+            "disabled_success": "Notificaciones desactivadas",
+            "permission_required": "Permiso del sistema requerido",
+            "test_title": "Probar notificaciones",
+            "test_description": "Enviar una notificación de prueba para verificar el funcionamiento",
+            "test_button": "Probar",
+            "info_title": "Tipos de notificaciones:",
+            "info_download": "• Finalización de descarga de juegos",
+            "info_update": "• Actualizaciones disponibles",
+            "info_error": "• Errores importantes"
         }
     },
     "update": {
@@ -81,7 +97,7 @@
             "downloading": "{{progress}}%",
             "verifying": "Verificando integridad del archivo...",
             "extracting": "Extrayendo archivos del juego...",
-      "extracting_file": "Extrayendo {{file}} ({{progress}}%)",
+            "extracting_file": "Extrayendo {{file}} ({{progress}}%)",
             "installing": "Finalizando instalación...",
             "cleaning": "Limpiando archivos temporales...",
             "complete": "{{game}} v{{version}} instalado exitosamente!",

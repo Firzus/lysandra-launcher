@@ -36,6 +36,22 @@
             "enabled_success": "Autostart aktiviert",
             "disabled_success": "Autostart deaktiviert",
             "toggle_error": "Fehler beim Ändern der Autostart-Einstellung"
+        },
+        "notifications_settings": {
+            "title": "Windows-Benachrichtigungen",
+            "description": "Desktop-Benachrichtigungen für wichtige Ereignisse empfangen",
+            "enable": "Benachrichtigungen aktivieren",
+            "error": "Benachrichtigungsfehler",
+            "enabled_success": "Benachrichtigungen aktiviert",
+            "disabled_success": "Benachrichtigungen deaktiviert",
+            "permission_required": "Systemberechtigung erforderlich",
+            "test_title": "Benachrichtigungen testen",
+            "test_description": "Eine Test-Benachrichtigung senden um die Funktionalität zu überprüfen",
+            "test_button": "Testen",
+            "info_title": "Benachrichtigungstypen:",
+            "info_download": "• Abschluss von Spiele-Downloads",
+            "info_update": "• Verfügbare Updates",
+            "info_error": "• Wichtige Fehler"
         }
     },
     "update": {
