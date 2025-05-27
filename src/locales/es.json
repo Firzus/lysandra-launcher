@@ -19,8 +19,6 @@
         "general": "General",
         "download": "Descarga",
         "download_speed": "Velocidad de descarga",
-        "notifications": "Notificaciones",
-        "allow_notifications": "Permitir notificaciones",
         "legal": "Legal",
         "user_agreement": "Acuerdo de usuario",
         "privacy_policy": "Política de privacidad",
@@ -35,23 +33,7 @@
             "error": "Error",
             "enabled_success": "Activado",
             "disabled_success": "Desactivado",
-            "toggle_error": "Error al cambiar configuración"
-        },
-        "notifications_settings": {
-            "title": "Notificaciones de Windows",
-            "description": "Recibir notificaciones para eventos importantes",
-            "enable": "Activar notificaciones",
-            "error": "Error",
-            "enabled_success": "Activadas",
-            "disabled_success": "Desactivadas",
-            "permission_required": "Permiso del sistema requerido",
-            "test_title": "Probar notificaciones",
-            "test_description": "Enviar una notificación de prueba",
-            "test_button": "Probar",
-            "info_title": "Tipos de notificaciones:",
-            "info_download": "• Finalización de descarga",
-            "info_update": "• Actualizaciones disponibles",
-            "info_error": "• Errores importantes"
+            "toggle_error": "Error al cambiar"
         }
     },
     "update": {
@@ -191,16 +173,6 @@
         "open": "Abrir",
         "copy": "Copiar",
         "copied": "¡Copiado!"
-    },
-    "notification": {
-        "download_complete": {
-            "title": "Descarga completa",
-            "body": "¡{{game}} v{{version}} instalado!"
-        },
-        "update_complete": {
-            "title": "Actualización completa",
-            "body": "¡{{game}} actualizado a {{version}}!"
-        }
     },
     "carousel": {
         "previous_slide": "Diapositiva anterior",

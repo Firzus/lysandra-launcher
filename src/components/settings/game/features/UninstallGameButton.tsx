@@ -39,7 +39,6 @@ export const UninstallGameButton: React.FC<Props> = ({ className, onUninstallCom
         onOpenChange()
       } else {
         console.error('❌ Uninstall failed:', result.error)
-        // TODO: Afficher une notification d'erreur
       }
     } catch (error) {
       console.error('❌ Uninstall error:', error)

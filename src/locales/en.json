@@ -19,39 +19,21 @@
     "general": "General",
     "download": "Download",
     "download_speed": "Download speed",
-    "notifications": "Notifications",
-    "allow_notifications": "Allow notifications",
     "legal": "Legal",
-    "user_agreement": "User Agreement",
-    "privacy_policy": "Privacy Policy",
+    "user_agreement": "User agreement",
+    "privacy_policy": "Privacy policy",
     "language_client": "Client language",
     "language_game": "Game language",
     "startup_option": "Startup options",
     "close_client": "Close client",
     "autostart": {
       "title": "Auto-start",
-      "description": "Launch automatically when system starts",
+      "description": "Automatically start on system startup",
       "enable": "Enable",
       "error": "Error",
       "enabled_success": "Enabled",
       "disabled_success": "Disabled",
-      "toggle_error": "Error changing setting"
-    },
-    "notifications_settings": {
-      "title": "Windows Notifications",
-      "description": "Receive notifications for important events",
-      "enable": "Enable notifications",
-      "error": "Error",
-      "enabled_success": "Enabled",
-      "disabled_success": "Disabled",
-      "permission_required": "System permission required",
-      "test_title": "Test notifications",
-      "test_description": "Send a test notification",
-      "test_button": "Test",
-      "info_title": "Notification types:",
-      "info_download": "• Download completion",
-      "info_update": "• Available updates",
-      "info_error": "• Important errors"
+      "toggle_error": "Error while toggling"
     }
   },
   "update": {
@@ -191,16 +173,6 @@
     "open": "Open",
     "copy": "Copy",
     "copied": "Copied!"
-  },
-  "notification": {
-    "download_complete": {
-      "title": "Download Complete",
-      "body": "{{game}} v{{version}} installed!"
-    },
-    "update_complete": {
-      "title": "Update Complete",
-      "body": "{{game}} updated to {{version}}!"
-    }
   },
   "carousel": {
     "previous_slide": "Previous slide",

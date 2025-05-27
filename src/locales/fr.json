@@ -19,8 +19,6 @@
     "general": "Général",
     "download": "Téléchargement",
     "download_speed": "Vitesse de téléchargement",
-    "notifications": "Notifications",
-    "allow_notifications": "Autoriser les notifications",
     "legal": "Légal",
     "user_agreement": "Accord utilisateur",
     "privacy_policy": "Politique de confidentialité",
@@ -36,22 +34,6 @@
       "enabled_success": "Activé",
       "disabled_success": "Désactivé",
       "toggle_error": "Erreur lors du changement"
-    },
-    "notifications_settings": {
-      "title": "Notifications Windows",
-      "description": "Recevoir des notifications pour les événements importants",
-      "enable": "Activer les notifications",
-      "error": "Erreur",
-      "enabled_success": "Activées",
-      "disabled_success": "Désactivées",
-      "permission_required": "Permission système requise",
-      "test_title": "Test des notifications",
-      "test_description": "Envoyer une notification de test",
-      "test_button": "Tester",
-      "info_title": "Types de notifications :",
-      "info_download": "• Fin de téléchargement",
-      "info_update": "• Mises à jour disponibles",
-      "info_error": "• Erreurs importantes"
     }
   },
   "update": {
@@ -191,16 +173,6 @@
     "open": "Ouvrir",
     "copy": "Copier",
     "copied": "Copié !"
-  },
-  "notification": {
-    "download_complete": {
-      "title": "Téléchargement terminé",
-      "body": "{{game}} v{{version}} installé !"
-    },
-    "update_complete": {
-      "title": "Mise à jour terminée",
-      "body": "{{game}} mis à jour vers {{version}} !"
-    }
   },
   "carousel": {
     "previous_slide": "Diapositive précédente",

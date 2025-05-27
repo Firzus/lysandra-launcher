@@ -6,11 +6,6 @@ import { Button } from '@heroui/button'
 import { useDisclosure } from '@heroui/modal'
 import { useTranslation } from 'react-i18next'
 import { listen } from '@tauri-apps/api/event'
-import {
-  sendNotification,
-  isPermissionGranted,
-  requestPermission,
-} from '@tauri-apps/plugin-notification'
 
 import { useGameDownload } from '@/hooks/useGameDownload'
 import { GameSettingsModal } from '@/components/settings/game/GameSettingsModal'
@@ -131,8 +126,8 @@ export const GameActions: React.FC = () => {
     if (import.meta.env.DEV) {
       console.log('🐛 Sync debugger initialized in development mode')
 
-      // Ajouter une fonction globale pour tester la sync
-      ;(window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
+        // Ajouter une fonction globale pour tester la sync
+        ; (window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
       console.log('🔧 Use window.forceSyncCheck() to manually check synchronization')
     }
 
@@ -142,23 +137,6 @@ export const GameActions: React.FC = () => {
         delete (window as any).forceSyncCheck
       }
     }
-  }, [])
-
-  // Demander les permissions de notification au chargement
-  React.useEffect(() => {
-    const requestNotificationPermission = async () => {
-      try {
-        const permissionGranted = await isPermissionGranted()
-
-        if (!permissionGranted) {
-          await requestPermission()
-        }
-      } catch {
-        // Notification permission error handled silently
-      }
-    }
-
-    requestNotificationPermission()
   }, [])
 
   // Surveillance du processus de jeu pour les transitions Playing ↔ Ready
@@ -255,7 +233,6 @@ export const GameActions: React.FC = () => {
 
       if (result.success) {
         dispatch({ type: completedAction })
-        await sendDownloadCompleteNotification(isUpdate, result.version)
 
         // Mettre à jour l'état d'installation après succès
         const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
@@ -344,28 +321,6 @@ export const GameActions: React.FC = () => {
 
     console.log(`✅ Game state refreshed: installed=${installed}, action=${result.action}`)
   }, [])
-
-  const sendDownloadCompleteNotification = async (isUpdate: boolean, version?: string) => {
-    try {
-      const permissionGranted = await isPermissionGranted()
-
-      if (permissionGranted) {
-        await sendNotification({
-          title: isUpdate
-            ? t('notification.update_complete.title')
-            : t('notification.download_complete.title'),
-          body: isUpdate
-            ? t('notification.update_complete.body', { version: version || 'unknown' })
-            : t('notification.download_complete.body', {
-                game: 'Lysandra',
-                version: version || 'unknown',
-              }),
-        })
-      }
-    } catch {
-      // Notification error handled silently
-    }
-  }
 
   const getButtonConfig = () => {
     // Vérifier s'il y a un téléchargement actif avec le nouveau système
@@ -520,11 +475,10 @@ export const GameActions: React.FC = () => {
       {installProgress && (gameState === 'downloading' || gameState === 'updating') && (
         <div className="mb-4 w-full max-w-md">
           <div
-            className={`text-muted-foreground mb-1 text-sm ${
-              installProgress.step !== 'downloading' && installProgress.step !== 'complete'
+            className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
                 ? 'animate-pulse'
                 : ''
-            }`}
+              }`}
           >
             {installProgress.message}
           </div>
@@ -547,9 +501,8 @@ export const GameActions: React.FC = () => {
       {repairProgress && gameState === 'repairing' && (
         <div className="mb-4 w-full max-w-md">
           <div
-            className={`text-muted-foreground mb-1 text-sm ${
-              repairProgress.step !== 'complete' ? 'animate-pulse' : ''
-            }`}
+            className={`text-muted-foreground mb-1 text-sm ${repairProgress.step !== 'complete' ? 'animate-pulse' : ''
+              }`}
           >
             {repairProgress.message}
           </div>

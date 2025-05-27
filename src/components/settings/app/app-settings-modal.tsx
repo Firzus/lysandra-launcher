@@ -3,7 +3,6 @@ import { Tabs, Tab } from '@heroui/tabs'
 import { useTranslation } from 'react-i18next'
 
 import { GeneralAppSettings } from './tabs/general-app-settings'
-import { NotificationsAppSettings } from './tabs/notifications-app-settings'
 
 type Props = {
   isOpen: boolean
@@ -45,14 +44,6 @@ export const AppSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => {
             <div className="mt-4 size-full overflow-y-auto">
               <p>{t('settings.download_speed')}</p>
             </div>
-          </Tab>
-
-          <Tab key="notifications" title={t('settings.notifications')}>
-            <p className="text-lg font-semibold">{t('settings.notifications')}</p>
-
-            <section className="mt-4 size-full overflow-y-auto pr-3">
-              <NotificationsAppSettings />
-            </section>
           </Tab>
 
           <Tab key="legal" title={t('settings.legal')}>
