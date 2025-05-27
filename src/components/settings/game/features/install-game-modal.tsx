@@ -5,7 +5,7 @@ import { Input } from '@heroui/input'
 import { useState, useEffect } from 'react'
 import { LuFolder, LuFolderOpen, LuDownload, LuMapPin } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
-import { invoke } from '@tauri-apps/api/core'
+import { open } from '@tauri-apps/plugin-dialog'
 
 import { getGamePaths } from '@/utils/paths'
 
@@ -32,7 +32,7 @@ export const InstallGameModal: React.FC<Props> = ({
   gameId,
   isUpdate = false,
 }) => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
   const [config, setConfig] = useState<InstallConfig>({
     installPath: '',
     createDesktopShortcut: true,
@@ -65,9 +65,11 @@ export const InstallGameModal: React.FC<Props> = ({
   const handleBrowseInstallPath = async () => {
     try {
       setIsLoadingPath(true)
-      const selectedPath = await invoke<string | null>('open_folder_dialog', {
+      const selectedPath = await open({
         title: t('game.install_modal.select_install_folder'),
-        default_path: config.installPath,
+        defaultPath: config.installPath,
+        directory: true,
+        multiple: false,
       })
 
       if (selectedPath) {
@@ -86,9 +88,11 @@ export const InstallGameModal: React.FC<Props> = ({
   const handleBrowseExistingGame = async () => {
     try {
       setIsLoadingPath(true)
-      const selectedPath = await invoke<string | null>('open_folder_dialog', {
+      const selectedPath = await open({
         title: t('game.install_modal.locate_existing_game'),
-        default_path: config.existingGamePath || '',
+        defaultPath: config.existingGamePath || '',
+        directory: true,
+        multiple: false,
       })
 
       if (selectedPath) {
@@ -163,6 +167,7 @@ export const InstallGameModal: React.FC<Props> = ({
                       endContent={
                         <Button
                           isIconOnly
+                          aria-label={t('game.install_modal.browse_existing_game')}
                           isLoading={isLoadingPath}
                           size="sm"
                           variant="light"
@@ -193,6 +198,7 @@ export const InstallGameModal: React.FC<Props> = ({
                     endContent={
                       <Button
                         isIconOnly
+                        aria-label={t('game.install_modal.browse_install_path')}
                         isLoading={isLoadingPath}
                         size="sm"
                         variant="light"

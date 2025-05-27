@@ -1,28 +1,47 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + HeroUI</title>
-    <meta key="title" content="Vite + HeroUI" property="og:title" />
+
+    <!-- Titre et métadonnées -->
+    <title>Lysandra Launcher</title>
     <meta
-      content="Make beautiful websites regardless of your design experience."
-      property="og:description"
-    />
-    <meta
-      content="Make beautiful websites regardless of your design experience."
       name="description"
+      content="Launcher officiel pour les jeux Lysandra - Gérez vos installations et mises à jour facilement"
     />
+    <meta name="author" content="Lysandra Team" />
+    <meta name="application-name" content="Lysandra Launcher" />
+
+    <!-- Open Graph pour le partage -->
+    <meta property="og:title" content="Lysandra Launcher" />
+    <meta property="og:description" content="Launcher officiel pour les jeux Lysandra" />
+    <meta property="og:type" content="application" />
+    <meta property="og:locale" content="fr_FR" />
+
+    <!-- Configuration pour Tauri -->
     <meta
-      key="viewport"
-      content="viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
       name="viewport"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
     />
-    <link href="/favicon.ico" rel="icon" />
+
+    <!-- Icônes -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Préchargement des polices critiques -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Thème sombre par défaut -->
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0C0A09" />
   </head>
   <body>
+    <!-- Point de montage React -->
     <div id="root"></div>
+
+    <!-- Script principal -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -2,10 +2,10 @@
   "loader": {
     "initializing": "Initialisation",
     "checking": "Vérification des mises à jour",
-    "downloading": "Téléchargement : {{progress}}%",
-    "ready": "Chargement terminé",
+    "downloading": "{{progress}}%",
+    "ready": "Prêt",
     "installing": "Installation",
-    "error": "Erreur inconnue"
+    "error": "Erreur"
   },
   "window": {
     "minimize": "Minimiser",
@@ -15,42 +15,60 @@
     "settings": "Paramètres"
   },
   "settings": {
-    "title": "Paramètres du launcher",
+    "title": "Paramètres",
     "general": "Général",
     "download": "Téléchargement",
-    "download_speed": "Vitesse de téléchargement : illimité / limité",
+    "download_speed": "Vitesse de téléchargement",
     "notifications": "Notifications",
-    "allow_notifications": "Autoriser les notifications sur le bureau",
+    "allow_notifications": "Autoriser les notifications",
     "legal": "Légal",
-    "user_agreement": "Accord utilisateurs",
+    "user_agreement": "Accord utilisateur",
     "privacy_policy": "Politique de confidentialité",
     "language_client": "Langue du client",
     "language_game": "Langue du jeu",
-    "startup_option": "Paramètre de démarrage",
+    "startup_option": "Options de démarrage",
     "close_client": "Fermer le client",
     "autostart": {
       "title": "Démarrage automatique",
-      "description": "Lancer le launcher automatiquement au démarrage du système",
-      "enable": "Activer le démarrage automatique",
-      "error": "Erreur autostart",
-      "enabled_success": "Démarrage automatique activé",
-      "disabled_success": "Démarrage automatique désactivé",
-      "toggle_error": "Erreur lors du changement du démarrage automatique"
+      "description": "Lancer automatiquement au démarrage du système",
+      "enable": "Activer",
+      "error": "Erreur",
+      "enabled_success": "Activé",
+      "disabled_success": "Désactivé",
+      "toggle_error": "Erreur lors du changement"
+    },
+    "notifications_settings": {
+      "title": "Notifications Windows",
+      "description": "Recevoir des notifications pour les événements importants",
+      "enable": "Activer les notifications",
+      "error": "Erreur",
+      "enabled_success": "Activées",
+      "disabled_success": "Désactivées",
+      "permission_required": "Permission système requise",
+      "test_title": "Test des notifications",
+      "test_description": "Envoyer une notification de test",
+      "test_button": "Tester",
+      "info_title": "Types de notifications :",
+      "info_download": "• Fin de téléchargement",
+      "info_update": "• Mises à jour disponibles",
+      "info_error": "• Erreurs importantes"
     }
   },
   "update": {
-    "refresh_launcher": "Actualiser le launcher",
-    "check_desc": "Vérifiez si une nouvelle version du launcher est disponible.",
+    "refresh_launcher": "Actualiser",
+    "check_desc": "Vérifier les nouvelles versions disponibles",
     "check": "Vérifier",
-    "ready": "Launcher à jour",
-    "already_latest": "Le launcher est déjà à jour.",
+    "ready": "À jour",
+    "already_latest": "Déjà à jour",
     "error": "Erreur de mise à jour",
-    "error_desc": "Une erreur est survenue lors de la vérification des mises à jour.",
+    "error_desc": "Erreur lors de la vérification des mises à jour",
     "available": "Mise à jour disponible",
-    "will_restart": "Votre launcher va être redémarré pour appliquer la mise à jour."
+    "will_restart": "Redémarrage requis pour appliquer la mise à jour",
+    "disabled": "Mode développement",
+    "disabled_desc": "Auto-update désactivé en mode développement"
   },
   "language": {
-    "desciption": "Sélection de la langue",
+    "description": "Sélection de la langue",
     "options": {
       "en": "Anglais",
       "fr": "Français",
@@ -62,70 +80,84 @@
     "settings_title": "Paramètres du jeu",
     "infos": "Informations",
     "logs": "Journaux",
-    "logs_content": "Aucun journal pour le moment.",
+    "logs_content": "Aucun journal disponible",
     "size": "Taille",
     "directory": "Répertoire",
     "check_updates": "Vérifier les mises à jour",
     "repair": "Réparer",
-    "locate": "Localiser le jeu",
+    "locate": "Localiser",
     "uninstall": "Désinstaller",
     "download": "Télécharger",
-    "downloading": "Téléchargement : {{progress}}%",
+    "downloading": "{{progress}}%",
     "download_complete": "Téléchargement terminé",
-    "download_complete_message": "Le fichier a été téléchargé avec succès",
+    "download_complete_message": "Fichier téléchargé avec succès",
     "install": {
-      "fetching": "Récupération des informations du jeu...",
-      "downloading": "Téléchargement de {{game}} v{{version}}...",
-      "verifying": "Vérification de l'intégrité du fichier...",
-      "extracting": "Extraction des fichiers du jeu...",
-      "installing": "Finalisation de l'installation...",
-      "cleaning": "Nettoyage des fichiers temporaires...",
-      "complete": "{{game}} v{{version}} installé avec succès !",
+      "initializing_structure": "Initialisation de la structure...",
+      "fetching": "Récupération des informations...",
+      "downloading": "{{progress}}%",
+      "verifying": "Vérification...",
+      "extracting": "Extraction...",
+      "extracting_file": "Extraction de {{file}} ({{progress}}%)",
+      "installing": "Finalisation...",
+      "cleaning": "Nettoyage...",
+      "complete": "{{game}} v{{version}} installé !",
       "update_preparing": "Préparation de la mise à jour...",
-      "updated_from_to": "Jeu mis à jour de {{oldVersion}} vers {{newVersion}}"
+      "updated_from_to": "Mis à jour de {{oldVersion}} vers {{newVersion}}"
     },
     "uninstall_modal": {
       "title": "Désinstaller Lysandra",
-      "description": "Cette action va supprimer les fichiers du jeu de votre ordinateur.",
-      "keep_saves_info": "Par défaut : Vos sauvegardes et paramètres seront conservés.",
-      "delete_all_data": "Supprimer aussi les sauvegardes et paramètres",
+      "description": "Suppression des fichiers du jeu",
+      "keep_saves_info": "Vos sauvegardes seront conservées par défaut",
+      "delete_all_data": "Supprimer aussi les sauvegardes",
       "irreversible": "(irréversible)",
-      "warning_complete": "⚠️ Attention : Toutes vos données de jeu seront définitivement perdues !",
+      "warning_complete": "⚠️ Toutes vos données seront définitivement perdues !",
       "cancel": "Annuler",
       "confirm": "Désinstaller",
       "in_progress": "Désinstallation..."
     },
     "install_modal": {
-      "install_title": "Dossier d'installation",
-      "update_title": "Mettre à jour le jeu",
-      "locate_existing": "J'ai déjà ce jeu installé",
-      "locate_existing_desc": "Sélectionnez cette option si vous voulez localiser une installation existante du jeu",
-      "existing_game_path": "Emplacement du dossier de jeu",
-      "existing_game_path_placeholder": "Sélectionnez le dossier contenant les fichiers du jeu",
+      "install_title": "Installation",
+      "update_title": "Mise à jour",
+      "locate_existing": "J'ai déjà ce jeu",
+      "locate_existing_desc": "Localiser une installation existante",
+      "existing_game_path": "Emplacement du jeu",
+      "existing_game_path_placeholder": "Dossier contenant les fichiers du jeu",
       "installation_settings": "Paramètres d'installation",
       "install_path": "Dossier d'installation",
-      "install_path_placeholder": "Choisissez où installer le jeu",
+      "install_path_placeholder": "Choisir l'emplacement d'installation",
       "shortcuts": "Raccourcis",
-      "desktop_shortcut": "Créer un raccourci sur le bureau",
-      "start_menu_shortcut": "Créer un raccourci dans le menu Démarrer",
-      "disk_space_info": "Informations sur l'espace disque",
+      "desktop_shortcut": "Raccourci sur le bureau",
+      "start_menu_shortcut": "Raccourci dans le menu Démarrer",
+      "disk_space_info": "Espace disque",
       "required_space": "Espace requis",
       "recommended_space": "Espace libre recommandé",
-      "select_install_folder": "Sélectionner le dossier d'installation",
-      "locate_existing_game": "Localiser le jeu existant",
+      "select_install_folder": "Sélectionner le dossier",
+      "locate_existing_game": "Localiser le jeu",
       "cancel": "Annuler",
-      "install_confirm": "Lancer",
+      "install_confirm": "Installer",
       "update_confirm": "Mettre à jour",
-      "locate_confirm": "Localiser le jeu"
+      "locate_confirm": "Localiser",
+      "browse_install_path": "Parcourir",
+      "browse_existing_game": "Parcourir"
     },
     "actions": {
       "title": "Actions",
       "open_folder": "Ouvrir le dossier",
-      "open_folder_desc": "Ouvrir le dossier contenant les fichiers du jeu",
+      "open_folder_desc": "Ouvrir le dossier du jeu",
       "game_size": "Taille du jeu",
-      "game_size_desc": "Espace utilisé sur le disque",
-      "uninstall_game": "Désinstaller le jeu",
-      "uninstall_game_desc": "Supprimer Lysandra de votre ordinateur"
+      "game_size_desc": "Espace utilisé",
+      "game_size_not_installed": "Non installé",
+      "uninstall_game": "Désinstaller",
+      "uninstall_game_desc": "Supprimer Lysandra"
+    },
+    "uninstall_progress": {
+      "starting": "Démarrage...",
+      "removing_files": "Suppression des fichiers...",
+      "removing_version": "Suppression de la version...",
+      "removing_logs": "Suppression des logs...",
+      "removing_all": "Suppression complète...",
+      "completed": "Désinstallation terminée",
+      "in_progress": "En cours..."
     },
     "states": {
       "checking": "Vérification...",
@@ -137,19 +169,25 @@
       "processing": "Traitement...",
       "update": "Mettre à jour",
       "repair": "Réparer",
-      "download": "Télécharger"
+      "download": "Télécharger",
+      "play": "Jouer",
+      "launching": "Lancement...",
+      "playing": "En jeu",
+      "uninstalling": "Désinstallation...",
+      "error": "Erreur",
+      "unknown": "Inconnu"
     }
   },
   "debug": {
-    "title": "Outils de débogage",
-    "launcher_structure": "Structure du Launcher",
-    "launcher_structure_desc": "Créer manuellement la structure de dossiers dans AppLocalData",
-    "create_structure": "Créer la structure",
+    "title": "Outils de debug",
+    "launcher_structure": "Structure du launcher",
+    "launcher_structure_desc": "Créer la structure dans AppLocalData",
+    "create_structure": "Créer",
     "creating": "Création...",
     "created": "Créé !",
     "error": "Erreur",
-    "launcher_folder": "Dossier du Launcher",
-    "launcher_folder_desc": "Afficher et ouvrir le dossier AppLocalData du launcher",
+    "launcher_folder": "Dossier du launcher",
+    "launcher_folder_desc": "Ouvrir le dossier AppLocalData",
     "open": "Ouvrir",
     "copy": "Copier",
     "copied": "Copié !"
@@ -157,11 +195,15 @@
   "notification": {
     "download_complete": {
       "title": "Téléchargement terminé",
-      "body": "{{game}} v{{version}} a été installé avec succès !"
+      "body": "{{game}} v{{version}} installé !"
     },
     "update_complete": {
       "title": "Mise à jour terminée",
-      "body": "{{game}} a été mis à jour vers la version {{version}} !"
+      "body": "{{game}} mis à jour vers {{version}} !"
     }
+  },
+  "carousel": {
+    "previous_slide": "Diapositive précédente",
+    "next_slide": "Diapositive suivante"
   }
 }

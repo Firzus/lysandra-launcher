@@ -2,9 +2,10 @@ use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Manager};
 use tauri_plugin_http::reqwest;
 
-// Module pour la vérification d'intégrité SHA-256
+// Modules
 pub mod hash;
 pub mod zip;
+pub mod download_manager;
 
 // Structure pour les événements de progression
 #[derive(Clone, Serialize, Deserialize)]
@@ -13,6 +14,15 @@ pub struct ProgressEvent {
     pub progress: u64,
     pub total: u64,
     pub version: String,
+}
+
+// Structure pour les événements de désinstallation
+#[derive(Clone, Serialize, Deserialize)]
+pub struct UninstallEvent {
+    pub game_id: String,
+    pub step: String,
+    pub message: String,
+    pub success: bool,
 }
 
 // Commandes Tauri
@@ -24,22 +34,44 @@ fn handle_download_progress(
     total: u64,
     version: String,
 ) {
-    app_handle
-        .emit(
-            "download-progress",
-            ProgressEvent {
-                progress_percentage,
-                progress,
-                total,
-                version,
-            },
-        )
-        .unwrap();
+    if let Err(e) = app_handle.emit(
+        "download-progress",
+        ProgressEvent {
+            progress_percentage,
+            progress,
+            total,
+            version,
+        },
+    ) {
+        eprintln!("Failed to emit download-progress event: {}", e);
+    }
 }
 
 #[tauri::command]
 fn handle_download_complete(app_handle: tauri::AppHandle, version: String) {
-    app_handle.emit("download-complete", version).unwrap();
+    if let Err(e) = app_handle.emit("download-complete", version) {
+        eprintln!("Failed to emit download-complete event: {}", e);
+    }
+}
+
+#[tauri::command]
+fn emit_uninstall_event(
+    app_handle: tauri::AppHandle,
+    game_id: String,
+    step: String,
+    message: String,
+    success: bool,
+) {
+    let event = UninstallEvent {
+        game_id,
+        step,
+        message,
+        success,
+    };
+    
+    if let Err(e) = app_handle.emit("game-uninstall", event) {
+        eprintln!("Failed to emit game-uninstall event: {}", e);
+    }
 }
 
 #[tauri::command]
@@ -55,12 +87,23 @@ fn verify_file_integrity(file_path: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn fetch_manifest_from_github(url: String) -> Result<String, String> {
-    let response = reqwest::get(&url).await.map_err(|e| e.to_string())?;
+    println!("🌐 Fetching manifest from: {}", url);
+    
+    let response = reqwest::get(&url).await.map_err(|e| {
+        format!("Network error fetching {}: {}", url, e)
+    })?;
+    
     if !response.status().is_success() {
-        return Err(format!("Request failed: {}", response.status()));
+        let status = response.status();
+        let error_body = response.text().await.unwrap_or_else(|_| "Unable to read error response".to_string());
+        return Err(format!("HTTP {} from {}: {}", status, url, error_body));
     }
 
-    let body = response.text().await.map_err(|e| e.to_string())?;
+    let body = response.text().await.map_err(|e| {
+        format!("Failed to read response body from {}: {}", url, e)
+    })?;
+    
+    println!("✅ Successfully fetched manifest from: {}", url);
     Ok(body)
 }
 
@@ -85,68 +128,264 @@ fn check_directory_exists(path: String) -> Result<bool, String> {
 }
 
 #[tauri::command]
-fn write_text_file(path: String, content: String) -> Result<(), String> {
-    std::fs::write(&path, content).map_err(|e| e.to_string())
+fn check_file_exists(path: String) -> Result<bool, String> {
+    Ok(std::path::Path::new(&path).is_file())
 }
 
 #[tauri::command]
-fn open_folder(path: String) -> Result<(), String> {
+fn get_file_size(path: String) -> Result<u64, String> {
+    use std::fs;
+    use std::path::Path;
+    
+    let file_path = Path::new(&path);
+    
+    if !file_path.exists() {
+        return Err(format!("File does not exist: {}", path));
+    }
+    
+    if !file_path.is_file() {
+        return Err(format!("Path is not a file: {}", path));
+    }
+    
+    fs::metadata(file_path)
+        .map(|metadata| metadata.len())
+        .map_err(|e| format!("Failed to get file size for {}: {}", path, e))
+}
+
+#[tauri::command]
+async fn launch_game_executable(executable_path: String) -> Result<u32, String> {
+    use std::process::Command;
+    
+    println!("🚀 Launching game executable: {}", executable_path);
+    
+    let mut command = Command::new(&executable_path);
+    
+    // Lancer le processus en arrière-plan
+    let child = command
+        .spawn()
+        .map_err(|e| format!("Failed to launch game: {}", e))?;
+    
+    let pid = child.id();
+    println!("✅ Game launched with PID: {}", pid);
+    
+    Ok(pid)
+}
+
+#[tauri::command]
+fn check_process_running(pid: u32) -> Result<bool, String> {
+    use std::process::Command;
+    
+    // Sur Windows, utiliser tasklist pour vérifier si le processus existe
     #[cfg(target_os = "windows")]
     {
-        std::process::Command::new("explorer")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| e.to_string())?;
+        let output = Command::new("tasklist")
+            .args(&["/FI", &format!("PID eq {}", pid)])
+            .output()
+            .map_err(|e| format!("Failed to check process: {}", e))?;
+        
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        Ok(output_str.contains(&pid.to_string()))
     }
-
-    #[cfg(target_os = "macos")]
+    
+    // Sur Unix, utiliser ps
+    #[cfg(not(target_os = "windows"))]
     {
-        std::process::Command::new("open")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| e.to_string())?;
+        let output = Command::new("ps")
+            .args(&["-p", &pid.to_string()])
+            .output()
+            .map_err(|e| format!("Failed to check process: {}", e))?;
+        
+        Ok(output.status.success())
     }
-
-    #[cfg(target_os = "linux")]
-    {
-        std::process::Command::new("xdg-open")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| e.to_string())?;
-    }
-
-    Ok(())
 }
 
 #[tauri::command]
-fn delete_file(path: String) -> Result<(), String> {
-    std::fs::remove_file(&path).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-fn delete_directory(path: String) -> Result<(), String> {
-    std::fs::remove_dir_all(&path).map_err(|e| e.to_string())
+fn check_unity_process_running() -> Result<bool, String> {
+    use std::process::Command;
+    
+    // Sur Windows, utiliser tasklist pour chercher des processus Unity
+    #[cfg(target_os = "windows")]
+    {
+        let output = Command::new("tasklist")
+            .args(&["/FO", "CSV"])
+            .output()
+            .map_err(|e| format!("Failed to list processes: {}", e))?;
+        
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        
+        // Chercher des processus qui pourraient être des jeux Unity
+        let unity_indicators = [
+            "Unity",
+            "UnityPlayer",
+            "Lysandra",
+            "lysandra",
+            "Game.exe",
+            "game.exe"
+        ];
+        
+        for line in output_str.lines() {
+            let line_lower = line.to_lowercase();
+            for indicator in &unity_indicators {
+                if line_lower.contains(&indicator.to_lowercase()) {
+                    println!("🎮 Found potential game process: {}", line);
+                    return Ok(true);
+                }
+            }
+        }
+        
+        Ok(false)
+    }
+    
+    // Sur Unix, utiliser ps
+    #[cfg(not(target_os = "windows"))]
+    {
+        let output = Command::new("ps")
+            .args(&["aux"])
+            .output()
+            .map_err(|e| format!("Failed to list processes: {}", e))?;
+        
+        let output_str = String::from_utf8_lossy(&output.stdout);
+        
+        // Chercher des processus qui pourraient être des jeux Unity
+        let unity_indicators = [
+            "Unity",
+            "UnityPlayer",
+            "Lysandra",
+            "lysandra",
+            "Game",
+            "game"
+        ];
+        
+        for line in output_str.lines() {
+            let line_lower = line.to_lowercase();
+            for indicator in &unity_indicators {
+                if line_lower.contains(&indicator.to_lowercase()) {
+                    println!("🎮 Found potential game process: {}", line);
+                    return Ok(true);
+                }
+            }
+        }
+        
+        Ok(false)
+    }
 }
 
 #[tauri::command]
 fn get_directory_size(path: String) -> Result<u64, String> {
-    fn dir_size(path: &std::path::Path) -> std::io::Result<u64> {
+    use std::fs;
+    use std::path::Path;
+    
+    fn calculate_dir_size(dir: &Path) -> Result<u64, std::io::Error> {
         let mut size = 0;
-        if path.is_dir() {
-            for entry in std::fs::read_dir(path)? {
+        
+        if dir.is_dir() {
+            for entry in fs::read_dir(dir)? {
                 let entry = entry?;
                 let path = entry.path();
+                
                 if path.is_dir() {
-                    size += dir_size(&path)?;
+                    size += calculate_dir_size(&path)?;
                 } else {
                     size += entry.metadata()?.len();
                 }
             }
         }
+        
         Ok(size)
     }
+    
+    let dir_path = Path::new(&path);
+    
+    if !dir_path.exists() {
+        return Ok(0); // Si le dossier n'existe pas, retourner 0
+    }
+    
+    calculate_dir_size(dir_path)
+        .map_err(|e| format!("Failed to calculate directory size: {}", e))
+}
 
-    dir_size(std::path::Path::new(&path)).map_err(|e| e.to_string())
+#[tauri::command]
+fn delete_file(path: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+    
+    let file_path = Path::new(&path);
+    
+    if !file_path.exists() {
+        return Ok(()); // Si le fichier n'existe pas, considérer comme succès
+    }
+    
+    if file_path.is_file() {
+        fs::remove_file(file_path)
+            .map_err(|e| format!("Failed to delete file {}: {}", path, e))
+    } else {
+        Err(format!("Path {} is not a file", path))
+    }
+}
+
+#[tauri::command]
+fn delete_directory(path: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+    
+    let dir_path = Path::new(&path);
+    
+    if !dir_path.exists() {
+        return Ok(()); // Si le dossier n'existe pas, considérer comme succès
+    }
+    
+    if dir_path.is_dir() {
+        fs::remove_dir_all(dir_path)
+            .map_err(|e| format!("Failed to delete directory {}: {}", path, e))
+    } else {
+        Err(format!("Path {} is not a directory", path))
+    }
+}
+
+#[tauri::command]
+fn list_directory_contents(path: String) -> Result<Vec<String>, String> {
+    use std::fs;
+    use std::path::Path;
+    
+    let dir_path = Path::new(&path);
+    
+    if !dir_path.exists() {
+        return Err(format!("Directory does not exist: {}", path));
+    }
+    
+    if !dir_path.is_dir() {
+        return Err(format!("Path is not a directory: {}", path));
+    }
+    
+    let mut contents = Vec::new();
+    
+    match fs::read_dir(dir_path) {
+        Ok(entries) => {
+            for entry in entries {
+                match entry {
+                    Ok(entry) => {
+                        let file_name = entry.file_name().to_string_lossy().to_string();
+                        let is_dir = entry.path().is_dir();
+                        let prefix = if is_dir { "[DIR] " } else { "[FILE] " };
+                        contents.push(format!("{}{}", prefix, file_name));
+                    }
+                    Err(e) => {
+                        contents.push(format!("[ERROR] Failed to read entry: {}", e));
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            return Err(format!("Failed to read directory {}: {}", path, e));
+        }
+    }
+    
+    Ok(contents)
+}
+
+#[tauri::command]
+fn write_text_file(path: String, content: String) -> Result<(), String> {
+    std::fs::write(&path, content).map_err(|e| e.to_string())
 }
 
 /// Initialise la structure de base du launcher (appelé au setup)
@@ -178,69 +417,39 @@ fn initialize_launcher_structure(app_handle: &tauri::AppHandle) -> Result<(), St
     Ok(())
 }
 
-#[tauri::command]
-async fn initialize_launcher_directories(app_handle: tauri::AppHandle) -> Result<(), String> {
-    initialize_launcher_structure(&app_handle)
-}
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_upload::init());
 
-#[tauri::command]
-async fn open_folder_dialog(
-    app_handle: tauri::AppHandle,
-    title: String,
-    default_path: Option<String>,
-) -> Result<Option<String>, String> {
-    use std::sync::mpsc;
-    use tauri_plugin_dialog::DialogExt;
-
-    let mut dialog = app_handle.dialog().file();
-
-    dialog = dialog.set_title(&title);
-
-    if let Some(path) = default_path {
-        if !path.is_empty() {
-            dialog = dialog.set_directory(&path);
+    // Plugins conditionnels pour desktop uniquement
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        builder = builder
+            .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec!["--flag1", "--flag2"])))
+            .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+                println!("{}, {argv:?}, {cwd}", app.package_info().name);
+            }));
+        
+        // Plugin updater uniquement si activé par variable d'environnement
+        if std::env::var("TAURI_CONFIG_PLUGINS_UPDATER_ACTIVE").unwrap_or_default() == "true" {
+            builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
         }
     }
 
-    let (tx, rx) = mpsc::channel();
-
-    dialog.pick_folder(move |result| {
-        let _ = tx.send(result);
-    });
-
-    match rx.recv().map_err(|e| e.to_string())? {
-        Some(path) => Ok(Some(path.to_string())),
-        None => Ok(None),
-    }
-}
-
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_autostart::init(
-            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-            Some(vec!["--minimized"]) // Arguments à passer au launcher lors du démarrage automatique
-        ))
-        .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_http::init())
-        .plugin(tauri_plugin_upload::init())
-        .plugin(tauri_plugin_store::Builder::new().build())
-        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            // Focus on the main window when trying to open a second instance
-            let _ = app
-                .get_webview_window("main")
-                .expect("no main window")
-                .set_focus();
-        }))
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_os::init())
+    builder
         .invoke_handler(tauri::generate_handler![
             handle_download_progress,
             handle_download_complete,
+            emit_uninstall_event,
             verify_file_integrity,
             fetch_manifest_from_github,
             read_version_file,
@@ -248,27 +457,46 @@ pub fn run() {
             write_text_file,
             create_dir_all,
             check_directory_exists,
-            open_folder,
+            check_file_exists,
+            get_file_size,
+            launch_game_executable,
+            check_process_running,
+            check_unity_process_running,
+            get_directory_size,
             delete_file,
             delete_directory,
-            get_directory_size,
-            initialize_launcher_directories,
-            open_folder_dialog,
-            zip::extract_zip_file
+            list_directory_contents,
+            zip::extract_zip_file,
+            zip::extract_zip_file_async,
+            // Commandes du download manager
+            download_manager::start_download,
+            download_manager::pause_download,
+            download_manager::resume_download,
+            download_manager::cancel_download,
+            download_manager::remove_download,
+            download_manager::get_download_progress,
+            download_manager::get_all_downloads,
+            download_manager::cleanup_completed_downloads,
+            download_manager::get_download_stats
         ])
         .setup(|app| {
+            println!("🚀 Tauri application starting...");
+            
             // Initialiser la structure de base du launcher au démarrage
+            println!("📁 Initializing launcher structure...");
             if let Err(e) = initialize_launcher_structure(app.handle()) {
-                eprintln!("Failed to initialize launcher structure: {}", e);
+                eprintln!("❌ Failed to initialize launcher structure: {}", e);
+                return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, e)));
             }
+            println!("✅ Launcher structure initialized successfully");
 
-            if cfg!(debug_assertions) {
-                app.handle().plugin(
-                    tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Info)
-                        .build(),
-                )?;
-            }
+            // Initialiser le gestionnaire de téléchargements
+            println!("⬇️ Initializing download manager...");
+            let download_manager = download_manager::init_download_manager();
+            app.manage(download_manager);
+            println!("✅ Download manager initialized successfully");
+
+            println!("🌐 Tauri setup completed successfully");
             Ok(())
         })
         .run(tauri::generate_context!())

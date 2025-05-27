@@ -20,7 +20,7 @@ type Props = {
 }
 
 export const UninstallGameButton: React.FC<Props> = ({ className, onUninstallComplete }) => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [isUninstalling, setIsUninstalling] = useState(false)
   const [deleteAllData, setDeleteAllData] = useState(false)

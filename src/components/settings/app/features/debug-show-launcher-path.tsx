@@ -2,7 +2,7 @@ import { Button } from '@heroui/button'
 import { useState } from 'react'
 import { LuFolderOpen, LuCopy, LuCheck } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
-import { invoke } from '@tauri-apps/api/core'
+import { openPath } from '@tauri-apps/plugin-opener'
 
 import { getLauncherRootPath } from '@/utils/paths'
 
@@ -11,7 +11,7 @@ type Props = {
 }
 
 export const DebugShowLauncherPath: React.FC<Props> = ({ className }) => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
   const [path, setPath] = useState<string>('')
   const [copied, setCopied] = useState(false)
 
@@ -27,14 +27,16 @@ export const DebugShowLauncherPath: React.FC<Props> = ({ className }) => {
 
   const handleOpenFolder = async () => {
     try {
-      if (!path) {
-        await handleShowPath()
+      // Obtenir le chemin du launcher et l'ouvrir directement
+      const launcherPath = await getLauncherRootPath()
 
-        return
+      // Mettre à jour le state pour afficher le chemin si ce n'est pas déjà fait
+      if (!path) {
+        setPath(launcherPath)
       }
 
-      // Ouvrir le dossier dans l'explorateur
-      await invoke('open_folder', { path })
+      // Ouvrir le dossier dans l'explorateur avec le plugin opener
+      await openPath(launcherPath)
     } catch {
       // Error opening folder
     }

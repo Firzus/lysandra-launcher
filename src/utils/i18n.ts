@@ -2,38 +2,18 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
-// Lazy loading des traductions pour améliorer les performances
-const loadTranslations = async (language: string) => {
-  try {
-    // Import dynamique avec gestion explicite des langues supportées
-    let translations
+// Import synchrone des traductions
+import enTranslations from '@/locales/en.json'
+import frTranslations from '@/locales/fr.json'
+import esTranslations from '@/locales/es.json'
+import deTranslations from '@/locales/de.json'
 
-    switch (language) {
-      case 'fr':
-        translations = await import('@/locales/fr.json')
-        break
-      case 'en':
-        translations = await import('@/locales/en.json')
-        break
-      case 'es':
-        translations = await import('@/locales/es.json')
-        break
-      case 'de':
-        translations = await import('@/locales/de.json')
-        break
-      default:
-        // Fallback vers l'anglais pour les langues non supportées
-        translations = await import('@/locales/en.json')
-        break
-    }
-
-    return translations.default
-  } catch (error) {
-    console.warn(`Failed to load translations for ${language}, falling back to English`)
-    const fallback = await import('@/locales/en.json')
-
-    return fallback.default
-  }
+// Mapping des traductions
+const translations = {
+  en: enTranslations,
+  fr: frTranslations,
+  es: esTranslations,
+  de: deTranslations,
 }
 
 // Fonction pour détecter la langue du système
@@ -47,14 +27,23 @@ const getSystemLanguage = (): string => {
   return supportedLanguages.includes(langCode) ? langCode : 'en'
 }
 
-// Configuration i18n optimisée
+// Préparer les ressources avec toutes les traductions
+const systemLang = getSystemLanguage()
+const resources = {
+  en: { translation: translations.en },
+  fr: { translation: translations.fr },
+  es: { translation: translations.es },
+  de: { translation: translations.de },
+}
+
+// Configuration i18n optimisée avec chargement synchrone
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    // Chargement initial vide pour démarrer rapidement
-    resources: {},
-    lng: getSystemLanguage(),
+    // Chargement synchrone de toutes les traductions
+    resources,
+    lng: systemLang,
     fallbackLng: 'en',
 
     // Configuration du détecteur de langue
@@ -83,19 +72,5 @@ i18n
     // Optimisations de performance
     cleanCode: true,
   })
-
-// Précharger les traductions de la langue système
-const systemLang = getSystemLanguage()
-
-loadTranslations(systemLang).then((translations) => {
-  i18n.addResourceBundle(systemLang, 'translation', translations, true, true)
-})
-
-// Précharger l'anglais comme fallback si ce n'est pas la langue système
-if (systemLang !== 'en') {
-  loadTranslations('en').then((translations) => {
-    i18n.addResourceBundle('en', 'translation', translations, true, true)
-  })
-}
 
 export default i18n

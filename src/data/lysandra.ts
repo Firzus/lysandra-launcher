@@ -11,8 +11,9 @@ const globalInfos: GlobalInfosProps = {
   id: 1,
   name: 'Lysandra',
   owner: 'Firzus',
-  repositoryName: 'lysandra-launcher',
-  repositoryUrl: 'https://github.com/Firzus/lysandra-launcher',
+  repositoryName: 'lysandra-vslice',
+  repositoryUrl: 'https://github.com/Firzus/lysandra-vslice',
+  gameExecutable: 'StandaloneWindows64.exe',
 }
 
 const carouselEvents: CarouselEventsProps[] = [

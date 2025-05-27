@@ -17,26 +17,17 @@ export function useLanguagePreference() {
   useEffect(() => {
     const loadLanguagePreference = async () => {
       try {
-        // Vérifier d'abord s'il y a une langue sauvegardée
         const savedLang = await store.get<string>(LANGUAGE_KEY)
-
         let targetLanguage: string
 
         if (savedLang) {
-          // Utiliser la langue sauvegardée si elle existe
           targetLanguage = savedLang
-          console.log('Using saved language:', savedLang)
         } else if (systemLanguage && !isDetectingSystem) {
-          // Utiliser la langue système si aucune langue n'est sauvegardée
           targetLanguage = systemLanguage
-          console.log('Using system language:', systemLanguage)
-          // Sauvegarder la langue système comme préférence par défaut
           await store.set(LANGUAGE_KEY, systemLanguage)
           await store.save()
         } else {
-          // Fallback vers la langue par défaut
-          targetLanguage = 'en'
-          console.log('Using fallback language: en')
+          targetLanguage = 'en' // Fallback
         }
 
         if (targetLanguage !== i18n.language) {
@@ -45,7 +36,6 @@ export function useLanguagePreference() {
         }
       } catch (error) {
         console.warn('Failed to load language preference:', error)
-        // En cas d'erreur, utiliser la langue système ou fallback
         const fallbackLang = systemLanguage || 'en'
 
         if (fallbackLang !== i18n.language) {
@@ -57,7 +47,6 @@ export function useLanguagePreference() {
       }
     }
 
-    // Attendre que la détection système soit terminée avant de charger les préférences
     if (!isDetectingSystem) {
       loadLanguagePreference()
     }
@@ -79,8 +68,7 @@ export function useLanguagePreference() {
           await store.save()
         } catch (error) {
           console.error('Failed to change language:', error)
-          // Revenir à la langue précédente en cas d'erreur
-          setSelectedLanguage(selectedLanguage)
+          setSelectedLanguage(selectedLanguage) // Revenir en cas d'erreur
         }
       }
     },

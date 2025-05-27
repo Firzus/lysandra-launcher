@@ -4,6 +4,7 @@ type GlobalInfosProps = {
   owner: string
   repositoryName: string
   repositoryUrl: `https://github.com/${owner}/${repositoryName}`
+  gameExecutable: string // Nom de l'exécutable principal du jeu
 }
 
 type CarouselEventsProps = {
