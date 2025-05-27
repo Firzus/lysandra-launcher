@@ -5,7 +5,7 @@ import i18n from './i18n'
 import { getGamePaths, GAME_IDS } from './paths'
 import { fetchManifest } from './update-service'
 import { checkFileHash } from './hash-verification'
-import { extractZip } from './zip'
+import { extractZipAsync } from './zip'
 import { getGameRepository } from './game-data'
 import {
   initializeGameDirectoryStructure,
@@ -221,9 +221,32 @@ export async function downloadAndInstallGame(
     // S'assurer que le dossier d'installation existe (double vérification)
     await invoke('create_dir_all', { path: gamePaths.install })
 
-    // Extraction simple
-    await extractZip(zipFilePath, gamePaths.install)
-    console.log(`✅ Extraction completed`)
+    // Extraction asynchrone avec progression
+    await new Promise<void>((resolve, reject) => {
+      extractZipAsync(zipFilePath, gamePaths.install, {
+        onProgress: (progress) => {
+          console.log(
+            `📦 Extracting: ${progress.current_file} (${progress.files_processed}/${progress.total_files} - ${progress.percentage.toFixed(1)}%)`,
+          )
+          onProgress?.({
+            step: 'extracting',
+            progress: Math.round(progress.percentage),
+            message: i18n.t('game.install.extracting_file', {
+              file: progress.current_file,
+              progress: Math.round(progress.percentage),
+            }),
+          })
+        },
+        onComplete: () => {
+          console.log(`✅ Extraction completed`)
+          resolve()
+        },
+        onError: (error) => {
+          console.error(`❌ Extraction failed:`, error)
+          reject(new Error(`Extraction failed: ${error}`))
+        },
+      }).catch(reject)
+    })
 
     // 7. Sauvegarder la version
     console.log(`💾 Saving version file...`)

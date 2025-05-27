@@ -81,6 +81,7 @@
             "downloading": "{{progress}}%",
             "verifying": "Verificando integridad del archivo...",
             "extracting": "Extrayendo archivos del juego...",
+      "extracting_file": "Extrayendo {{file}} ({{progress}}%)",
             "installing": "Finalizando instalación...",
             "cleaning": "Limpiando archivos temporales...",
             "complete": "{{game}} v{{version}} instalado exitosamente!",

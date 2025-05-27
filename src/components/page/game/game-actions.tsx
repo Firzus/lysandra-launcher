@@ -131,8 +131,8 @@ export const GameActions: React.FC = () => {
     if (import.meta.env.DEV) {
       console.log('🐛 Sync debugger initialized in development mode')
 
-        // Ajouter une fonction globale pour tester la sync
-        ; (window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
+      // Ajouter une fonction globale pour tester la sync
+      ;(window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
       console.log('🔧 Use window.forceSyncCheck() to manually check synchronization')
     }
 
@@ -357,9 +357,9 @@ export const GameActions: React.FC = () => {
           body: isUpdate
             ? t('notification.update_complete.body', { version: version || 'unknown' })
             : t('notification.download_complete.body', {
-              game: 'Lysandra',
-              version: version || 'unknown',
-            }),
+                game: 'Lysandra',
+                version: version || 'unknown',
+              }),
         })
       }
     } catch {
@@ -520,10 +520,11 @@ export const GameActions: React.FC = () => {
       {installProgress && (gameState === 'downloading' || gameState === 'updating') && (
         <div className="mb-4 w-full max-w-md">
           <div
-            className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
+            className={`text-muted-foreground mb-1 text-sm ${
+              installProgress.step !== 'downloading' && installProgress.step !== 'complete'
                 ? 'animate-pulse'
                 : ''
-              }`}
+            }`}
           >
             {installProgress.message}
           </div>
@@ -546,8 +547,9 @@ export const GameActions: React.FC = () => {
       {repairProgress && gameState === 'repairing' && (
         <div className="mb-4 w-full max-w-md">
           <div
-            className={`text-muted-foreground mb-1 text-sm ${repairProgress.step !== 'complete' ? 'animate-pulse' : ''
-              }`}
+            className={`text-muted-foreground mb-1 text-sm ${
+              repairProgress.step !== 'complete' ? 'animate-pulse' : ''
+            }`}
           >
             {repairProgress.message}
           </div>

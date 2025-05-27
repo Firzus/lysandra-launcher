@@ -467,6 +467,7 @@ pub fn run() {
             delete_directory,
             list_directory_contents,
             zip::extract_zip_file,
+            zip::extract_zip_file_async,
             // Commandes du download manager
             download_manager::start_download,
             download_manager::pause_download,
