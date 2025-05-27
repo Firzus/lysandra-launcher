@@ -1,5 +1,5 @@
 {
-  "name": "lysandra-launcher",
+  "name": "huz-studio-launcher",
   "private": true,
   "version": "0.0.4",
   "type": "module",
@@ -10,7 +10,6 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@heroui/alert": "^2.2.19",
     "@heroui/button": "2.2.19",
     "@heroui/card": "^2.2.18",
     "@heroui/checkbox": "^2.3.18",
@@ -20,8 +19,6 @@
     "@heroui/input": "^2.4.19",
     "@heroui/link": "2.2.16",
     "@heroui/modal": "^2.2.16",
-    "@heroui/progress": "^2.2.15",
-    "@heroui/scroll-shadow": "^2.3.13",
     "@heroui/select": "^2.4.19",
     "@heroui/spinner": "^2.2.16",
     "@heroui/switch": "^2.2.17",
@@ -30,8 +27,6 @@
     "@heroui/theme": "2.4.15",
     "@heroui/toast": "^2.0.9",
     "@heroui/tooltip": "^2.2.16",
-    "@react-aria/visually-hidden": "3.8.22",
-    "@react-types/shared": "3.29.0",
     "@tauri-apps/api": "^2.5.0",
     "@tauri-apps/plugin-autostart": "^2.3.0",
     "@tauri-apps/plugin-dialog": "^2.2.1",
@@ -44,7 +39,6 @@
     "@tauri-apps/plugin-store": "^2.2.0",
     "@tauri-apps/plugin-updater": "^2.7.1",
     "@tauri-apps/plugin-upload": "^2.2.1",
-    "framer-motion": "11.15.0",
     "i18next": "^25.1.2",
     "i18next-browser-languagedetector": "^8.1.0",
     "react": "18.3.1",
@@ -52,7 +46,6 @@
     "react-error-boundary": "^6.0.0",
     "react-i18next": "^15.5.1",
     "react-icons": "^5.5.0",
-    "tailwind-variants": "0.3.0",
     "tailwindcss": "3.4.16"
   },
   "devDependencies": {
@@ -63,12 +56,10 @@
     "@types/node": "20.5.7",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
-    "@types/react-i18next": "^7.8.3",
     "@typescript-eslint/eslint-plugin": "8.31.1",
     "@typescript-eslint/parser": "8.31.1",
     "@vitejs/plugin-react": "4.4.1",
     "autoprefixer": "10.4.21",
-    "cross-env": "^7.0.3",
     "eslint": "9.25.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.31.0",

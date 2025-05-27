@@ -1,98 +1,130 @@
-# Lysandra Launcher
+# Huz Studio Launcher
 
-A modern cross-platform desktop application built with Tauri 2.0, Vite, React, and HeroUI.
+Un launcher de jeu moderne multiplateforme construit avec Tauri 2.0, Vite, React et HeroUI.
 
-## Technologies Used
+## Description
+
+Huz Studio Launcher est une application de bureau moderne qui permet de gérer l'installation, les mises à jour et le lancement des jeux Huz Studio. L'application offre une interface utilisateur moderne et intuitive avec support multilingue.
+
+## À propos
+
+Huz Studio Launcher est une application de bureau qui permet de gérer l'installation, les mises à jour et le lancement du jeu Huz Studio. L'application offre une interface utilisateur moderne et intuitive avec support multilingue.
+
+## Technologies utilisées
 
 ### Frontend
 
-- [Vite](https://vitejs.dev/guide/) - Next Generation Frontend Tooling
-- [React 18](https://react.dev/) - JavaScript library for building user interfaces
-- [HeroUI v2](https://heroui.com) - Modern UI components built on React
-- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
-- [Tailwind Variants](https://tailwind-variants.org) - Type-safe variants for Tailwind CSS
-- [TypeScript](https://www.typescriptlang.org) - Typed JavaScript
-- [Framer Motion](https://www.framer.com/motion) - Animation library for React
+- [Vite](https://vitejs.dev/) - Outil de build moderne et rapide
+- [React 18](https://react.dev/) - Bibliothèque JavaScript pour les interfaces utilisateur
+- [HeroUI v2](https://heroui.com) - Composants UI modernes basés sur React
+- [Tailwind CSS](https://tailwindcss.com) - Framework CSS utilitaire
+- [TypeScript](https://www.typescriptlang.org) - JavaScript typé
+- [React i18next](https://react.i18next.com/) - Internationalisation pour React
 
-### Desktop App Framework
+### Framework d'application de bureau
 
-- [Tauri 2.0](https://tauri.app/) - Framework for building secure, lightweight, and cross-platform desktop apps
-  - Smaller binaries compared to Electron
-  - Native system dialogs and notifications
-  - System tray support
-  - Auto-updates
-  - Deep OS integration
+- [Tauri 2.0](https://tauri.app/) - Framework pour créer des applications de bureau sécurisées et légères
+  - Binaires plus petits comparé à Electron
+  - Dialogues et notifications natifs du système
+  - Support du system tray
+  - Mises à jour automatiques
+  - Intégration native avec l'OS
 
 ### Backend
 
-- [Rust](https://www.rust-lang.org/) - Fast and memory-efficient systems programming language
-  - Powers the Tauri core functionality
-  - Provides native performance for critical operations
+- [Rust](https://www.rust-lang.org/) - Langage de programmation système rapide et efficace en mémoire
+  - Alimente les fonctionnalités principales de Tauri
+  - Fournit des performances natives pour les opérations critiques
 
-## How to Use
+## Fonctionnalités
 
-To clone the project, run the following command:
+- **Interface moderne** : Interface utilisateur moderne avec thème sombre
+- **Multilingue** : Support pour Français, Anglais, Espagnol et Allemand
+- **Gestion des installations** : Installation, mise à jour et désinstallation du jeu
+- **Notifications** : Notifications système pour les événements importants
+- **Démarrage automatique** : Option pour démarrer avec le système
+- **Mises à jour automatiques** : Mise à jour automatique du launcher
+- **Contrôles de fenêtre personnalisés** : Interface sans décoration avec contrôles intégrés
+
+## Comment utiliser
+
+Pour cloner le projet, exécutez la commande suivante :
 
 ```bash
-git clone https://github.com/frontio-ai/vite-template.git
+git clone https://github.com/Firzus/lysandra-launcher.git
+cd lysandra-launcher
 ```
 
-### Install dependencies
+### Installer les dépendances
 
-You can use one of them `npm`, `yarn`, `pnpm`, `bun`. Example using `npm`:
+Vous pouvez utiliser `npm` :
 
 ```bash
 npm install
 ```
 
-### Run the development server
+### Commandes Tauri
 
 ```bash
+# Développement avec rechargement automatique
 npm run dev
-```
 
-### Build for production
-
-```bash
+# Compilation pour la production
 npm run build
+
+# Compiler pour une plateforme spécifique
+npm run build -- --target universal-apple-darwin  # macOS Universal
+npm run build -- --target x86_64-pc-windows-msvc  # Windows x64
+npm run build -- --target x86_64-unknown-linux-gnu  # Linux x64
 ```
 
-### Run Tauri commands
+## Structure du projet
 
-```bash
-# Development with hot-reload
-npm run tauri dev
-
-# Build for production
-npm run tauri build
-
-# Build for a specific target platform
-npm run tauri build -- --target universal-apple-darwin  # macOS Universal
-npm run tauri build -- --target x86_64-pc-windows-msvc  # Windows x64
-npm run tauri build -- --target x86_64-unknown-linux-gnu  # Linux x64
+```
+lysandra-launcher/
+├── src/
+│   ├── components/     # Composants React réutilisables
+│   ├── hooks/         # Hooks React personnalisés
+│   ├── locales/       # Fichiers de traduction (fr, en, es, de)
+│   ├── pages/         # Pages de l'application
+│   ├── types/         # Définitions TypeScript
+│   ├── utils/         # Fonctions utilitaires
+│   └── App.tsx        # Composant principal
+├── src-tauri/         # Code Rust et configuration Tauri
+├── public/            # Assets statiques
+└── dist/              # Build de production
 ```
 
-## CI/CD with GitHub Actions
+## CI/CD avec GitHub Actions
 
-This project uses GitHub Actions to automate the build and release process across multiple platforms (Windows, macOS, and Linux). When a tag is pushed with the format `v*` (e.g., `v1.0.0`), or when manually triggered, GitHub Actions will build the application for all platforms and create a draft release.
+Ce projet utilise GitHub Actions pour automatiser le processus de compilation et de publication sur plusieurs plateformes (Windows, macOS et Linux). Quand un tag avec le format `v*` (par exemple `v1.0.0`) est poussé, GitHub Actions compile automatiquement l'application pour toutes les plateformes et crée un draft release.
 
-### Automated Build Process
+### Processus de compilation automatisé
 
-The `.github/workflows/release.yml` workflow automates building the application for Windows, macOS, and Linux, and creates a draft release on GitHub when a `v*` tag is pushed or the workflow is manually dispatched.
+Le workflow `.github/workflows/publish.yml` automatise la compilation de l'application pour Windows, macOS et Linux, et crée un draft release sur GitHub quand un tag `v*` est poussé.
 
-### Creating a Release
+### Créer une nouvelle version
 
-To create a new release:
+Pour créer une nouvelle version :
 
-1. Update the version in `package.json` and `src-tauri/tauri.conf.json`
-2. Create and push a new tag:
+1. Mettre à jour la version dans `package.json` et `src-tauri/tauri.conf.json`
+2. Créer et pousser un nouveau tag :
    ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
+   git tag v0.0.5
+   git push origin v0.0.5
    ```
-3. GitHub Actions will automatically build the application and create a draft release
-4. Review and publish the draft release on GitHub
+3. GitHub Actions compilera automatiquement l'application et créera un draft release
+4. Revoir et publier le draft release sur GitHub
 
-## License
+## Configuration
 
-Licensed under the [MIT license](https://github.com/frontio-ai/vite-template/blob/main/LICENSE).
+L'application peut être configurée via l'interface des paramètres :
+
+- **Langue** : Choisir entre Français, Anglais, Espagnol et Allemand
+- **Notifications** : Activer/désactiver les notifications système
+- **Démarrage automatique** : Lancer l'application au démarrage du système
+- **Mises à jour** : Vérifier et installer les mises à jour automatiquement
+
+## Licence
+
+Sous licence [MIT](LICENSE).
