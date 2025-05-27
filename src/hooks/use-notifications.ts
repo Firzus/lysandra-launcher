@@ -27,7 +27,7 @@ export const useNotifications = () => {
         const savedPreference = await store.get<boolean>(NOTIFICATIONS_KEY)
         const isEnabled = savedPreference !== null ? savedPreference : permission
 
-        setIsNotificationsEnabled(isEnabled)
+        setIsNotificationsEnabled(isEnabled ?? false)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erreur inconnue')
         setIsNotificationsEnabled(false)
