@@ -8,7 +8,7 @@ import { NotificationsToggle } from '../features/notifications-toggle'
 import { sendAppNotification } from '@/utils/notifications'
 
 export const NotificationsAppSettings: React.FC = () => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
 
   const handleTestNotification = async () => {
     await sendAppNotification({

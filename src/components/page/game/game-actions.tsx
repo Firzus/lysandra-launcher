@@ -28,7 +28,7 @@ import { GAME_IDS } from '@/utils/paths'
 import { syncDebugger } from '@/utils/debug-sync'
 
 export const GameActions: React.FC = () => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const {

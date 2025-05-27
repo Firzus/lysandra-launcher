@@ -201,5 +201,9 @@
       "title": "Update Complete",
       "body": "{{game}} updated to {{version}}!"
     }
+  },
+  "carousel": {
+    "previous_slide": "Previous slide",
+    "next_slide": "Next slide"
   }
 }

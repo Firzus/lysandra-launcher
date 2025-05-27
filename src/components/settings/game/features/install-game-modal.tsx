@@ -32,7 +32,7 @@ export const InstallGameModal: React.FC<Props> = ({
   gameId,
   isUpdate = false,
 }) => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
   const [config, setConfig] = useState<InstallConfig>({
     installPath: '',
     createDesktopShortcut: true,

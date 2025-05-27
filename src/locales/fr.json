@@ -201,5 +201,9 @@
       "title": "Mise à jour terminée",
       "body": "{{game}} mis à jour vers {{version}} !"
     }
+  },
+  "carousel": {
+    "previous_slide": "Diapositive précédente",
+    "next_slide": "Diapositive suivante"
   }
 }

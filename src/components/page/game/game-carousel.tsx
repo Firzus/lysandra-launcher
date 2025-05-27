@@ -4,6 +4,7 @@ import { Link } from '@heroui/link'
 import { Image } from '@heroui/image'
 import { Card, CardBody, CardFooter } from '@heroui/card'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
+import { useTranslation } from 'react-i18next'
 
 import { openLink } from '@/utils/opener'
 import { carouselEvents } from '@/data/lysandra'
@@ -11,6 +12,7 @@ import { carouselEvents } from '@/data/lysandra'
 type Props = {}
 
 export const GameCarousel: React.FC<Props> = () => {
+  const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const nextSlide = () => {
@@ -40,7 +42,7 @@ export const GameCarousel: React.FC<Props> = () => {
 
         <Button
           isIconOnly
-          aria-label="Previous slide"
+          aria-label={t('carousel.previous_slide')}
           className="absolute left-4 top-1/2 z-10 -translate-y-1/2"
           radius="full"
           size="sm"
@@ -52,7 +54,7 @@ export const GameCarousel: React.FC<Props> = () => {
 
         <Button
           isIconOnly
-          aria-label="Next slide"
+          aria-label={t('carousel.next_slide')}
           className="absolute right-4 top-1/2 z-10 -translate-y-1/2"
           radius="full"
           size="sm"

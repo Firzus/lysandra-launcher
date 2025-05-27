@@ -201,5 +201,9 @@
             "title": "Actualización completa",
             "body": "¡{{game}} actualizado a {{version}}!"
         }
+    },
+    "carousel": {
+        "previous_slide": "Diapositiva anterior",
+        "next_slide": "Diapositiva siguiente"
     }
 }

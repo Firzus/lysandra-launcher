@@ -61,6 +61,8 @@ export const CheckUpdateButton: React.FC<Props> = ({ className }) => {
         title: t('update.error'),
         description: error || t('update.error_desc'),
       })
+
+      return
     }
 
     // Déclencher une nouvelle vérification

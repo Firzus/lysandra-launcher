@@ -201,5 +201,9 @@
             "title": "Update abgeschlossen",
             "body": "{{game}} auf {{version}} aktualisiert!"
         }
+    },
+    "carousel": {
+        "previous_slide": "Vorherige Folie",
+        "next_slide": "Nächste Folie"
     }
 }

@@ -9,7 +9,7 @@ import { DebugShowLauncherPath } from '../features/debug-show-launcher-path'
 import { CheckUpdateButton } from '@/components/settings/app/features/check-update-button'
 
 export const GeneralAppSettings: React.FC = () => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
 
   return (
     <>
@@ -26,7 +26,7 @@ export const GeneralAppSettings: React.FC = () => {
       {/* Language Selection */}
       <Card shadow="none">
         <CardBody className="flex-row justify-between">
-          <p>{t('language.desciption')}</p>
+          <p>{t('language.description')}</p>
           <LanguageSwitcher className="ml-6" />
         </CardBody>
       </Card>

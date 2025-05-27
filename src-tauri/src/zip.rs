@@ -7,6 +7,8 @@ use ::zip::ZipArchive;
 use tauri::{AppHandle, Emitter};
 use serde::{Deserialize, Serialize};
 use tokio::time::{sleep, Duration};
+use tokio::sync::mpsc;
+use log::{info, debug, warn};
 
 // Structure pour les événements de progression d'extraction
 #[derive(Clone, Serialize, Deserialize)]
@@ -43,7 +45,7 @@ pub fn extract_zip_file(file_path: String, extract_to: String) -> Result<(), Str
         .map_err(|e| format!("Failed to create output dir: {}", e))?;
 
     let total_files = archive.len();
-    println!("Starting extraction of {} files to: {}", total_files, extract_to);
+    info!("Starting extraction of {} files to: {}", total_files, extract_to);
 
     for i in 0..archive.len() {
         let mut file = archive
@@ -54,7 +56,7 @@ pub fn extract_zip_file(file_path: String, extract_to: String) -> Result<(), Str
         let relative_path = match sanitize_zip_path(&entry_name) {
             Some(path) => path,
             None => {
-                println!("Skipped suspicious file path: {}", entry_name);
+                warn!("Skipped suspicious file path: {}", entry_name);
                 continue;
             }
         };
@@ -63,18 +65,18 @@ pub fn extract_zip_file(file_path: String, extract_to: String) -> Result<(), Str
 
         if file.is_dir() {
             fs::create_dir_all(&out_path).map_err(|e| e.to_string())?;
-            println!("Created directory: {}", entry_name);
+            debug!("Created directory: {}", entry_name);
         } else {
             if let Some(parent) = out_path.parent() {
                 fs::create_dir_all(parent).map_err(|e| e.to_string())?;
             }
             let mut outfile = File::create(&out_path).map_err(|e| e.to_string())?;
             std::io::copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
-            println!("Extracted file: {}", entry_name);
+            debug!("Extracted file: {}", entry_name);
         }
     }
 
-    println!("Extraction completed successfully!");
+    info!("Extraction completed successfully!");
     Ok(())
 }
 
@@ -86,6 +88,9 @@ pub async fn extract_zip_file_async(
     extraction_id: String,
     app: AppHandle,
 ) -> Result<(), String> {
+    // Créer un channel pour communiquer les événements de progression
+    let (progress_tx, mut progress_rx) = mpsc::unbounded_channel::<ExtractionProgress>();
+
     // Émettre le début de l'extraction
     let _ = app.emit(
         "extraction-progress",
@@ -99,11 +104,14 @@ pub async fn extract_zip_file_async(
         },
     );
 
-    // Ouvrir l'archive ZIP de manière asynchrone (en spawning un task bloquant)
+    // Cloner les variables pour la tâche blocking
     let file_path_clone = file_path.clone();
     let extract_to_clone = extract_to.clone();
+    let extraction_id_clone = extraction_id.clone();
+    let progress_tx_clone = progress_tx.clone();
     
-    tokio::task::spawn_blocking(move || -> Result<(), String> {
+    // Spawner la tâche d'extraction en parallèle avec la tâche d'émission d'événements
+    let extraction_task = tokio::task::spawn_blocking(move || -> Result<(), String> {
         let zip_file = File::open(&file_path_clone).map_err(|e| format!("Failed to open zip: {}", e))?;
         let mut archive = ZipArchive::new(zip_file).map_err(|e| format!("Invalid zip archive: {}", e))?;
 
@@ -111,22 +119,16 @@ pub async fn extract_zip_file_async(
             .map_err(|e| format!("Failed to create output dir: {}", e))?;
 
         let total_files = archive.len();
-        println!("Starting async extraction of {} files to: {}", total_files, extract_to_clone);
+        info!("Starting async extraction of {} files to: {}", total_files, extract_to_clone);
 
-        // Émettre la progression initiale avec le nombre total de fichiers
-        let rt = tokio::runtime::Handle::current();
-        rt.block_on(async {
-            let _ = app.emit(
-                "extraction-progress",
-                ExtractionProgress {
-                    extraction_id: extraction_id.clone(),
-                    current_file: String::new(),
-                    files_processed: 0,
-                    total_files,
-                    percentage: 0.0,
-                    status: "extracting".to_string(),
-                },
-            );
+        // Envoyer la progression initiale avec le nombre total de fichiers
+        let _ = progress_tx_clone.send(ExtractionProgress {
+            extraction_id: extraction_id_clone.clone(),
+            current_file: String::new(),
+            files_processed: 0,
+            total_files,
+            percentage: 0.0,
+            status: "extracting".to_string(),
         });
 
         for i in 0..archive.len() {
@@ -138,7 +140,7 @@ pub async fn extract_zip_file_async(
             let relative_path = match sanitize_zip_path(&entry_name) {
                 Some(path) => path,
                 None => {
-                    println!("Skipped suspicious file path: {}", entry_name);
+                    warn!("Skipped suspicious file path: {}", entry_name);
                     continue;
                 }
             };
@@ -147,59 +149,62 @@ pub async fn extract_zip_file_async(
 
             if file.is_dir() {
                 fs::create_dir_all(&out_path).map_err(|e| e.to_string())?;
-                println!("Created directory: {}", entry_name);
+                debug!("Created directory: {}", entry_name);
             } else {
                 if let Some(parent) = out_path.parent() {
                     fs::create_dir_all(parent).map_err(|e| e.to_string())?;
                 }
                 let mut outfile = File::create(&out_path).map_err(|e| e.to_string())?;
                 std::io::copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
-                println!("Extracted file: {}", entry_name);
+                debug!("Extracted file: {}", entry_name);
             }
 
-            // Calculer et émettre la progression
+            // Calculer et envoyer la progression
             let files_processed = i + 1;
             let percentage = (files_processed as f64 / total_files as f64) * 100.0;
 
-            // Émettre la progression de manière asynchrone
-            rt.block_on(async {
-                let _ = app.emit(
-                    "extraction-progress",
-                    ExtractionProgress {
-                        extraction_id: extraction_id.clone(),
-                        current_file: entry_name.clone(),
-                        files_processed,
-                        total_files,
-                        percentage,
-                        status: "extracting".to_string(),
-                    },
-                );
-
-                // Petit délai pour ne pas spammer les événements et permettre à l'UI de se mettre à jour
-                sleep(Duration::from_millis(10)).await;
+            let _ = progress_tx_clone.send(ExtractionProgress {
+                extraction_id: extraction_id_clone.clone(),
+                current_file: entry_name,
+                files_processed,
+                total_files,
+                percentage,
+                status: "extracting".to_string(),
             });
         }
 
-        // Émettre la completion
-        rt.block_on(async {
-            let _ = app.emit(
-                "extraction-progress",
-                ExtractionProgress {
-                    extraction_id: extraction_id.clone(),
-                    current_file: String::new(),
-                    files_processed: total_files,
-                    total_files,
-                    percentage: 100.0,
-                    status: "completed".to_string(),
-                },
-            );
+        // Envoyer la completion
+        let _ = progress_tx_clone.send(ExtractionProgress {
+            extraction_id: extraction_id_clone.clone(),
+            current_file: String::new(),
+            files_processed: total_files,
+            total_files,
+            percentage: 100.0,
+            status: "completed".to_string(),
         });
 
-        println!("Async extraction completed successfully!");
+        info!("Async extraction completed successfully!");
         Ok(())
-    })
-    .await
-    .map_err(|e| format!("Task join error: {}", e))??;
+    });
 
-    Ok(())
+    // Tâche pour émettre les événements de progression
+    let event_task = tokio::spawn(async move {
+        while let Some(progress) = progress_rx.recv().await {
+            let _ = app.emit("extraction-progress", progress);
+            
+            // Petit délai pour ne pas spammer les événements et permettre à l'UI de se mettre à jour
+            sleep(Duration::from_millis(10)).await;
+        }
+    });
+
+    // Attendre que l'extraction soit terminée
+    let extraction_result = extraction_task
+        .await
+        .map_err(|e| format!("Task join error: {}", e))?;
+
+    // Fermer le channel et attendre que tous les événements soient émis
+    drop(progress_tx); // Fermer l'envoyeur pour terminer la boucle de réception
+    let _ = event_task.await;
+
+    extraction_result
 }

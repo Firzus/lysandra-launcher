@@ -10,7 +10,7 @@ type Props = {
 }
 
 export const GameSizeDisplay: React.FC<Props> = ({ className }) => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
   const [size, setSize] = useState<string>('Calcul...')
   const [isLoading, setIsLoading] = useState(true)
 

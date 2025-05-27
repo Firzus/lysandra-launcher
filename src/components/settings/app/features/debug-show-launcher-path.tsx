@@ -11,7 +11,7 @@ type Props = {
 }
 
 export const DebugShowLauncherPath: React.FC<Props> = ({ className }) => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
   const [path, setPath] = useState<string>('')
   const [copied, setCopied] = useState(false)
 

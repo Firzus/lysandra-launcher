@@ -13,7 +13,7 @@ type Props = {
 }
 
 export const DebugLauncherStructure: React.FC<Props> = ({ className }) => {
-  const { t } = useTranslation() as any
+  const { t } = useTranslation()
   const [status, setStatus] = useState<DebugStatus>('idle')
   const [message, setMessage] = useState<string>('')
 
