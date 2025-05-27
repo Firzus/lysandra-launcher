@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "LysandraLauncher",
+  "productName": "Huz Studio Launcher",
   "version": "0.0.4",
-  "identifier": "com.lysandra.dev",
+  "identifier": "com.huzstudio.launcher",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Launcher",
+        "title": "Huz Studio Launcher",
         "width": 1280,
         "height": 720,
         "fullscreen": false,
@@ -21,7 +21,8 @@
         "decorations": false,
         "backgroundColor": "#0C0A09",
         "center": true,
-        "theme": "Dark"
+        "theme": "Dark",
+        "devtools": false
       }
     ],
     "security": {
@@ -65,7 +66,7 @@
     "updater": {
       "active": false,
       "endpoints": [
-        "https://github.com/Firzus/lysandra-launcher/releases/latest/download/latest.json"
+        "https://github.com/Firzus/huz-studio-launcher/releases/latest/download/latest.json"
       ]
     }
   }

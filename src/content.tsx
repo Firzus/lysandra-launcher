@@ -3,16 +3,17 @@ import { Divider } from '@heroui/divider'
 
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
-// Lazy loading des composants
+// Lazy loading des composants du Huz Studio Launcher
 const Sidebar = lazy(() =>
   import('@/components/page/sidebar').then((module) => ({ default: module.Sidebar })),
 )
-const LysandraGame = lazy(() =>
-  import('@/pages/games/lysandra-game').then((module) => ({ default: module.LysandraGame })),
+
+const HuzStudioGame = lazy(() =>
+  import('@/pages/games/huz-studio-game').then((module) => ({ default: module.HuzStudioGame })),
 )
 
 const ContentComponent: React.FC = () => {
-  console.log('📄 Content: Component rendering...')
+  console.log('🎮 Huz Studio Launcher: Content rendering...')
 
   return (
     <>
@@ -25,12 +26,12 @@ const ContentComponent: React.FC = () => {
 
       {/* Pages */}
       <Suspense fallback={<LoadingSpinner />}>
-        <LysandraGame />
+        <HuzStudioGame />
       </Suspense>
     </>
   )
 }
 
-// Mémorisation du composant pour éviter les re-renders inutiles
+// Mémorisation du composant Huz Studio pour éviter les re-renders inutiles
 export const Content = memo(ContentComponent)
-Content.displayName = 'Content'
+Content.displayName = 'HuzStudioContent'

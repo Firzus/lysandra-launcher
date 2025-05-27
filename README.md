@@ -51,8 +51,8 @@ Huz Studio Launcher est une application de bureau qui permet de gérer l'install
 Pour cloner le projet, exécutez la commande suivante :
 
 ```bash
-git clone https://github.com/Firzus/lysandra-launcher.git
-cd lysandra-launcher
+git clone https://github.com/Firzus/huz-studio-launcher.git
+cd huz-studio-launcher
 ```
 
 ### Installer les dépendances
@@ -81,7 +81,7 @@ npm run build -- --target x86_64-unknown-linux-gnu  # Linux x64
 ## Structure du projet
 
 ```
-lysandra-launcher/
+huz-studio-launcher/
 ├── src/
 │   ├── components/     # Composants React réutilisables
 │   ├── hooks/         # Hooks React personnalisés

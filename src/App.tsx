@@ -14,10 +14,10 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 const Content = lazy(() => import('./content').then((module) => ({ default: module.Content })))
 
 export default function App() {
-  // Charge la langue sauvegardée dès le lancement
+  // Charge la langue sauvegardée dès le lancement du Huz Studio
   const { isLoading: isLanguageLoading } = useLanguagePreference()
 
-  // Vérifier l'intégrité de la structure du launcher
+  // Vérifier l'intégrité de la structure du Huz Studio Launcher
   const launcherIntegrity = useLauncherIntegrity()
 
   const { t } = useTranslation()
@@ -47,24 +47,21 @@ export default function App() {
   // Afficher l'erreur de structure si elle existe mais ne pas bloquer
   if (launcherIntegrity.hasError) {
     // Garder un avertissement discret peut être utile ici
-    console.warn('Launcher integrity warning:', launcherIntegrity.error)
+    console.warn('Huz Studio Launcher integrity warning:', launcherIntegrity.error)
   }
 
   // Log informatif pour le mode développement
   if (status === 'disabled') {
-    console.log('🔧 Mode développement détecté - Auto-update désactivé')
+    console.log('🔧 Huz Studio - Mode développement détecté - Auto-update désactivé')
   }
 
   return (
     <main className="flex h-screen select-none overflow-hidden bg-background text-foreground antialiased">
-      {/* System */}
+      {/* System Controls */}
       <DragZone />
       <WindowControls />
 
-      {/* Debug Tools - Supprimé */}
-      {/* <DevToolsToggle className="absolute bottom-2 right-2 z-50" /> */}
-
-      {/* Content */}
+      {/* Huz Studio Launcher Content */}
       {isLoading ? (
         <Loader message={message} />
       ) : (
