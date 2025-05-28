@@ -16,12 +16,20 @@ import {
 } from '@/components/settings/game/features/InstallGameModal'
 import reducer from '@/utils/game-action-sm'
 import { initializeGameCheck } from '@/utils/game-checker'
-import { installLysandra, updateLysandra, type GameInstallProgress } from '@/utils/game-installer'
+import {
+  downloadAndInstallGame,
+  type GameInstallProgress
+} from '@/utils/game-installer'
 import { repairGame, type GameRepairProgress } from '@/utils/game-repair'
 import { launchGame } from '@/utils/game-launcher'
 import { isGameInstalled } from '@/utils/game-uninstaller'
 import { GAME_IDS } from '@/utils/paths'
 import { syncDebugger } from '@/utils/debug-sync'
+import { getGameRepository } from '@/utils/game-data'
+import {
+  GameInstallConfiguration,
+  type GameInstallResult
+} from '@/utils/install-config'
 
 export const GameActions: React.FC = () => {
   const { t } = useTranslation()
@@ -251,13 +259,33 @@ export const GameActions: React.FC = () => {
         return
       }
 
-      const installFunction = isUpdate ? updateLysandra : installLysandra
+      // Créer la configuration d'installation pour le système
+      const installConfiguration: GameInstallConfiguration = {
+        gameId: GAME_IDS.LYSANDRA,
+        customInstallPath: config.installPath,
+        createDesktopShortcut: config.createDesktopShortcut,
+        createStartMenuShortcut: config.createStartMenuShortcut,
+        useCustomPath: Boolean(config.installPath && config.installPath.trim() !== ''),
+      }
+
+      console.log('🔧 Install configuration created:', installConfiguration)
+
       const completedAction = isUpdate ? 'UPDATE_COMPLETED' : 'DOWNLOAD_COMPLETED'
       const failedAction = isUpdate ? 'FAILED_TO_UPDATE' : 'FAILED_TO_DOWNLOAD'
 
-      const result = await installFunction((progress) => {
-        setInstallProgress(progress)
-      })
+      let result: GameInstallResult
+
+      // Pour les mises à jour ET les nouvelles installations, utiliser la nouvelle fonction avec configuration
+      const { owner, repo } = getGameRepository(GAME_IDS.LYSANDRA)
+      result = await downloadAndInstallGame(
+        GAME_IDS.LYSANDRA,
+        owner,
+        repo,
+        installConfiguration,
+        (progress) => {
+          setInstallProgress(progress)
+        }
+      )
 
       if (result.success) {
         dispatch({ type: completedAction })
@@ -266,6 +294,8 @@ export const GameActions: React.FC = () => {
         const installed = await isGameInstalled(GAME_IDS.LYSANDRA)
 
         setGameInstalled(installed)
+
+        console.log(`✅ Game installation completed successfully at custom path`)
       } else {
         dispatch({ type: failedAction })
         setErrorMessage(result.error || 'Installation failed')
@@ -601,7 +631,6 @@ export const GameActions: React.FC = () => {
         />
 
         <InstallGameModal
-          gameId="lysandra"
           isOpen={isInstallModalOpen}
           isUpdate={gameState === 'waitingForUpdate'}
           onInstallConfirm={handleInstallConfirm}

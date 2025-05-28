@@ -2,12 +2,16 @@ import { Button } from '@heroui/button'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
 import { Checkbox } from '@heroui/checkbox'
 import { Input } from '@heroui/input'
+import { Divider } from '@heroui/divider'
 import { useState, useEffect } from 'react'
-import { LuFolder, LuFolderOpen, LuDownload, LuMapPin } from 'react-icons/lu'
+import { LuFolder, LuFolderOpen, LuDownload, LuMapPin, LuCheck, LuX, LuLoader } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
 import { open } from '@tauri-apps/plugin-dialog'
 
-import { getGamePaths } from '@/utils/paths'
+import { getLauncherPaths } from '@/utils/paths'
+import { AutoDetectionPanel } from './AutoDetectionPanel'
+import { validateGameInstallation } from '@/utils/game-auto-detection'
+import type { ValidationResult } from '@/types/game-detection'
 
 type InstallConfig = {
   installPath: string
@@ -21,7 +25,6 @@ type Props = {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   onInstallConfirm: (config: InstallConfig) => void
-  gameId: string
   isUpdate?: boolean
 }
 
@@ -29,7 +32,6 @@ export const InstallGameModal: React.FC<Props> = ({
   isOpen,
   onOpenChange,
   onInstallConfirm,
-  gameId,
   isUpdate = false,
 }) => {
   const { t } = useTranslation()
@@ -41,16 +43,80 @@ export const InstallGameModal: React.FC<Props> = ({
     existingGamePath: '',
   })
   const [isLoadingPath, setIsLoadingPath] = useState(false)
+  const [isValidatingPath, setIsValidatingPath] = useState(false)
+  const [pathValidation, setPathValidation] = useState<ValidationResult | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
+
+  // Fonction pour valider le chemin d'un jeu existant
+  const validateExistingGamePath = async (path: string) => {
+    if (!path || path.trim() === '') {
+      setPathValidation(null)
+      setValidationError(null)
+      return
+    }
+
+    try {
+      setIsValidatingPath(true)
+      setValidationError(null)
+
+      console.log('🔍 Validating existing game path:', path)
+      const result = await validateGameInstallation(path)
+
+      setPathValidation(result)
+
+      if (!result.is_valid) {
+        if (!result.path_accessible) {
+          setValidationError(t('game.install_modal.path_not_accessible'))
+        } else if (!result.executable_exists) {
+          setValidationError(t('game.install_modal.no_executable_found'))
+        } else if (!result.is_game_directory) {
+          setValidationError(t('game.install_modal.not_game_directory'))
+        } else {
+          setValidationError(t('game.install_modal.validation_failed'))
+        }
+      }
+    } catch (error) {
+      console.error('❌ Failed to validate game path:', error)
+      setValidationError(t('game.install_modal.validation_error'))
+      setPathValidation(null)
+    } finally {
+      setIsValidatingPath(false)
+    }
+  }
+
+  // Valider automatiquement quand le chemin change
+  useEffect(() => {
+    if (config.locateExistingGame && config.existingGamePath) {
+      // Débounce de 500ms pour éviter trop d'appels
+      const timeoutId = setTimeout(() => {
+        validateExistingGamePath(config.existingGamePath!)
+      }, 500)
+
+      return () => clearTimeout(timeoutId)
+    } else {
+      setPathValidation(null)
+      setValidationError(null)
+    }
+  }, [config.existingGamePath, config.locateExistingGame])
+
+  // Réinitialiser la validation quand on ferme/ouvre le modal
+  useEffect(() => {
+    if (!isOpen) {
+      setPathValidation(null)
+      setValidationError(null)
+      setIsValidatingPath(false)
+    }
+  }, [isOpen])
 
   // Initialiser le chemin par défaut
   useEffect(() => {
     const initDefaultPath = async () => {
       try {
-        const gamePaths = await getGamePaths(gameId)
+        const launcherPaths = await getLauncherPaths()
 
         setConfig((prev) => ({
           ...prev,
-          installPath: gamePaths.install,
+          installPath: launcherPaths.games,
         }))
       } catch (error) {
         console.error('Failed to get default install path:', error)
@@ -60,7 +126,7 @@ export const InstallGameModal: React.FC<Props> = ({
     if (isOpen) {
       initDefaultPath()
     }
-  }, [isOpen, gameId])
+  }, [isOpen])
 
   const handleBrowseInstallPath = async () => {
     try {
@@ -108,6 +174,15 @@ export const InstallGameModal: React.FC<Props> = ({
     }
   }
 
+  const handleAutoDetectionSelection = (path: string, executable?: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      existingGamePath: path,
+      // Optionellement stocker l'exécutable suggéré dans les métadonnées
+    }))
+    console.log('✅ Auto-detection selected:', path, 'executable:', executable)
+  }
+
   const handleConfirm = () => {
     onInstallConfirm(config)
     onOpenChange(false)
@@ -115,10 +190,30 @@ export const InstallGameModal: React.FC<Props> = ({
 
   const isConfigValid = () => {
     if (config.locateExistingGame) {
-      return config.existingGamePath && config.existingGamePath.trim() !== ''
+      // Pour localiser un jeu existant, il faut que le chemin soit valide
+      return config.existingGamePath &&
+        config.existingGamePath.trim() !== '' &&
+        pathValidation?.is_valid === true &&
+        !isValidatingPath
     }
 
     return config.installPath && config.installPath.trim() !== ''
+  }
+
+  const getValidationIcon = () => {
+    if (isValidatingPath) {
+      return <LuLoader className="animate-spin text-default-400" size={16} />
+    }
+
+    if (pathValidation?.is_valid) {
+      return <LuCheck className="text-success" size={16} />
+    }
+
+    if (pathValidation !== null && !pathValidation.is_valid) {
+      return <LuX className="text-danger" size={16} />
+    }
+
+    return null
   }
 
   return (
@@ -162,19 +257,22 @@ export const InstallGameModal: React.FC<Props> = ({
                 </p>
 
                 {config.locateExistingGame && (
-                  <div className="ml-6 space-y-2">
+                  <div className="ml-6 space-y-4">
                     <Input
                       endContent={
-                        <Button
-                          isIconOnly
-                          aria-label={t('game.install_modal.browse_existing_game')}
-                          isLoading={isLoadingPath}
-                          size="sm"
-                          variant="light"
-                          onPress={handleBrowseExistingGame}
-                        >
-                          <LuFolderOpen size={16} />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          {getValidationIcon()}
+                          <Button
+                            isIconOnly
+                            aria-label={t('game.install_modal.browse_existing_game')}
+                            isLoading={isLoadingPath}
+                            size="sm"
+                            variant="light"
+                            onPress={handleBrowseExistingGame}
+                          >
+                            <LuFolderOpen size={16} />
+                          </Button>
+                        </div>
                       }
                       label={t('game.install_modal.existing_game_path')}
                       placeholder={t('game.install_modal.existing_game_path_placeholder')}
@@ -182,6 +280,51 @@ export const InstallGameModal: React.FC<Props> = ({
                       onValueChange={(value) =>
                         setConfig((prev) => ({ ...prev, existingGamePath: value }))
                       }
+                    />
+
+                    {/* Affichage des résultats de validation */}
+                    {config.existingGamePath && config.existingGamePath.trim() !== '' && (
+                      <div className="space-y-2">
+                        {isValidatingPath && (
+                          <p className="text-xs text-default-500 flex items-center gap-2">
+                            <LuLoader className="animate-spin" size={12} />
+                            {t('game.install_modal.validation_in_progress')}
+                          </p>
+                        )}
+
+                        {pathValidation && pathValidation.is_valid && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-success flex items-center gap-2">
+                              <LuCheck size={12} />
+                              {t('game.install_modal.validation_success')}
+                            </p>
+                            {pathValidation.suggested_executable && (
+                              <p className="text-xs text-default-500">
+                                {t('game.install_modal.suggested_executable', {
+                                  executable: pathValidation.suggested_executable
+                                })}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {validationError && (
+                          <p className="text-xs text-danger flex items-center gap-2">
+                            <LuX size={12} />
+                            {validationError}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Divider entre sélection manuelle et automatique */}
+                    <Divider />
+
+                    {/* Panneau de détection automatique */}
+                    <AutoDetectionPanel
+                      gameNameToSearch="Lysandra"
+                      onInstallationSelected={handleAutoDetectionSelection}
+                      isSearching={isLoadingPath}
                     />
                   </div>
                 )}

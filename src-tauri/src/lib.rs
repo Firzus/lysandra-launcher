@@ -1,11 +1,13 @@
 use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Manager};
 use tauri_plugin_http::reqwest;
+use std::path::Path;
 
 // Modules
 pub mod hash;
 pub mod zip;
 pub mod download_manager;
+pub mod game_detection;
 
 // Structure pour les événements de progression
 #[derive(Clone, Serialize, Deserialize)]
@@ -161,6 +163,85 @@ fn get_file_size(path: String) -> Result<u64, String> {
     fs::metadata(file_path)
         .map(|metadata| metadata.len())
         .map_err(|e| format!("Failed to get file size for {}: {}", path, e))
+}
+
+// Nouvelle fonction pour lire les premiers bytes d'un fichier (test d'accessibilité)
+#[tauri::command]
+fn read_binary_file_head(path: String, size: usize) -> Result<Vec<u8>, String> {
+    use std::fs::File;
+    use std::io::{Read, BufReader};
+    use std::path::Path;
+    
+    let file_path = Path::new(&path);
+    
+    if !file_path.exists() {
+        return Err(format!("File does not exist: {}", path));
+    }
+    
+    if !file_path.is_file() {
+        return Err(format!("Path is not a file: {}", path));
+    }
+    
+    let file = File::open(file_path)
+        .map_err(|e| format!("Failed to open file {}: {}", path, e))?;
+    
+    let mut reader = BufReader::new(file);
+    let mut buffer = vec![0u8; size];
+    
+    match reader.read(&mut buffer) {
+        Ok(bytes_read) => {
+            buffer.truncate(bytes_read);
+            Ok(buffer)
+        },
+        Err(e) => Err(format!("Failed to read from file {}: {}", path, e))
+    }
+}
+
+// Nouvelle fonction pour forcer la synchronisation du cache système
+#[tauri::command]
+fn force_file_sync(path: String) -> Result<(), String> {
+    use std::fs::File;
+    use std::path::Path;
+    
+    let file_path = Path::new(&path);
+    
+    if !file_path.exists() {
+        return Err(format!("File does not exist: {}", path));
+    }
+    
+    // Ouvrir le fichier et forcer la synchronisation
+    let file = File::open(file_path)
+        .map_err(|e| format!("Failed to open file for sync {}: {}", path, e))?;
+    
+    #[cfg(windows)]
+    {
+        // Sur Windows, utiliser FlushFileBuffers
+        use std::os::windows::io::AsRawHandle;
+        use winapi::um::fileapi::FlushFileBuffers;
+        use winapi::um::handleapi::INVALID_HANDLE_VALUE;
+        
+        let handle = file.as_raw_handle() as winapi::um::winnt::HANDLE;
+        unsafe {
+            if FlushFileBuffers(handle) == 0 {
+                return Err("Failed to flush file buffers".to_string());
+            }
+        }
+    }
+    
+    #[cfg(unix)]
+    {
+        // Sur Unix, utiliser fsync
+        use std::os::unix::io::AsRawFd;
+        
+        let fd = file.as_raw_fd();
+        unsafe {
+            if libc::fsync(fd) != 0 {
+                return Err("Failed to sync file".to_string());
+            }
+        }
+    }
+    
+    Ok(())
 }
 
 #[tauri::command]
@@ -397,15 +478,197 @@ fn write_text_file(path: String, content: String) -> Result<(), String> {
     std::fs::write(&path, content).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn get_app_data_dir(app: tauri::AppHandle) -> Result<String, String> {
+    let app_data_path = app.path()
+        .app_local_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?
+        .to_string_lossy()
+        .to_string();
+    
+    Ok(app_data_path)
+}
+
+#[tauri::command]
+fn store_config(app: tauri::AppHandle, key: String, value: String) -> Result<(), String> {
+    use std::collections::HashMap;
+    
+    // Utiliser la nouvelle API de Tauri v2 pour les chemins
+    let config_dir = app.path()
+        .app_local_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?
+        .join("config");
+    
+    std::fs::create_dir_all(&config_dir)
+        .map_err(|e| format!("Failed to create config directory: {}", e))?;
+    
+    let config_file = config_dir.join("launcher_config.json");
+    
+    // Lire la configuration existante ou créer une nouvelle
+    let mut config_map: HashMap<String, String> = if config_file.exists() {
+        let content = std::fs::read_to_string(&config_file)
+            .map_err(|e| format!("Failed to read config file: {}", e))?;
+        serde_json::from_str(&content).unwrap_or_default()
+    } else {
+        HashMap::new()
+    };
+    
+    // Ajouter/mettre à jour la clé
+    config_map.insert(key, value);
+    
+    // Sauvegarder
+    let json_content = serde_json::to_string_pretty(&config_map)
+        .map_err(|e| format!("Failed to serialize config: {}", e))?;
+    
+    std::fs::write(&config_file, json_content)
+        .map_err(|e| format!("Failed to write config file: {}", e))?;
+    
+    Ok(())
+}
+
+#[tauri::command]
+fn get_config(app: tauri::AppHandle, key: String) -> Result<String, String> {
+    use std::collections::HashMap;
+    
+    let config_dir = app.path()
+        .app_local_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?
+        .join("config");
+    
+    let config_file = config_dir.join("launcher_config.json");
+    
+    if !config_file.exists() {
+        return Err("Config file not found".to_string());
+    }
+    
+    let content = std::fs::read_to_string(&config_file)
+        .map_err(|e| format!("Failed to read config file: {}", e))?;
+    
+    let config_map: HashMap<String, String> = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse config file: {}", e))?;
+    
+    config_map.get(&key)
+        .cloned()
+        .ok_or_else(|| format!("Key '{}' not found in config", key))
+}
+
+#[tauri::command]
+fn get_free_space(path: String) -> Result<u64, String> {
+    use std::path::Path;
+    
+    let _path_obj = Path::new(&path);
+    
+    // Utiliser statvfs sur Unix ou GetDiskFreeSpaceEx sur Windows
+    #[cfg(unix)]
+    {
+        use std::ffi::CString;
+        use libc::{statvfs, c_char};
+        
+        let c_path = CString::new(path.as_bytes())
+            .map_err(|e| format!("Invalid path: {}", e))?;
+        
+        let mut stat: libc::statvfs = unsafe { std::mem::zeroed() };
+        
+        let result = unsafe { statvfs(c_path.as_ptr() as *const c_char, &mut stat) };
+        
+        if result == 0 {
+            let free_space = stat.f_bavail * stat.f_frsize;
+            Ok(free_space as u64)
+        } else {
+            Err("Failed to get disk free space".to_string())
+        }
+    }
+    
+    #[cfg(windows)]
+    {
+        use std::ffi::OsStr;
+        use std::os::windows::ffi::OsStrExt;
+        use winapi::um::fileapi::GetDiskFreeSpaceExW;
+        
+        let wide_path: Vec<u16> = OsStr::new(&path)
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
+        
+        let mut free_bytes_available: u64 = 0;
+        let mut total_bytes: u64 = 0;
+        let mut total_free_bytes: u64 = 0;
+        
+        let result = unsafe {
+            GetDiskFreeSpaceExW(
+                wide_path.as_ptr(),
+                &mut free_bytes_available as *mut u64 as *mut _,
+                &mut total_bytes as *mut u64 as *mut _,
+                &mut total_free_bytes as *mut u64 as *mut _,
+            )
+        };
+        
+        if result != 0 {
+            Ok(free_bytes_available)
+        } else {
+            Err("Failed to get disk free space".to_string())
+        }
+    }
+    
+    #[cfg(not(any(unix, windows)))]
+    {
+        Err("Platform not supported for disk space check".to_string())
+    }
+}
+
+#[tauri::command]
+async fn copy_directory(source: String, destination: String) -> Result<(), String> {
+    use std::path::Path;
+    
+    let src_path = Path::new(&source);
+    let dst_path = Path::new(&destination);
+    
+    if !src_path.exists() {
+        return Err(format!("Source directory does not exist: {}", source));
+    }
+    
+    if !src_path.is_dir() {
+        return Err(format!("Source is not a directory: {}", source));
+    }
+    
+    // Créer le dossier de destination
+    std::fs::create_dir_all(dst_path)
+        .map_err(|e| format!("Failed to create destination directory: {}", e))?;
+    
+    // Copier récursivement
+    copy_dir_recursive(src_path, dst_path)
+        .map_err(|e| format!("Failed to copy directory: {}", e))
+}
+
+fn copy_dir_recursive(src: &Path, dst: &Path) -> std::io::Result<()> {
+    if src.is_dir() {
+        std::fs::create_dir_all(dst)?;
+        
+        for entry in std::fs::read_dir(src)? {
+            let entry = entry?;
+            let src_path = entry.path();
+            let dst_path = dst.join(entry.file_name());
+            
+            if src_path.is_dir() {
+                copy_dir_recursive(&src_path, &dst_path)?;
+            } else {
+                std::fs::copy(&src_path, &dst_path)?;
+            }
+        }
+    } else {
+        std::fs::copy(src, dst)?;
+    }
+    
+    Ok(())
+}
+
 /// Initialise la structure de base du launcher (appelé au setup)
 fn initialize_launcher_structure(app_handle: &tauri::AppHandle) -> Result<(), String> {
-    use tauri::Manager;
-
-    // Obtenir le dossier app local data
+    // Obtenir le dossier app local data avec la nouvelle API
     let app_local_data_dir = app_handle
         .path()
         .app_local_data_dir()
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| format!("Failed to get app local data directory: {}", e))?;
 
     // Créer la structure de dossiers de base
     let directories = [
@@ -484,7 +747,23 @@ pub fn run() {
             download_manager::get_download_progress,
             download_manager::get_all_downloads,
             download_manager::cleanup_completed_downloads,
-            download_manager::get_download_stats
+            download_manager::get_download_stats,
+            // Commandes de détection automatique de jeux
+            game_detection::search_installed_games,
+            game_detection::validate_game_installation,
+            game_detection::get_common_game_directories,
+            get_app_data_dir,
+            get_free_space,
+            copy_directory,
+            store_config,
+            get_config,
+            // Nouvelles fonctions pour la vérification d'intégrité
+            read_binary_file_head,
+            force_file_sync,
+            // Gestionnaire de téléchargement
+            download_manager::start_download,
+            download_manager::get_download_progress,
+            download_manager::cancel_download,
         ])
         .setup(|app| {
             println!("🚀 Tauri application starting...");

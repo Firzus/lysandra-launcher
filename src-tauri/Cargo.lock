@@ -107,6 +107,7 @@ version = "0.0.0"
 dependencies = [
  "chrono",
  "futures",
+ "libc",
  "log",
  "reqwest 0.11.27",
  "serde",
@@ -129,6 +130,8 @@ dependencies = [
  "tauri-plugin-upload",
  "tokio",
  "uuid",
+ "winapi",
+ "winreg 0.52.0",
  "zip 3.0.0",
 ]
 

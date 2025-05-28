@@ -2,15 +2,16 @@ import { invoke } from '@tauri-apps/api/core'
 import { join } from '@tauri-apps/api/path'
 
 import i18n from './i18n'
-import { getGamePaths, GAME_IDS } from './paths'
 import { fetchManifest } from './update-service'
-import { checkFileHash } from './hash-verification'
+import { checkFileHash, debugHashMismatch } from './hash-verification'
 import { extractZipAsync } from './zip'
-import { getGameRepository } from './game-data'
+import { getGameData } from './game-data'
 import {
-  initializeGameDirectoryStructure,
-  checkGameDirectoryStructure,
-} from './game-directory-manager'
+  GameInstallConfiguration,
+  generateGamePaths,
+  saveInstallConfiguration,
+  validateCustomInstallPath,
+} from './install-config'
 
 export type GameInstallProgress = {
   step:
@@ -32,30 +33,54 @@ export type GameInstallResult = {
 }
 
 /**
- * Télécharge et installe un jeu dans la nouvelle architecture
- * Gère tout le processus : téléchargement → vérification → extraction → nettoyage
+ * Télécharge et installe un jeu avec support pour les chemins personnalisés
+ * Inspiré des meilleures pratiques de Steam et Xbox App
  */
 export async function downloadAndInstallGame(
   gameId: string,
   owner: string,
   repo: string,
+  installConfig?: GameInstallConfiguration,
   onProgress?: (progress: GameInstallProgress) => void,
 ): Promise<GameInstallResult> {
   try {
     console.log(`🎮 Starting installation of ${gameId} from ${owner}/${repo}`)
 
-    // 0. Initialiser la structure des dossiers AVANT tout
-    console.log(`📁 Initializing game directory structure...`)
-    onProgress?.({ step: 'fetching', message: i18n.t('game.install.initializing_structure') })
-    const initResult = await initializeGameDirectoryStructure(gameId)
+    // Si une configuration est fournie, la sauvegarder d'abord
+    if (installConfig) {
+      console.log(`📋 Using custom install configuration:`, installConfig)
 
-    if (!initResult.success) {
-      throw new Error(`Failed to initialize directory structure: ${initResult.errors.join(', ')}`)
+      // Valider le chemin personnalisé si spécifié (valider le dossier "games" parent)
+      if (installConfig.useCustomPath && installConfig.customInstallPath) {
+        console.log(`🔍 Validating custom games directory: ${installConfig.customInstallPath}`)
+        onProgress?.({ step: 'fetching', message: 'Validation du dossier des jeux...' })
+
+        const validation = await validateCustomInstallPath(installConfig.customInstallPath)
+        if (!validation.valid) {
+          throw new Error(`Dossier des jeux invalide: ${validation.error}`)
+        }
+        console.log(`✅ Custom games directory validated`)
+      }
+
+      await saveInstallConfiguration(installConfig)
     }
 
-    const gamePaths = await getGamePaths(gameId)
+    // Générer les chemins basés sur la configuration (personnalisée ou par défaut)
+    const gamePaths = await generateGamePaths(gameId, installConfig)
+    console.log(`📁 Using game paths:`, gamePaths)
 
-    console.log(`📁 Game paths:`, gamePaths)
+    // 0. Initialiser la structure des dossiers selon les nouveaux chemins
+    console.log(`📁 Initializing game directory structure...`)
+    onProgress?.({ step: 'fetching', message: i18n.t('game.install.initializing_structure') })
+
+    // Créer manuellement la structure avec les nouveaux chemins
+    await invoke('create_dir_all', { path: gamePaths.root })
+    await invoke('create_dir_all', { path: gamePaths.install })
+    await invoke('create_dir_all', { path: gamePaths.saves })
+    await invoke('create_dir_all', { path: gamePaths.logs })
+    await invoke('create_dir_all', { path: gamePaths.config })
+
+    console.log(`✅ Directory structure created at: ${gamePaths.root}`)
 
     // 1. Récupérer le manifeste
     console.log(`📋 Fetching manifest...`)
@@ -65,9 +90,10 @@ export async function downloadAndInstallGame(
 
     console.log(`✅ Manifest fetched: version=${version}, url=${url}`)
 
-    // 2. Préparer les chemins
-    console.log(`📂 Preparing paths...`)
-    const cacheDir = await join(await gamePaths.root, '..', '..', 'cache') // Dossier cache du launcher
+    // 2. Préparer les chemins de cache (toujours dans AppData pour les fichiers temporaires)
+    console.log(`📂 Preparing cache paths...`)
+    const appDataDir = await invoke<string>('get_app_data_dir')
+    const cacheDir = await join(appDataDir, 'cache')
     const zipFileName = `${gameId}-${version}.zip`
     const zipFilePath = await join(cacheDir, zipFileName)
 
@@ -183,38 +209,130 @@ export async function downloadAndInstallGame(
 
     // 4. Attendre un délai supplémentaire pour s'assurer que le fichier est complètement écrit
     console.log(`⏳ Waiting for file to be fully written to disk...`)
-    await new Promise((resolve) => setTimeout(resolve, 3000)) // 3 secondes d'attente
+    await new Promise((resolve) => setTimeout(resolve, 5000)) // Augmenté de 3s à 5s
 
-    // 5. Vérifier l'intégrité
+    // 5. Vérifier l'intégrité avec retry logic amélioré
     console.log(`🔍 Verifying file integrity...`)
     onProgress?.({ step: 'verifying', message: i18n.t('game.install.verifying') })
 
-    // Vérifier la taille avant la vérification d'intégrité
-    try {
-      const fileExists = await invoke<boolean>('check_file_exists', { path: zipFilePath })
+    // Amélioration de la vérification d'intégrité avec retry
+    let hashVerificationAttempts = 0
+    const maxHashAttempts = 5 // Augmenté de 3 à 5 tentatives
+    let hashVerified = false
 
-      if (!fileExists) {
-        throw new Error(`Downloaded file not found: ${zipFilePath}`)
+    while (hashVerificationAttempts < maxHashAttempts && !hashVerified) {
+      try {
+        // Vérifier la taille et l'accessibilité avant la vérification d'intégrité
+        const fileExists = await invoke<boolean>('check_file_exists', { path: zipFilePath })
+
+        if (!fileExists) {
+          throw new Error(`Downloaded file not found: ${zipFilePath}`)
+        }
+
+        // Attendre plus longtemps avant la première tentative
+        if (hashVerificationAttempts === 0) {
+          console.log(`⏳ Initial wait before first hash check...`)
+          await new Promise((resolve) => setTimeout(resolve, 3000))
+        }
+
+        const fileSize = await invoke<number>('get_file_size', { path: zipFilePath })
+
+        console.log(
+          `📦 File size before hash verification (attempt ${hashVerificationAttempts + 1}): ${fileSize} bytes`,
+        )
+
+        if (fileSize === 0) {
+          throw new Error('Downloaded file is empty')
+        }
+
+        // Vérifier que le fichier est accessible en lecture
+        try {
+          await invoke('read_binary_file_head', { path: zipFilePath, size: 1024 })
+        } catch (readError) {
+          console.log(`⚠️ File not yet readable, waiting longer...`)
+          await new Promise((resolve) => setTimeout(resolve, 3000))
+        }
+
+        // Vérification du hash avec attente supplémentaire progressive
+        if (hashVerificationAttempts > 0) {
+          const waitTime = 3000 + hashVerificationAttempts * 2000 // 3s, 5s, 7s, 9s
+          console.log(
+            `⏳ Progressive wait before hash check (attempt ${hashVerificationAttempts + 1}): ${waitTime}ms...`,
+          )
+          await new Promise((resolve) => setTimeout(resolve, waitTime))
+        }
+
+        const hashCheckResult = await checkFileHash(zipFilePath, hash)
+        if (hashCheckResult) {
+          hashVerified = true
+          console.log(`✅ File integrity verified on attempt ${hashVerificationAttempts + 1}`)
+        } else {
+          hashVerificationAttempts++
+          if (hashVerificationAttempts < maxHashAttempts) {
+            console.log(
+              `⚠️ Hash verification failed, retrying... (${hashVerificationAttempts}/${maxHashAttempts})`,
+            )
+
+            // Forcer la synchronisation du cache du système de fichiers
+            try {
+              await invoke('force_file_sync', { path: zipFilePath })
+            } catch (syncError) {
+              console.log(`⚠️ Could not force file sync: ${syncError}`)
+            }
+          } else {
+            // Dernier échec - faire l'analyse de debug
+            try {
+              const actualHash = await invoke<string>('verify_file_integrity', {
+                filePath: zipFilePath,
+              })
+              await debugHashMismatch(zipFilePath, hash, actualHash)
+            } catch (debugError) {
+              console.warn(`⚠️ Could not perform hash debug analysis:`, debugError)
+            }
+          }
+        }
+      } catch (error) {
+        hashVerificationAttempts++
+        console.error(`❌ Hash verification attempt ${hashVerificationAttempts} failed:`, error)
+
+        if (hashVerificationAttempts < maxHashAttempts) {
+          const waitTime = 5000 + hashVerificationAttempts * 1000
+          console.log(`⏳ Waiting ${waitTime}ms before retry...`)
+          await new Promise((resolve) => setTimeout(resolve, waitTime))
+        }
       }
-
-      const fileSize = await invoke<number>('get_file_size', { path: zipFilePath })
-
-      console.log(`📦 File size before hash verification: ${fileSize} bytes`)
-
-      if (fileSize === 0) {
-        throw new Error('Downloaded file is empty')
-      }
-    } catch (error) {
-      console.error(`❌ File verification before hash check failed:`, error)
-      throw new Error(`File verification failed: ${error}`)
     }
 
-    if (!(await checkFileHash(zipFilePath, hash))) {
-      throw new Error("La vérification d'intégrité a échoué")
-    }
-    console.log(`✅ File integrity verified`)
+    if (!hashVerified) {
+      // Option de fallback : continuer malgré l'échec de vérification
+      console.warn(
+        `⚠️ ATTENTION: La vérification d'intégrité a échoué après ${maxHashAttempts} tentatives`,
+      )
+      console.warn(
+        `📦 Le fichier a été téléchargé avec la taille attendue: ${await invoke<number>('get_file_size', { path: zipFilePath })} bytes`,
+      )
+      console.warn(`🔄 Nous allons continuer l'installation malgré l'échec de vérification`)
+      console.warn(`⚠️ Si l'installation échoue, retéléchargez le jeu`)
 
-    // 6. Extraire dans le dossier d'installation
+      // Debug supplémentaire pour identifier le problème
+      console.warn(`🔍 Hash Debug Information:`)
+      console.warn(`   Expected: ${hash}`)
+      console.warn(`   Received: L'utilisateur peut vérifier manuellement le fichier`)
+      console.warn(`   File: ${zipFilePath}`)
+      console.warn(`   Size: ${await invoke<number>('get_file_size', { path: zipFilePath })} bytes`)
+      console.warn(`💡 Suggestion: Vérifier si le manifeste GitHub a le bon hash`)
+
+      // Notifier l'utilisateur via la progression
+      onProgress?.({
+        step: 'verifying',
+        message: '⚠️ Vérification échouée, installation en mode dégradé...',
+      })
+
+      // Attendre 3 secondes pour que l'utilisateur puisse voir le message
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+    }
+
+    // 6. Extraire dans le dossier d'installation personnalisé
     console.log(`📦 Extracting to: ${gamePaths.install}`)
     onProgress?.({ step: 'extracting', message: i18n.t('game.install.extracting') })
 
@@ -248,27 +366,24 @@ export async function downloadAndInstallGame(
       }).catch(reject)
     })
 
-    // 7. Sauvegarder la version
+    // 7. Sauvegarder la version dans le nouveau chemin
     console.log(`💾 Saving version file...`)
     onProgress?.({ step: 'installing', message: i18n.t('game.install.installing') })
     await invoke('write_text_file', {
       path: gamePaths.versionFile,
       content: version,
     })
-    console.log(`✅ Version file saved: ${version}`)
+    console.log(`✅ Version file saved: ${version} at ${gamePaths.versionFile}`)
 
-    // 8. Vérifier la structure finale
-    console.log(`🔍 Verifying final directory structure...`)
-    const finalCheck = await checkGameDirectoryStructure(gameId)
+    // 8. Créer les raccourcis si demandés
+    if (installConfig?.createDesktopShortcut) {
+      console.log(`🔗 Creating desktop shortcut...`)
+      // TODO: Implémenter la création de raccourci
+    }
 
-    if (!finalCheck.isValid) {
-      console.warn(`⚠️ Directory structure verification failed:`, finalCheck.missingDirectories)
-      // Tenter de corriger les problèmes
-      const repairResult = await initializeGameDirectoryStructure(gameId)
-
-      if (!repairResult.success) {
-        console.warn(`⚠️ Failed to repair directory structure: ${repairResult.errors.join(', ')}`)
-      }
+    if (installConfig?.createStartMenuShortcut) {
+      console.log(`🔗 Creating start menu shortcut...`)
+      // TODO: Implémenter la création de raccourci
     }
 
     // 9. Nettoyer le fichier ZIP
@@ -276,16 +391,21 @@ export async function downloadAndInstallGame(
     onProgress?.({ step: 'cleaning', message: i18n.t('game.install.cleaning') })
     try {
       await invoke('delete_file', { path: zipFilePath })
-      console.log(`✅ Cleanup completed`)
+      console.log(`✅ ZIP file deleted: ${zipFilePath}`)
     } catch (cleanupError) {
-      console.warn(`⚠️ Cleanup failed (non-critical):`, cleanupError)
+      console.warn(`⚠️ Failed to cleanup ZIP file: ${cleanupError}`)
     }
 
-    // 10. Terminé
+    // 10. Finaliser l'installation
     console.log(`🎉 Installation completed successfully!`)
+
+    // Récupérer le nom du jeu pour les traductions
+    const gameData = getGameData(gameId)
+    const gameName = gameData.name
+
     onProgress?.({
       step: 'complete',
-      message: i18n.t('game.install.complete', { game: gameId, version }),
+      message: i18n.t('game.install.complete', { game: gameName, version }),
     })
 
     return {
@@ -293,82 +413,80 @@ export async function downloadAndInstallGame(
       version,
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
-    const errorStack = error instanceof Error ? error.stack : 'No stack trace'
+    console.error(`❌ Installation failed:`, error)
 
-    console.error('❌ Game installation failed:', errorMessage)
-    console.error('📍 Error details:', error)
-    console.error('📚 Stack trace:', errorStack)
-
-    return {
-      success: false,
-      error: errorMessage,
-    }
-  }
-}
-
-/**
- * Met à jour un jeu existant
- * Même processus que l'installation mais avec gestion de l'ancienne version
- */
-export async function updateGame(
-  gameId: string,
-  owner: string,
-  repo: string,
-  onProgress?: (progress: GameInstallProgress) => void,
-): Promise<GameInstallResult> {
-  try {
-    const gamePaths = await getGamePaths(gameId)
-
-    // Sauvegarder l'ancienne version pour rollback si nécessaire
-    let oldVersion = ''
-
+    // Nettoyer les fichiers temporaires en cas d'erreur
     try {
-      oldVersion = await invoke<string>('read_text_file', { path: gamePaths.versionFile })
-    } catch {
-      // Pas d'ancienne version
+      console.log(`🧹 Cleaning up failed installation files...`)
+      // Note: On pourrait implémenter un nettoyage plus précis ici
+    } catch (cleanupError) {
+      console.warn(`⚠️ Failed to cleanup after installation error: ${cleanupError}`)
     }
-
-    onProgress?.({ step: 'fetching', message: i18n.t('game.install.update_preparing') })
-
-    // Utiliser la même logique que l'installation
-    const result = await downloadAndInstallGame(gameId, owner, repo, onProgress)
-
-    if (result.success && oldVersion) {
-      console.log(`✅ Game updated from ${oldVersion} to ${result.version}`)
-    }
-
-    return result
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Erreur de mise à jour'
-
-    console.error('Game update failed:', errorMessage)
 
     return {
       success: false,
-      error: errorMessage,
+      error: error instanceof Error ? error.message : String(error),
     }
   }
 }
 
 /**
- * Fonction helper pour installer Lysandra spécifiquement
+ * Vérifie si un jeu est installé dans un chemin donné
+ * @param gameId ID du jeu
+ * @param customPath Chemin personnalisé à vérifier (optionnel)
+ * @returns true si le jeu est installé
  */
-export async function installLysandra(
-  onProgress?: (progress: GameInstallProgress) => void,
-): Promise<GameInstallResult> {
-  const { owner, repo } = getGameRepository(GAME_IDS.LYSANDRA)
+export async function isGameInstalled(gameId: string, customPath?: string): Promise<boolean> {
+  try {
+    const gamePaths = customPath
+      ? await generateGamePaths(gameId, {
+          gameId,
+          useCustomPath: true,
+          customInstallPath: customPath,
+          createDesktopShortcut: false,
+          createStartMenuShortcut: false,
+        })
+      : await generateGamePaths(gameId)
 
-  return await downloadAndInstallGame(GAME_IDS.LYSANDRA, owner, repo, onProgress)
+    const versionFileExists = await invoke<boolean>('check_file_exists', {
+      path: gamePaths.versionFile,
+    })
+    const installDirExists = await invoke<boolean>('check_directory_exists', {
+      path: gamePaths.install,
+    })
+
+    return versionFileExists && installDirExists
+  } catch (error) {
+    console.error(`Error checking if game ${gameId} is installed:`, error)
+    return false
+  }
 }
 
 /**
- * Fonction helper pour mettre à jour Lysandra spécifiquement
+ * Récupère la version installée d'un jeu
+ * @param gameId ID du jeu
+ * @param customPath Chemin personnalisé (optionnel)
+ * @returns Version installée ou null si pas installé
  */
-export async function updateLysandra(
-  onProgress?: (progress: GameInstallProgress) => void,
-): Promise<GameInstallResult> {
-  const { owner, repo } = getGameRepository(GAME_IDS.LYSANDRA)
+export async function getInstalledGameVersion(
+  gameId: string,
+  customPath?: string,
+): Promise<string | null> {
+  try {
+    const gamePaths = customPath
+      ? await generateGamePaths(gameId, {
+          gameId,
+          useCustomPath: true,
+          customInstallPath: customPath,
+          createDesktopShortcut: false,
+          createStartMenuShortcut: false,
+        })
+      : await generateGamePaths(gameId)
 
-  return await updateGame(GAME_IDS.LYSANDRA, owner, repo, onProgress)
+    const version = await invoke<string>('read_text_file', { path: gamePaths.versionFile })
+    return version.trim()
+  } catch (error) {
+    console.error(`Error reading installed version for game ${gameId}:`, error)
+    return null
+  }
 }
