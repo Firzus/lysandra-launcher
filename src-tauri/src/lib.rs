@@ -173,101 +173,47 @@ async fn launch_game_executable(executable_path: String) -> Result<u32, String> 
 
 #[tauri::command]
 fn check_process_running(pid: u32) -> Result<bool, String> {
-    use std::process::Command;
+    use sysinfo::{System, Pid, ProcessRefreshKind};
     
-    // Sur Windows, utiliser tasklist pour vérifier si le processus existe
-    #[cfg(target_os = "windows")]
-    {
-        let output = Command::new("tasklist")
-            .args(&["/FI", &format!("PID eq {}", pid)])
-            .output()
-            .map_err(|e| format!("Failed to check process: {}", e))?;
-        
-        let output_str = String::from_utf8_lossy(&output.stdout);
-        Ok(output_str.contains(&pid.to_string()))
-    }
+    let mut system = System::new();
+    system.refresh_processes_specifics(sysinfo::ProcessesToUpdate::All, false, ProcessRefreshKind::new());
     
-    // Sur Unix, utiliser ps
-    #[cfg(not(target_os = "windows"))]
-    {
-        let output = Command::new("ps")
-            .args(&["-p", &pid.to_string()])
-            .output()
-            .map_err(|e| format!("Failed to check process: {}", e))?;
-        
-        Ok(output.status.success())
-    }
+    let pid = Pid::from_u32(pid);
+    Ok(system.processes().contains_key(&pid))
 }
 
 #[tauri::command]
 fn check_unity_process_running() -> Result<bool, String> {
-    use std::process::Command;
+    use sysinfo::{System, ProcessRefreshKind};
     
-    // Sur Windows, utiliser tasklist pour chercher des processus Unity
-    #[cfg(target_os = "windows")]
-    {
-        let output = Command::new("tasklist")
-            .args(&["/FO", "CSV"])
-            .output()
-            .map_err(|e| format!("Failed to list processes: {}", e))?;
+    let mut system = System::new_all();
+    system.refresh_processes_specifics(sysinfo::ProcessesToUpdate::All, false, ProcessRefreshKind::new());
+    
+    // Chercher des processus qui pourraient être des jeux Unity
+    let unity_indicators = [
+        "unity",
+        "unityplayer",
+        "lysandra",
+        "game"
+    ];
+    
+    for (pid, process) in system.processes() {
+        let process_name = process.name().to_string_lossy().to_lowercase();
+        let process_exe = process.exe()
+            .and_then(|path| path.file_name())
+            .and_then(|name| name.to_str())
+            .unwrap_or("")
+            .to_lowercase();
         
-        let output_str = String::from_utf8_lossy(&output.stdout);
-        
-        // Chercher des processus qui pourraient être des jeux Unity
-        let unity_indicators = [
-            "Unity",
-            "UnityPlayer",
-            "Lysandra",
-            "lysandra",
-            "Game.exe",
-            "game.exe"
-        ];
-        
-        for line in output_str.lines() {
-            let line_lower = line.to_lowercase();
-            for indicator in &unity_indicators {
-                if line_lower.contains(&indicator.to_lowercase()) {
-                    println!("🎮 Found potential game process: {}", line);
-                    return Ok(true);
-                }
+        for indicator in &unity_indicators {
+            if process_name.contains(indicator) || process_exe.contains(indicator) {
+                println!("🎮 Found potential game process: {} (PID: {})", process.name().to_string_lossy(), pid);
+                return Ok(true);
             }
         }
-        
-        Ok(false)
     }
     
-    // Sur Unix, utiliser ps
-    #[cfg(not(target_os = "windows"))]
-    {
-        let output = Command::new("ps")
-            .args(&["aux"])
-            .output()
-            .map_err(|e| format!("Failed to list processes: {}", e))?;
-        
-        let output_str = String::from_utf8_lossy(&output.stdout);
-        
-        // Chercher des processus qui pourraient être des jeux Unity
-        let unity_indicators = [
-            "Unity",
-            "UnityPlayer",
-            "Lysandra",
-            "lysandra",
-            "Game",
-            "game"
-        ];
-        
-        for line in output_str.lines() {
-            let line_lower = line.to_lowercase();
-            for indicator in &unity_indicators {
-                if line_lower.contains(&indicator.to_lowercase()) {
-                    println!("🎮 Found potential game process: {}", line);
-                    return Ok(true);
-                }
-            }
-        }
-        
-        Ok(false)
-    }
+    Ok(false)
 }
 
 #[tauri::command]

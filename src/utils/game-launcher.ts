@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core'
 
 import { getGamePaths } from './paths'
 import { getGameExecutable } from './game-data'
+import { setGameProcessPid, getGameProcessPid, clearGameProcessPid } from './process-store'
 
 export type GameLaunchResult = {
   success: boolean
@@ -42,6 +43,9 @@ export async function launchGame(gameId: string): Promise<GameLaunchResult> {
 
     console.log(`✅ Game launched successfully with PID: ${pid}`)
 
+    // Stocker le PID pour le monitoring
+    setGameProcessPid(pid)
+
     return {
       success: true,
       processId: pid,
@@ -60,16 +64,33 @@ export async function launchGame(gameId: string): Promise<GameLaunchResult> {
  * Vérifie si le jeu est en cours d'exécution
  * Utilisé pour détecter les transitions Playing ↔ Ready
  */
-export async function checkGameProcessStatus(gameId: string): Promise<GameProcessStatus> {
+export async function checkGameProcessStatus(
+  gameId: string,
+  processId?: number,
+): Promise<GameProcessStatus> {
   try {
-    // Pour l'instant, on utilise une approche simple en cherchant les processus Unity
-    // TODO: Améliorer avec un système de tracking des PID
+    // Si on a un PID spécifique, vérifier ce processus en priorité
+    if (processId) {
+      try {
+        const isRunning = await invoke<boolean>('check_process_running', { pid: processId })
 
+        if (isRunning) {
+          return {
+            isRunning: true,
+            processId,
+          }
+        }
+      } catch (error) {
+        console.warn(`⚠️ Failed to check specific process ${processId}:`, error)
+      }
+    }
+
+    // Fallback: chercher des processus Unity génériques
     const isRunning = await checkUnityProcessRunning()
 
     return {
       isRunning,
-      processId: isRunning ? undefined : undefined, // TODO: tracker le PID réel
+      processId: isRunning ? undefined : undefined,
     }
   } catch (error) {
     console.error(`❌ Failed to check game process status for ${gameId}:`, error)
@@ -207,7 +228,9 @@ export function startGameProcessMonitoring(
     if (!isMonitoring) return
 
     try {
-      const status = await checkGameProcessStatus(gameId)
+      // Utiliser le PID stocké pour un monitoring plus précis
+      const storedPid = getGameProcessPid()
+      const status = await checkGameProcessStatus(gameId, storedPid)
 
       if (status.isRunning && !wasRunning) {
         // Jeu vient de démarrer
@@ -217,13 +240,14 @@ export function startGameProcessMonitoring(
       } else if (!status.isRunning && wasRunning) {
         // Jeu vient de s'arrêter
         console.log('🛑 Game process stopped - transitioning to Ready')
+        clearGameProcessPid() // Nettoyer le PID stocké
         onGameStop()
         wasRunning = false
       }
     } catch (error) {
       console.error('Error monitoring game process:', error)
     }
-  }, 2000) // Vérifier toutes les 2 secondes
+  }, 3000) // Augmenté à 3 secondes pour réduire la charge système
 
   // Fonction de nettoyage
   return () => {

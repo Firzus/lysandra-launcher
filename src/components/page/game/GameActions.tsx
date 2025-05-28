@@ -476,8 +476,8 @@ export const GameActions: React.FC = () => {
         <div className="mb-4 w-full max-w-md">
           <div
             className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
-                ? 'animate-pulse'
-                : ''
+              ? 'animate-pulse'
+              : ''
               }`}
           >
             {installProgress.message}
