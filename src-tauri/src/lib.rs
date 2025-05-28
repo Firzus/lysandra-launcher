@@ -25,6 +25,17 @@ pub struct UninstallEvent {
     pub success: bool,
 }
 
+// Structure pour les événements de processus de jeu
+#[derive(Clone, Serialize, Deserialize)]
+pub struct GameProcessEvent {
+    #[serde(rename = "gameId")]
+    pub game_id: String,
+    #[serde(rename = "processId")]
+    pub process_id: Option<u32>,
+    pub status: String, // "starting", "running", "stopped"
+    pub error: Option<String>,
+}
+
 // Commandes Tauri
 #[tauri::command]
 fn handle_download_progress(
@@ -153,68 +164,120 @@ fn get_file_size(path: String) -> Result<u64, String> {
 }
 
 #[tauri::command]
-async fn launch_game_executable(executable_path: String) -> Result<u32, String> {
-    use std::process::Command;
+async fn launch_game_with_shell(
+    app_handle: tauri::AppHandle,
+    executable_path: String,
+    game_id: String,
+) -> Result<(), String> {
+    use tauri_plugin_shell::{ShellExt, process::CommandEvent};
     
-    println!("🚀 Launching game executable: {}", executable_path);
+    println!("🚀 Launching game executable with shell: {}", executable_path);
     
-    let mut command = Command::new(&executable_path);
-    
-    // Lancer le processus en arrière-plan
-    let child = command
+    let shell = app_handle.shell();
+    let (mut rx, child) = shell
+        .command(&executable_path)
         .spawn()
-        .map_err(|e| format!("Failed to launch game: {}", e))?;
+        .map_err(|e| format!("Failed to spawn game process: {}", e))?;
     
-    let pid = child.id();
-    println!("✅ Game launched with PID: {}", pid);
+    println!("✅ Game process spawned successfully");
     
-    Ok(pid)
-}
-
-#[tauri::command]
-fn check_process_running(pid: u32) -> Result<bool, String> {
-    use sysinfo::{System, Pid, ProcessRefreshKind};
+    // Émettre immédiatement l'événement de démarrage
+    let starting_event = GameProcessEvent {
+        game_id: game_id.clone(),
+        process_id: Some(child.pid()),
+        status: "starting".to_string(),
+        error: None,
+    };
     
-    let mut system = System::new();
-    system.refresh_processes_specifics(sysinfo::ProcessesToUpdate::All, false, ProcessRefreshKind::new());
-    
-    let pid = Pid::from_u32(pid);
-    Ok(system.processes().contains_key(&pid))
-}
-
-#[tauri::command]
-fn check_unity_process_running() -> Result<bool, String> {
-    use sysinfo::{System, ProcessRefreshKind};
-    
-    let mut system = System::new_all();
-    system.refresh_processes_specifics(sysinfo::ProcessesToUpdate::All, false, ProcessRefreshKind::new());
-    
-    // Chercher des processus qui pourraient être des jeux Unity
-    let unity_indicators = [
-        "unity",
-        "unityplayer",
-        "lysandra",
-        "game"
-    ];
-    
-    for (pid, process) in system.processes() {
-        let process_name = process.name().to_string_lossy().to_lowercase();
-        let process_exe = process.exe()
-            .and_then(|path| path.file_name())
-            .and_then(|name| name.to_str())
-            .unwrap_or("")
-            .to_lowercase();
-        
-        for indicator in &unity_indicators {
-            if process_name.contains(indicator) || process_exe.contains(indicator) {
-                println!("🎮 Found potential game process: {} (PID: {})", process.name().to_string_lossy(), pid);
-                return Ok(true);
-            }
-        }
+    if let Err(e) = app_handle.emit("game-process-event", starting_event) {
+        eprintln!("Failed to emit starting event: {}", e);
     }
     
-    Ok(false)
+    let app_handle_clone = app_handle.clone();
+    let game_id_clone = game_id.clone();
+    
+    // Gérer les événements du processus en arrière-plan
+    tauri::async_runtime::spawn(async move {
+        let mut has_started = false;
+        
+        while let Some(event) = rx.recv().await {
+            match event {
+                CommandEvent::Stdout(data) => {
+                    let output = String::from_utf8_lossy(&data);
+                    println!("🎮 Game stdout: {}", output.trim());
+                    
+                    // Émettre l'événement "running" au premier output
+                    if !has_started {
+                        has_started = true;
+                                                 let running_event = GameProcessEvent {
+                             game_id: game_id_clone.clone(),
+                             process_id: Some(child.pid()),
+                             status: "running".to_string(),
+                             error: None,
+                         };
+                        
+                        if let Err(e) = app_handle_clone.emit("game-process-event", running_event) {
+                            eprintln!("Failed to emit running event: {}", e);
+                        } else {
+                            println!("✅ Game process confirmed running");
+                        }
+                    }
+                }
+                CommandEvent::Stderr(data) => {
+                    let error_output = String::from_utf8_lossy(&data);
+                    println!("🎮 Game stderr: {}", error_output.trim());
+                }
+                CommandEvent::Error(error) => {
+                    println!("❌ Game process error: {}", error);
+                    let error_event = GameProcessEvent {
+                        game_id: game_id_clone.clone(),
+                        process_id: Some(child.pid()),
+                        status: "stopped".to_string(),
+                        error: Some(error),
+                    };
+                    let _ = app_handle_clone.emit("game-process-event", error_event);
+                    break;
+                }
+                CommandEvent::Terminated(payload) => {
+                    println!("🛑 Game process terminated with code: {:?}, signal: {:?}", 
+                             payload.code, payload.signal);
+                    
+                    let stopped_event = GameProcessEvent {
+                        game_id: game_id_clone.clone(),
+                        process_id: Some(child.pid()),
+                        status: "stopped".to_string(),
+                        error: payload.code.and_then(|code| {
+                            if code != 0 {
+                                Some(format!("Process exited with code {}", code))
+                            } else {
+                                None
+                            }
+                        }),
+                    };
+                    
+                    if let Err(e) = app_handle_clone.emit("game-process-event", stopped_event) {
+                        eprintln!("Failed to emit stopped event: {}", e);
+                    } else {
+                        println!("✅ Successfully emitted stopped event");
+                    }
+                    break;
+                }
+                _ => {
+                    // Autres événements non gérés
+                    println!("🔍 Unhandled command event");
+                }
+            }
+        }
+        
+        println!("🔚 Game process monitoring ended");
+    });
+    
+    Ok(())
 }
+
+// Fonction supprimée - remplacée par launch_game_with_shell utilisant le plugin Shell de Tauri
+
+// Fonctions obsolètes supprimées - remplacées par le plugin Shell de Tauri
 
 #[tauri::command]
 fn get_directory_size(path: String) -> Result<u64, String> {
@@ -372,6 +435,7 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_upload::init());
 
@@ -404,9 +468,7 @@ pub fn run() {
             check_directory_exists,
             check_file_exists,
             get_file_size,
-            launch_game_executable,
-            check_process_running,
-            check_unity_process_running,
+            launch_game_with_shell,
             get_directory_size,
             delete_file,
             delete_directory,

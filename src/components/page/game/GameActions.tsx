@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { listen } from '@tauri-apps/api/event'
 
 import { useGameDownload } from '@/hooks/useGameDownload'
+import { useGameProcessEvents } from '@/hooks/useGameProcessEvents'
 import { GameSettingsModal } from '@/components/settings/game/GameSettingsModal'
 import {
   InstallGameModal,
@@ -17,7 +18,7 @@ import reducer from '@/utils/game-action-sm'
 import { initializeGameCheck } from '@/utils/game-checker'
 import { installLysandra, updateLysandra, type GameInstallProgress } from '@/utils/game-installer'
 import { repairGame, type GameRepairProgress } from '@/utils/game-repair'
-import { launchGame, startGameProcessMonitoring } from '@/utils/game-launcher'
+import { launchGame } from '@/utils/game-launcher'
 import { isGameInstalled } from '@/utils/game-uninstaller'
 import { GAME_IDS } from '@/utils/paths'
 import { syncDebugger } from '@/utils/debug-sync'
@@ -71,6 +72,11 @@ export const GameActions: React.FC = () => {
       if (unlisten) unlisten()
     }
   }, [])
+
+  // Logger les changements d'état pour debug
+  React.useEffect(() => {
+    console.log('🎯 Game state changed to:', gameState)
+  }, [gameState])
 
   // Écouter les événements de désinstallation
   React.useEffect(() => {
@@ -139,18 +145,40 @@ export const GameActions: React.FC = () => {
     }
   }, [])
 
-  // Surveillance du processus de jeu pour les transitions Playing ↔ Ready
-  React.useEffect(() => {
-    if (gameState === 'launching' || gameState === 'playing') {
-      const stopMonitoring = startGameProcessMonitoring(
-        GAME_IDS.LYSANDRA,
-        () => dispatch({ type: 'OPEN_UNITY' }),
-        () => dispatch({ type: 'CLOSE_UNITY' }),
-      )
+  // Note: État du processus supprimé - plus nécessaire avec le plugin Shell
 
-      return stopMonitoring
-    }
-  }, [gameState])
+  // Système d'écoute des événements de processus de jeu en temps réel
+  useGameProcessEvents({
+    onGameStarting: (gameId) => {
+      if (gameId === GAME_IDS.LYSANDRA) {
+        console.log('🚀 Game is starting, staying in launching state...')
+        // Rester en état "launching" jusqu'à confirmation que le jeu tourne
+      }
+    },
+    onGameRunning: (gameId, processId) => {
+      if (gameId === GAME_IDS.LYSANDRA) {
+        console.log(`🎮 Game is confirmed running with PID ${processId}`)
+        dispatch({ type: 'OPEN_UNITY' })
+      }
+    },
+    onGameStopped: (gameId) => {
+      if (gameId === GAME_IDS.LYSANDRA) {
+        console.log('🛑 Game has stopped - dispatching CLOSE_UNITY action')
+        console.log('Current game state before CLOSE_UNITY:', gameState)
+        dispatch({ type: 'CLOSE_UNITY' })
+        console.log('CLOSE_UNITY action dispatched')
+      }
+    },
+    onError: (gameId, error) => {
+      if (gameId === GAME_IDS.LYSANDRA) {
+        console.error('❌ Game process error:', error)
+        setErrorMessage(`Process error: ${error}`)
+        dispatch({ type: 'FAILED_TO_LAUNCH' })
+      }
+    },
+  })
+
+  // Note: Code debug obsolète supprimé - plus nécessaire avec le plugin Shell
 
   // Déclencher la vérification au chargement de la page
   React.useEffect(() => {

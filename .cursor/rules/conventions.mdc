@@ -6,3 +6,4 @@ alwaysApply: true
 - use Type instead of Interface for Typescript declarations
 - n'execute pas de commandes pour lancer le serveur comme "npx tauri dev"
 - les textes pouvant être lu par un utilisateur doivent être traduit dans les langues : [de.json](mdc:src/locales/de.json) [en.json](mdc:src/locales/en.json) [fr.json](mdc:src/locales/fr.json) [es.json](mdc:src/locales/es.json)
+- data driven

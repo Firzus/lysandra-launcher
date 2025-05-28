@@ -21,8 +21,7 @@
         "decorations": false,
         "backgroundColor": "#0C0A09",
         "center": true,
-        "theme": "Dark",
-        "devtools": false
+        "theme": "Dark"
       }
     ],
     "security": {

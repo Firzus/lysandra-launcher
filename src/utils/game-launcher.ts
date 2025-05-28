@@ -2,7 +2,6 @@ import { invoke } from '@tauri-apps/api/core'
 
 import { getGamePaths } from './paths'
 import { getGameExecutable } from './game-data'
-import { setGameProcessPid, getGameProcessPid, clearGameProcessPid } from './process-store'
 
 export type GameLaunchResult = {
   success: boolean
@@ -36,19 +35,17 @@ export async function launchGame(gameId: string): Promise<GameLaunchResult> {
       }
     }
 
-    // Lancer le jeu avec la commande Tauri
-    const pid = await invoke<number>('launch_game_executable', {
+    // Lancer le jeu avec le plugin Shell (gestion automatique des événements)
+    await invoke('launch_game_with_shell', {
       executablePath: gameExecutable,
+      gameId,
     })
 
-    console.log(`✅ Game launched successfully with PID: ${pid}`)
-
-    // Stocker le PID pour le monitoring
-    setGameProcessPid(pid)
+    console.log(`✅ Game launch initiated with Shell plugin for ${gameId}`)
 
     return {
       success: true,
-      processId: pid,
+      processId: undefined, // Le PID sera fourni dans les événements
     }
   } catch (error) {
     console.error(`❌ Failed to launch game ${gameId}:`, error)
@@ -212,46 +209,5 @@ async function checkUnityProcessRunning(): Promise<boolean> {
   }
 }
 
-/**
- * Surveille l'état du processus du jeu et émet des événements
- * Utilisé pour détecter automatiquement les changements d'état
- */
-export function startGameProcessMonitoring(
-  gameId: string,
-  onGameStart: () => void,
-  onGameStop: () => void,
-): () => void {
-  let isMonitoring = true
-  let wasRunning = false
-
-  const checkInterval = setInterval(async () => {
-    if (!isMonitoring) return
-
-    try {
-      // Utiliser le PID stocké pour un monitoring plus précis
-      const storedPid = getGameProcessPid()
-      const status = await checkGameProcessStatus(gameId, storedPid)
-
-      if (status.isRunning && !wasRunning) {
-        // Jeu vient de démarrer
-        console.log('🎮 Game process detected - transitioning to Playing')
-        onGameStart()
-        wasRunning = true
-      } else if (!status.isRunning && wasRunning) {
-        // Jeu vient de s'arrêter
-        console.log('🛑 Game process stopped - transitioning to Ready')
-        clearGameProcessPid() // Nettoyer le PID stocké
-        onGameStop()
-        wasRunning = false
-      }
-    } catch (error) {
-      console.error('Error monitoring game process:', error)
-    }
-  }, 3000) // Augmenté à 3 secondes pour réduire la charge système
-
-  // Fonction de nettoyage
-  return () => {
-    isMonitoring = false
-    clearInterval(checkInterval)
-  }
-}
+// Note: L'ancien système de polling a été remplacé par un système d'événements en temps réel
+// Voir useGameProcessEvents et start_game_process_monitoring dans le backend Rust
