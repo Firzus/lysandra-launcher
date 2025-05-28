@@ -8,6 +8,7 @@ pub mod hash;
 pub mod zip;
 pub mod download_manager;
 pub mod game_detection;
+pub mod path_manager;
 
 // Structure pour les événements de progression
 #[derive(Clone, Serialize, Deserialize)]
@@ -480,24 +481,17 @@ fn write_text_file(path: String, content: String) -> Result<(), String> {
 
 #[tauri::command]
 fn get_app_data_dir(app: tauri::AppHandle) -> Result<String, String> {
-    let app_data_path = app.path()
-        .app_local_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {}", e))?
-        .to_string_lossy()
-        .to_string();
-    
-    Ok(app_data_path)
+    // Utilise maintenant la nouvelle structure HuzStudio
+    path_manager::PathManager::get_huzstudio_root()
+        .map(|p| p.to_string_lossy().to_string())
 }
 
 #[tauri::command]
 fn store_config(app: tauri::AppHandle, key: String, value: String) -> Result<(), String> {
     use std::collections::HashMap;
     
-    // Utiliser la nouvelle API de Tauri v2 pour les chemins
-    let config_dir = app.path()
-        .app_local_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {}", e))?
-        .join("config");
+    // Utiliser le nouveau gestionnaire de chemins pour le répertoire config
+    let config_dir = path_manager::PathManager::get_config_dir()?;
     
     std::fs::create_dir_all(&config_dir)
         .map_err(|e| format!("Failed to create config directory: {}", e))?;
@@ -530,11 +524,7 @@ fn store_config(app: tauri::AppHandle, key: String, value: String) -> Result<(),
 fn get_config(app: tauri::AppHandle, key: String) -> Result<String, String> {
     use std::collections::HashMap;
     
-    let config_dir = app.path()
-        .app_local_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {}", e))?
-        .join("config");
-    
+    let config_dir = path_manager::PathManager::get_config_dir()?;
     let config_file = config_dir.join("launcher_config.json");
     
     if !config_file.exists() {
@@ -664,28 +654,10 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> std::io::Result<()> {
 
 /// Initialise la structure de base du launcher (appelé au setup)
 fn initialize_launcher_structure(app_handle: &tauri::AppHandle) -> Result<(), String> {
-    // Obtenir le dossier app local data avec la nouvelle API
-    let app_local_data_dir = app_handle
-        .path()
-        .app_local_data_dir()
-        .map_err(|e| format!("Failed to get app local data directory: {}", e))?;
-
-    // Créer la structure de dossiers de base
-    let directories = [
-        app_local_data_dir.join("games"),
-        app_local_data_dir.join("config"),
-        app_local_data_dir.join("cache"),
-        app_local_data_dir.join("logs"),
-    ];
-
-    for dir in directories {
-        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-    }
-
-    println!(
-        "Launcher structure initialized at: {:?}",
-        app_local_data_dir
-    );
+    // Utiliser le nouveau PathManager pour initialiser la structure HuzStudio
+    path_manager::PathManager::initialize_structure()?;
+    
+    println!("✅ HuzStudio launcher structure initialized successfully");
     Ok(())
 }
 
@@ -760,10 +732,16 @@ pub fn run() {
             // Nouvelles fonctions pour la vérification d'intégrité
             read_binary_file_head,
             force_file_sync,
-            // Gestionnaire de téléchargement
-            download_manager::start_download,
-            download_manager::get_download_progress,
-            download_manager::cancel_download,
+            // Nouvelles commandes PathManager pour la structure HuzStudio
+            path_manager::get_huzstudio_root_path,
+            path_manager::get_games_directory,
+            path_manager::get_config_directory,
+            path_manager::get_cache_directory,
+            path_manager::get_logs_directory,
+            path_manager::get_game_directory,
+            path_manager::get_game_install_directory,
+            path_manager::initialize_game_directories,
+            path_manager::verify_huzstudio_structure,
         ])
         .setup(|app| {
             println!("🚀 Tauri application starting...");

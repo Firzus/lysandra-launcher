@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Huz Studio Launcher",
+  "productName": "HuzStudio",
   "version": "0.0.4",
   "identifier": "com.huzstudio.launcher",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Huz Studio Launcher",
+        "title": "HuzStudio",
         "width": 1280,
         "height": 720,
         "fullscreen": false,
@@ -56,7 +56,9 @@
     ],
     "windows": {
       "nsis": {
-        "installerIcon": "icons/icon.ico"
+        "installerIcon": "icons/icon.ico",
+        "installMode": "perMachine",
+        "installerHooks": "./windows/hooks.nsi"
       }
     }
   },
