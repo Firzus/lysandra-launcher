@@ -1,3 +1,5 @@
+import type { ValidationResult } from '@/types/game-detection'
+
 import {
   Button,
   Modal,
@@ -22,10 +24,10 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { open } from '@tauri-apps/plugin-dialog'
 
-import { getLauncherPaths } from '@/utils/paths'
 import { AutoDetectionPanel } from './AutoDetectionPanel'
+
+import { getLauncherPaths } from '@/utils/paths'
 import { validateGameInstallation } from '@/utils/game-auto-detection'
-import type { ValidationResult } from '@/types/game-detection'
 
 type InstallConfig = {
   installPath: string
@@ -66,6 +68,7 @@ export const InstallGameModal: React.FC<Props> = ({
     if (!path || path.trim() === '') {
       setPathValidation(null)
       setValidationError(null)
+
       return
     }
 
@@ -339,8 +342,8 @@ export const InstallGameModal: React.FC<Props> = ({
                     {/* Panneau de détection automatique */}
                     <AutoDetectionPanel
                       gameNameToSearch="Lysandra"
-                      onInstallationSelected={handleAutoDetectionSelection}
                       isSearching={isLoadingPath}
+                      onInstallationSelected={handleAutoDetectionSelection}
                     />
                   </div>
                 )}

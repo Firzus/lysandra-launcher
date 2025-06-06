@@ -56,7 +56,7 @@ export default function App() {
   }
 
   return (
-    <main className="flex h-screen select-none overflow-hidden bg-background text-foreground antialiased">
+    <main className="bg-background text-foreground flex h-screen overflow-hidden antialiased select-none">
       {/* System Controls */}
       <DragZone />
       <WindowControls />

@@ -270,6 +270,7 @@ export const GameActions: React.FC = () => {
 
       // Pour les mises à jour ET les nouvelles installations, utiliser la nouvelle fonction avec configuration
       const { owner, repo } = getGameRepository(GAME_IDS.LYSANDRA)
+
       result = await downloadAndInstallGame(
         GAME_IDS.LYSANDRA,
         owner,

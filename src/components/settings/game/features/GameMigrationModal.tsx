@@ -102,7 +102,7 @@ export const GameMigrationModal: React.FC<Props> = ({
   const isValidPath = newPath.trim() !== '' && newPath !== currentPath
 
   return (
-    <Modal isOpen={isOpen} isDismissable={!isMigrating} size="lg" onOpenChange={handleClose}>
+    <Modal isDismissable={!isMigrating} isOpen={isOpen} size="lg" onOpenChange={handleClose}>
       <ModalContent>
         {() => (
           <>

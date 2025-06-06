@@ -29,7 +29,7 @@ const MainLayoutComponent: React.FC<MainLayoutProps> = ({
 
   return (
     <div
-      className={`flex h-screen select-none overflow-hidden bg-background text-foreground antialiased ${className}`}
+      className={`bg-background text-foreground flex h-screen overflow-hidden antialiased select-none ${className}`}
     >
       <ErrorBoundary
         FallbackComponent={FallbackComponent}

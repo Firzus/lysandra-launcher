@@ -1,7 +1,7 @@
+import type { GameProcessEventPayload } from '@/types/game-events'
+
 import React, { useEffect, useCallback } from 'react'
 import { listen, type UnlistenFn } from '@tauri-apps/api/event'
-
-import type { GameProcessEventPayload } from '@/types/game-events'
 
 export type UseGameProcessEventsOptions = {
   onGameStarting?: (gameId: string, processId?: number) => void
@@ -13,6 +13,7 @@ export type UseGameProcessEventsOptions = {
 export function useGameProcessEvents(options: UseGameProcessEventsOptions) {
   // Utiliser useRef pour garder les callbacks les plus récents sans déclencher re-abonnement
   const callbacksRef = React.useRef(options)
+
   callbacksRef.current = options
 
   const handleGameProcessEvent = useCallback(

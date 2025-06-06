@@ -147,6 +147,7 @@ export function usePathManager() {
   const initializeGame = async (gameId: string) => {
     try {
       await PathManager.initializeGameDirectories(gameId)
+
       return await PathManager.getGameStructure(gameId)
     } catch (err) {
       throw new Error(`Failed to initialize game directories: ${err}`)

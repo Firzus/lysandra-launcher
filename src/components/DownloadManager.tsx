@@ -326,14 +326,14 @@ const DownloadManager: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label
-                htmlFor="download-url"
                 className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                htmlFor="download-url"
               >
                 URL du fichier
               </label>
               <input
-                id="download-url"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                id="download-url"
                 placeholder="https://example.com/file.zip"
                 type="url"
                 value={newDownloadUrl}
@@ -342,14 +342,14 @@ const DownloadManager: React.FC = () => {
             </div>
             <div>
               <label
-                htmlFor="download-path"
                 className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                htmlFor="download-path"
               >
                 Chemin de destination
               </label>
               <input
-                id="download-path"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                id="download-path"
                 placeholder="/path/to/save/file.zip"
                 type="text"
                 value={newDownloadPath}

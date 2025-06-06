@@ -9,7 +9,9 @@ export async function verifyFileIntegrity(filePath: string): Promise<string> {
   try {
     console.log(`🔍 Computing SHA-256 hash for: ${filePath}`)
     const hash = await invoke<string>('verify_file_integrity', { filePath })
+
     console.log(`✅ Hash computed successfully: ${hash.substring(0, 16)}...`)
+
     return hash
   } catch (error) {
     console.error(`❌ Failed to compute hash for ${filePath}:`, error)
@@ -29,6 +31,7 @@ export async function checkFileHash(filePath: string, expectedHash: string): Pro
     console.log(`📋 Expected hash: ${expectedHash}`)
 
     const actualHash = await verifyFileIntegrity(filePath)
+
     console.log(`📋 Actual hash:   ${actualHash}`)
 
     const matches = actualHash.toLowerCase() === expectedHash.toLowerCase()
@@ -61,9 +64,11 @@ export async function testFileAccessibility(filePath: string): Promise<boolean> 
     await invoke<number[]>('read_binary_file_head', { path: filePath, size: 1024 })
 
     console.log(`✅ File is accessible for reading`)
+
     return true
   } catch (error) {
     console.error(`❌ File not accessible for reading:`, error)
+
     return false
   }
 }
@@ -81,6 +86,7 @@ export async function debugHashMismatch(
   try {
     // Informations sur le fichier
     const fileSize = await invoke<number>('get_file_size', { path: filePath })
+
     console.log(`📁 File: ${filePath}`)
     console.log(`📦 Size: ${fileSize} bytes (${Math.round(fileSize / (1024 * 1024))} MB)`)
 

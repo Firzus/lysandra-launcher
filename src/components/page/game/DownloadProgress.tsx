@@ -69,14 +69,14 @@ export const DownloadProgress: React.FC = () => {
           {downloadedMB} MB / {totalMB} MB
         </span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-content1">
+      <div className="bg-content1 h-2 w-full overflow-hidden rounded-full">
         <div
-          className="h-full bg-primary transition-all duration-300 ease-in-out"
+          className="bg-primary h-full transition-all duration-300 ease-in-out"
           style={{ width: `${progress}%` }}
         />
       </div>
       {progress === 100 && !isDownloading && (
-        <div className="mt-2 text-right text-sm text-success-500">
+        <div className="text-success-500 mt-2 text-right text-sm">
           {t('game.download_complete_message')}
         </div>
       )}

@@ -58,13 +58,16 @@ export async function getInstallConfiguration(
 
     if (configJson) {
       const config = JSON.parse(configJson) as GameInstallConfiguration
+
       console.log(`✅ Install configuration loaded for ${gameId}:`, config)
+
       return config
     }
 
     return null
   } catch (error) {
     console.warn(`⚠️ No install configuration found for ${gameId}:`, error)
+
     return null
   }
 }
@@ -82,6 +85,7 @@ export async function generateGamePaths(
     // Si pas de configuration fournie, essayer de la charger
     if (!config) {
       const loadedConfig = await getInstallConfiguration(gameId)
+
       if (loadedConfig) {
         config = loadedConfig
       }
@@ -97,6 +101,7 @@ export async function generateGamePaths(
       // Utiliser le chemin par défaut dans AppData avec dossier "games"
       console.log(`📁 Using default games path for ${gameId}`)
       const appDataDir = await invoke<string>('get_app_data_dir')
+
       // Ajouter le dossier "games" pour regrouper tous les jeux
       baseGamesPath = await join(appDataDir, 'games')
     }
@@ -162,6 +167,7 @@ export async function validateCustomInstallPath(
 
     // Vérifier les permissions d'écriture
     const testFilePath = await join(path, '.huz_launcher_test')
+
     try {
       await invoke('write_text_file', {
         path: testFilePath,
@@ -196,6 +202,7 @@ export async function validateCustomInstallPath(
     }
 
     console.log(`✅ Custom games directory validation successful: ${path}`)
+
     return { valid: true }
   } catch (error) {
     return {
@@ -221,6 +228,7 @@ export async function migrateGameInstallation(
 
     // Récupérer l'ancienne configuration
     const oldConfig = await getInstallConfiguration(gameId)
+
     if (!oldConfig) {
       throw new Error('No existing install configuration found')
     }
@@ -242,6 +250,7 @@ export async function migrateGameInstallation(
 
     // Valider le nouveau dossier "games" parent
     const validation = await validateCustomInstallPath(newGamesPath)
+
     if (!validation.valid) {
       throw new Error(`Invalid destination games directory: ${validation.error}`)
     }
@@ -283,9 +292,11 @@ export async function migrateGameInstallation(
     console.log(`✅ Migration completed successfully for ${gameId}`)
     console.log(`   Game moved from: ${oldPaths.root}`)
     console.log(`   Game moved to: ${newPaths.root}`)
+
     return { success: true }
   } catch (error) {
     console.error(`❌ Migration failed for ${gameId}:`, error)
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown migration error',

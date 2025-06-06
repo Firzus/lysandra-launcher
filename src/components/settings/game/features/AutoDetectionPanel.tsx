@@ -1,7 +1,10 @@
+import type { GameInstallation, ValidationResult } from '../../../../types/game-detection'
+
 import React, { useState } from 'react'
 import { Button, Card, CardBody, Chip, Progress, Badge, Tooltip } from '@heroui/react'
 import { LuSearch, LuCheck, LuX, LuFolderOpen, LuInfo, LuHardDrive } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
+
 import {
   searchGameByName,
   validateGameInstallation,
@@ -12,7 +15,6 @@ import {
   getInstallationStats,
   groupInstallationsByLauncher,
 } from '../../../../utils/game-auto-detection'
-import type { GameInstallation, ValidationResult } from '../../../../types/game-detection'
 
 type Props = {
   gameNameToSearch?: string
@@ -62,6 +64,7 @@ export const AutoDetectionPanel: React.FC<Props> = ({
 
       // Calculer les statistiques
       const stats = getInstallationStats(installations)
+
       setSearchStats(stats)
 
       // Valider automatiquement les meilleures installations
@@ -105,7 +108,9 @@ export const AutoDetectionPanel: React.FC<Props> = ({
     } finally {
       setValidatingPaths((prev) => {
         const newSet = new Set(prev)
+
         newSet.delete(path)
+
         return newSet
       })
     }
@@ -124,7 +129,7 @@ export const AutoDetectionPanel: React.FC<Props> = ({
     const validation = validationResults.get(installation.path)
 
     if (isValidating) {
-      return <Progress size="sm" isIndeterminate className="w-4" />
+      return <Progress isIndeterminate className="w-4" size="sm" />
     }
 
     if (validation) {
@@ -176,11 +181,11 @@ export const AutoDetectionPanel: React.FC<Props> = ({
 
           <Button
             color="primary"
+            isDisabled={getCurrentSearchState()}
+            isLoading={getCurrentSearchState()}
             size="sm"
             startContent={<LuSearch size={16} />}
             onPress={handleAutoSearch}
-            isLoading={getCurrentSearchState()}
-            isDisabled={getCurrentSearchState()}
           >
             {getCurrentSearchState()
               ? t('game.install_modal.auto_search_progress')
@@ -192,10 +197,10 @@ export const AutoDetectionPanel: React.FC<Props> = ({
       {/* Barre de progression pendant la recherche */}
       {getCurrentSearchState() && (
         <Progress
-          size="sm"
           isIndeterminate
-          label={t('game.install_modal.auto_search_progress')}
           className="w-full"
+          label={t('game.install_modal.auto_search_progress')}
+          size="sm"
         />
       )}
 
@@ -274,7 +279,7 @@ export const AutoDetectionPanel: React.FC<Props> = ({
               <div className="flex items-center gap-2">
                 <span className="text-lg">{getLauncherIcon(launcher)}</span>
                 <span className="text-sm font-medium">{launcher}</span>
-                <Badge size="sm" variant="flat" color="default">
+                <Badge color="default" size="sm" variant="flat">
                   {installations.length}
                 </Badge>
               </div>
@@ -284,8 +289,8 @@ export const AutoDetectionPanel: React.FC<Props> = ({
                 {installations.map((installation) => (
                   <Card
                     key={installation.path}
-                    className="cursor-pointer transition-shadow hover:shadow-md"
                     isPressable
+                    className="cursor-pointer transition-shadow hover:shadow-md"
                     onPress={() => handleSelectInstallation(installation)}
                   >
                     <CardBody className="py-3">
@@ -293,7 +298,7 @@ export const AutoDetectionPanel: React.FC<Props> = ({
                         {/* Ligne principale avec nom et statut */}
                         <div className="flex items-center justify-between">
                           <div className="flex min-w-0 flex-1 items-center gap-2">
-                            <LuFolderOpen size={16} className="text-default-500 flex-shrink-0" />
+                            <LuFolderOpen className="text-default-500 flex-shrink-0" size={16} />
                             <span className="truncate text-sm font-medium">
                               {installation.metadata.folder_name || 'Dossier'}
                             </span>
@@ -302,8 +307,8 @@ export const AutoDetectionPanel: React.FC<Props> = ({
 
                           <div className="flex flex-shrink-0 items-center gap-2">
                             <Chip
-                              size="sm"
                               color={getConfidenceColor(installation.confidence)}
+                              size="sm"
                               variant="flat"
                             >
                               {t('game.install_modal.confidence_score', {

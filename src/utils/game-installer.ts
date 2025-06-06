@@ -56,6 +56,7 @@ export async function downloadAndInstallGame(
         onProgress?.({ step: 'fetching', message: 'Validation du dossier des jeux...' })
 
         const validation = await validateCustomInstallPath(installConfig.customInstallPath)
+
         if (!validation.valid) {
           throw new Error(`Dossier des jeux invalide: ${validation.error}`)
         }
@@ -67,6 +68,7 @@ export async function downloadAndInstallGame(
 
     // Générer les chemins basés sur la configuration (personnalisée ou par défaut)
     const gamePaths = await generateGamePaths(gameId, installConfig)
+
     console.log(`📁 Using game paths:`, gamePaths)
 
     // 0. Initialiser la structure des dossiers selon les nouveaux chemins
@@ -256,6 +258,7 @@ export async function downloadAndInstallGame(
         // Vérification du hash avec attente supplémentaire progressive
         if (hashVerificationAttempts > 0) {
           const waitTime = 3000 + hashVerificationAttempts * 2000 // 3s, 5s, 7s, 9s
+
           console.log(
             `⏳ Progressive wait before hash check (attempt ${hashVerificationAttempts + 1}): ${waitTime}ms...`,
           )
@@ -263,6 +266,7 @@ export async function downloadAndInstallGame(
         }
 
         const hashCheckResult = await checkFileHash(zipFilePath, hash)
+
         if (hashCheckResult) {
           hashVerified = true
           console.log(`✅ File integrity verified on attempt ${hashVerificationAttempts + 1}`)
@@ -285,6 +289,7 @@ export async function downloadAndInstallGame(
               const actualHash = await invoke<string>('verify_file_integrity', {
                 filePath: zipFilePath,
               })
+
               await debugHashMismatch(zipFilePath, hash, actualHash)
             } catch (debugError) {
               console.warn(`⚠️ Could not perform hash debug analysis:`, debugError)
@@ -297,6 +302,7 @@ export async function downloadAndInstallGame(
 
         if (hashVerificationAttempts < maxHashAttempts) {
           const waitTime = 5000 + hashVerificationAttempts * 1000
+
           console.log(`⏳ Waiting ${waitTime}ms before retry...`)
           await new Promise((resolve) => setTimeout(resolve, waitTime))
         }
@@ -458,6 +464,7 @@ export async function isGameInstalled(gameId: string, customPath?: string): Prom
     return versionFileExists && installDirExists
   } catch (error) {
     console.error(`Error checking if game ${gameId} is installed:`, error)
+
     return false
   }
 }
@@ -484,9 +491,11 @@ export async function getInstalledGameVersion(
       : await generateGamePaths(gameId)
 
     const version = await invoke<string>('read_text_file', { path: gamePaths.versionFile })
+
     return version.trim()
   } catch (error) {
     console.error(`Error reading installed version for game ${gameId}:`, error)
+
     return null
   }
 }

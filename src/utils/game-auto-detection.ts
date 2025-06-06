@@ -1,10 +1,11 @@
-import { invoke } from '@tauri-apps/api/core'
 import type {
   GameSearchResult,
   ValidationResult,
   AutoDetectionOptions,
   GameInstallation,
 } from '../types/game-detection'
+
+import { invoke } from '@tauri-apps/api/core'
 
 /**
  * Recherche automatiquement les installations de jeux sur le système
@@ -95,6 +96,7 @@ export async function searchGameByName(
   }
 
   const result = await searchInstalledGames(options)
+
   return result.installations
 }
 
@@ -182,6 +184,7 @@ export function getConfidenceColor(
   if (confidence >= 80) return 'success'
   if (confidence >= 60) return 'warning'
   if (confidence >= 40) return 'danger'
+
   return 'default'
 }
 
@@ -234,6 +237,7 @@ export function getInstallationStats(installations: GameInstallation[]): {
 
   installations.forEach((installation) => {
     const launcher = formatLauncherName(installation.launcher)
+
     byLauncher[launcher] = (byLauncher[launcher] || 0) + 1
     totalConfidence += installation.confidence
 
@@ -260,6 +264,7 @@ export function groupInstallationsByLauncher(
 
   installations.forEach((installation) => {
     const launcher = formatLauncherName(installation.launcher)
+
     if (!grouped[launcher]) {
       grouped[launcher] = []
     }
@@ -283,9 +288,11 @@ export async function validateMultipleInstallations(
   const validationPromises = installations.map(async (installation) => {
     try {
       const result = await validateGameInstallation(installation.path)
+
       return { path: installation.path, result }
     } catch (error) {
       console.error(`Failed to validate ${installation.path}:`, error)
+
       return {
         path: installation.path,
         result: {
@@ -347,6 +354,7 @@ export async function advancedGameSearch(options: {
 
   // Validation optionnelle
   let validations: Map<string, ValidationResult> | undefined
+
   if (options.validateResults) {
     validations = await validateMultipleInstallations(installations)
   }
