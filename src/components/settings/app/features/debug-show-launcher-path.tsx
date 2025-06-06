@@ -1,4 +1,4 @@
-import { Button } from '@heroui/button'
+import { Button } from '@heroui/react'
 import { useState } from 'react'
 import { LuFolderOpen, LuCopy, LuCheck } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
@@ -82,7 +82,7 @@ export const DebugShowLauncherPath: React.FC<Props> = ({ className }) => {
         </Button>
       </div>
 
-      {path && <p className="text-muted-foreground mt-2 break-all font-mono text-xs">{path}</p>}
+      {path && <p className="text-muted-foreground mt-2 font-mono text-xs break-all">{path}</p>}
     </div>
   )
 }

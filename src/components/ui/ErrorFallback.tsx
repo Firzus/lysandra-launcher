@@ -1,6 +1,5 @@
 import { memo } from 'react'
-import { Button } from '@heroui/button'
-import { Card, CardBody, CardHeader } from '@heroui/card'
+import { Button, Card, CardBody, CardHeader } from '@heroui/react'
 import { LuTriangle, LuRefreshCw } from 'react-icons/lu'
 
 type ErrorFallbackProps = {
@@ -16,13 +15,13 @@ const ErrorFallbackComponent: React.FC<ErrorFallbackProps> = ({ error, resetErro
           <LuTriangle className="text-danger" size={24} />
           <div>
             <h3 className="text-lg font-semibold">Erreur</h3>
-            <p className="text-sm text-default-500">Une erreur est survenue</p>
+            <p className="text-default-500 text-sm">Une erreur est survenue</p>
           </div>
         </CardHeader>
         <CardBody className="space-y-4">
           {error && (
-            <div className="rounded-md bg-danger-50 p-3">
-              <p className="text-sm text-danger-700">{error.message}</p>
+            <div className="bg-danger-50 rounded-md p-3">
+              <p className="text-danger-700 text-sm">{error.message}</p>
             </div>
           )}
           {resetErrorBoundary && (

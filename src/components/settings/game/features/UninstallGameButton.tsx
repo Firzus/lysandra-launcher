@@ -1,13 +1,13 @@
-import { Button } from '@heroui/button'
 import {
+  Button,
+  Checkbox,
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from '@heroui/modal'
-import { Checkbox } from '@heroui/checkbox'
+} from '@heroui/react'
 import { useState } from 'react'
 import { LuTrash2, LuInfo } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
@@ -76,8 +76,8 @@ export const UninstallGameButton: React.FC<Props> = ({ className, onUninstallCom
                   {t('game.uninstall_modal.description')}
                 </p>
 
-                <div className="mb-4 rounded-lg border border-warning-200 bg-warning-50 p-3">
-                  <p className="text-sm text-warning-800">
+                <div className="border-warning-200 bg-warning-50 mb-4 rounded-lg border p-3">
+                  <p className="text-warning-800 text-sm">
                     {t('game.uninstall_modal.keep_saves_info')}
                   </p>
                 </div>
@@ -90,7 +90,7 @@ export const UninstallGameButton: React.FC<Props> = ({ className, onUninstallCom
                 >
                   <span className="text-sm">
                     {t('game.uninstall_modal.delete_all_data')}
-                    <span className="font-medium text-danger">
+                    <span className="text-danger font-medium">
                       {' '}
                       {t('game.uninstall_modal.irreversible')}
                     </span>
@@ -98,8 +98,8 @@ export const UninstallGameButton: React.FC<Props> = ({ className, onUninstallCom
                 </Checkbox>
 
                 {deleteAllData && (
-                  <div className="mt-3 rounded-lg border border-danger-200 bg-danger-50 p-3">
-                    <p className="text-sm text-danger-800">
+                  <div className="border-danger-200 bg-danger-50 mt-3 rounded-lg border p-3">
+                    <p className="text-danger-800 text-sm">
                       {t('game.uninstall_modal.warning_complete')}
                     </p>
                   </div>

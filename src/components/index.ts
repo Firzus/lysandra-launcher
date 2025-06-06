@@ -11,7 +11,7 @@ export { WindowControls } from './system/WindowControls'
 export { DragZone } from './system/DragZone'
 
 // Page Components
-export { Sidebar } from './page/Sidebar'
+export { Sidebar } from './page/sidebar'
 
 // Development Components
 export { LanguageDetectionTest } from './LanguageDetectionTest'

@@ -1,5 +1,4 @@
-import { Modal, ModalContent } from '@heroui/modal'
-import { Tabs, Tab } from '@heroui/tabs'
+import { Modal, ModalContent, Tabs, Tab } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
 
 import { GeneralAppSettings } from './tabs/general-app-settings'
@@ -15,7 +14,7 @@ export const AppSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange }) => {
   return (
     <Modal isOpen={isOpen} size="3xl" onOpenChange={onOpenChange}>
       <ModalContent>
-        <p className="text-muted-foreground absolute left-8 top-6 text-xl">{t('settings.title')}</p>
+        <p className="text-muted-foreground absolute top-6 left-8 text-xl">{t('settings.title')}</p>
 
         <Tabs
           fullWidth

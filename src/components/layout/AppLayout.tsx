@@ -1,8 +1,8 @@
 import { Suspense, memo } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Divider } from '@heroui/divider'
+import { Divider } from '@heroui/react'
 
-import { Sidebar } from '@/components/page/Sidebar'
+import { Sidebar } from '@/components/page/sidebar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ErrorFallback } from '@/components/ui/ErrorFallback'
 
@@ -12,10 +12,10 @@ type AppLayoutProps = {
 
 const AppLayoutComponent: React.FC<AppLayoutProps> = ({ children }) => {
   return (
-    <div className="flex h-screen select-none overflow-hidden bg-background text-foreground antialiased">
+    <div className="bg-background text-foreground flex h-screen overflow-hidden antialiased select-none">
       {/* Navigation */}
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <Suspense fallback={<div className="w-16 bg-content1" />}>
+        <Suspense fallback={<div className="bg-content1 w-16" />}>
           <Sidebar />
         </Suspense>
       </ErrorBoundary>

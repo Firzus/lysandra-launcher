@@ -1,19 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import './fonts.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Configuration pour HeroUI avec Tailwind v4 - approche CSS-first */
+@plugin '../../hero.ts';
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@custom-variant dark (&:is(.dark *));
 
 @layer base {
   html {
     font-family: 'Outfit', system-ui, sans-serif;
   }
+}
 
-  .bg-muted-foreground {
-    @apply bg-foreground/70;
-  }
+@utility bg-muted-foreground {
+  background-color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
+}
 
-  .text-muted-foreground {
-    @apply text-foreground/70;
-  }
+@utility text-muted-foreground {
+  color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
 }

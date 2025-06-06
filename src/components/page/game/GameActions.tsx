@@ -2,8 +2,7 @@ import type { UninstallEvent } from '@/types/uninstall'
 
 import React from 'react'
 import { LuCloudDownload, LuSettings2, LuPlay, LuWrench, LuRotateCcw } from 'react-icons/lu'
-import { Button } from '@heroui/button'
-import { useDisclosure } from '@heroui/modal'
+import { Button, useDisclosure } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
 import { listen } from '@tauri-apps/api/event'
 
@@ -16,20 +15,14 @@ import {
 } from '@/components/settings/game/features/InstallGameModal'
 import reducer from '@/utils/game-action-sm'
 import { initializeGameCheck } from '@/utils/game-checker'
-import {
-  downloadAndInstallGame,
-  type GameInstallProgress
-} from '@/utils/game-installer'
+import { downloadAndInstallGame, type GameInstallProgress } from '@/utils/game-installer'
 import { repairGame, type GameRepairProgress } from '@/utils/game-repair'
 import { launchGame } from '@/utils/game-launcher'
 import { isGameInstalled } from '@/utils/game-uninstaller'
 import { GAME_IDS } from '@/utils/paths'
 import { syncDebugger } from '@/utils/debug-sync'
 import { getGameRepository } from '@/utils/game-data'
-import {
-  GameInstallConfiguration,
-  type GameInstallResult
-} from '@/utils/install-config'
+import { GameInstallConfiguration, type GameInstallResult } from '@/utils/install-config'
 
 export const GameActions: React.FC = () => {
   const { t } = useTranslation()
@@ -140,8 +133,8 @@ export const GameActions: React.FC = () => {
     if (import.meta.env.DEV) {
       console.log('🐛 Sync debugger initialized in development mode')
 
-        // Ajouter une fonction globale pour tester la sync
-        ; (window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
+      // Ajouter une fonction globale pour tester la sync
+      ;(window as any).forceSyncCheck = () => syncDebugger.forceSyncCheck()
       console.log('🔧 Use window.forceSyncCheck() to manually check synchronization')
     }
 
@@ -284,7 +277,7 @@ export const GameActions: React.FC = () => {
         installConfiguration,
         (progress) => {
           setInstallProgress(progress)
-        }
+        },
       )
 
       if (result.success) {
@@ -533,10 +526,11 @@ export const GameActions: React.FC = () => {
       {installProgress && (gameState === 'downloading' || gameState === 'updating') && (
         <div className="mb-4 w-full max-w-md">
           <div
-            className={`text-muted-foreground mb-1 text-sm ${installProgress.step !== 'downloading' && installProgress.step !== 'complete'
-              ? 'animate-pulse'
-              : ''
-              }`}
+            className={`text-muted-foreground mb-1 text-sm ${
+              installProgress.step !== 'downloading' && installProgress.step !== 'complete'
+                ? 'animate-pulse'
+                : ''
+            }`}
           >
             {installProgress.message}
           </div>
@@ -547,7 +541,7 @@ export const GameActions: React.FC = () => {
           {installProgress.step === 'downloading' && (
             <div className="h-2 w-full rounded-full bg-gray-200">
               <div
-                className="h-2 rounded-full bg-primary transition-all duration-300 ease-out"
+                className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${downloadProgress}%` }}
               />
             </div>
@@ -559,8 +553,9 @@ export const GameActions: React.FC = () => {
       {repairProgress && gameState === 'repairing' && (
         <div className="mb-4 w-full max-w-md">
           <div
-            className={`text-muted-foreground mb-1 text-sm ${repairProgress.step !== 'complete' ? 'animate-pulse' : ''
-              }`}
+            className={`text-muted-foreground mb-1 text-sm ${
+              repairProgress.step !== 'complete' ? 'animate-pulse' : ''
+            }`}
           >
             {repairProgress.message}
           </div>
@@ -570,7 +565,7 @@ export const GameActions: React.FC = () => {
           {repairProgress.progress && (
             <div className="h-2 w-full rounded-full bg-gray-200">
               <div
-                className="h-2 rounded-full bg-primary transition-all duration-300 ease-out"
+                className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${repairProgress.progress}%` }}
               />
             </div>

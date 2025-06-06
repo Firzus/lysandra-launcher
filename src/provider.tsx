@@ -1,6 +1,5 @@
 import { memo } from 'react'
-import { HeroUIProvider } from '@heroui/system'
-import { ToastProvider } from '@heroui/toast'
+import { HeroUIProvider, ToastProvider } from '@heroui/react'
 import { I18nextProvider } from 'react-i18next'
 
 import i18n from '@/utils/i18n'

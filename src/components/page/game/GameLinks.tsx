@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from '@heroui/button'
+import { Button } from '@heroui/react'
 
 import { openLink } from '@/utils/opener'
 import { socialLinks } from '@/data/lysandra'
@@ -8,7 +8,7 @@ type Props = {}
 
 export const GameLinks: React.FC<Props> = () => {
   return (
-    <div className="absolute right-6 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-4">
+    <div className="absolute top-1/2 right-6 z-40 flex -translate-y-1/2 flex-col gap-4">
       {socialLinks.map((link, i) => (
         <Button
           key={i}

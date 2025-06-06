@@ -1,10 +1,24 @@
-import { Button } from '@heroui/button'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/modal'
-import { Checkbox } from '@heroui/checkbox'
-import { Input } from '@heroui/input'
-import { Divider } from '@heroui/divider'
+import {
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Checkbox,
+  Input,
+  Divider,
+} from '@heroui/react'
+import {
+  LuFolder,
+  LuFolderOpen,
+  LuDownload,
+  LuMapPin,
+  LuCheck,
+  LuX,
+  LuLoader,
+} from 'react-icons/lu'
 import { useState, useEffect } from 'react'
-import { LuFolder, LuFolderOpen, LuDownload, LuMapPin, LuCheck, LuX, LuLoader } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
 import { open } from '@tauri-apps/plugin-dialog'
 
@@ -191,10 +205,12 @@ export const InstallGameModal: React.FC<Props> = ({
   const isConfigValid = () => {
     if (config.locateExistingGame) {
       // Pour localiser un jeu existant, il faut que le chemin soit valide
-      return config.existingGamePath &&
+      return (
+        config.existingGamePath &&
         config.existingGamePath.trim() !== '' &&
         pathValidation?.is_valid === true &&
         !isValidatingPath
+      )
     }
 
     return config.installPath && config.installPath.trim() !== ''
@@ -202,7 +218,7 @@ export const InstallGameModal: React.FC<Props> = ({
 
   const getValidationIcon = () => {
     if (isValidatingPath) {
-      return <LuLoader className="animate-spin text-default-400" size={16} />
+      return <LuLoader className="text-default-400 animate-spin" size={16} />
     }
 
     if (pathValidation?.is_valid) {
@@ -286,7 +302,7 @@ export const InstallGameModal: React.FC<Props> = ({
                     {config.existingGamePath && config.existingGamePath.trim() !== '' && (
                       <div className="space-y-2">
                         {isValidatingPath && (
-                          <p className="text-xs text-default-500 flex items-center gap-2">
+                          <p className="text-default-500 flex items-center gap-2 text-xs">
                             <LuLoader className="animate-spin" size={12} />
                             {t('game.install_modal.validation_in_progress')}
                           </p>
@@ -294,14 +310,14 @@ export const InstallGameModal: React.FC<Props> = ({
 
                         {pathValidation && pathValidation.is_valid && (
                           <div className="space-y-1">
-                            <p className="text-xs text-success flex items-center gap-2">
+                            <p className="text-success flex items-center gap-2 text-xs">
                               <LuCheck size={12} />
                               {t('game.install_modal.validation_success')}
                             </p>
                             {pathValidation.suggested_executable && (
-                              <p className="text-xs text-default-500">
+                              <p className="text-default-500 text-xs">
                                 {t('game.install_modal.suggested_executable', {
-                                  executable: pathValidation.suggested_executable
+                                  executable: pathValidation.suggested_executable,
                                 })}
                               </p>
                             )}
@@ -309,7 +325,7 @@ export const InstallGameModal: React.FC<Props> = ({
                         )}
 
                         {validationError && (
-                          <p className="text-xs text-danger flex items-center gap-2">
+                          <p className="text-danger flex items-center gap-2 text-xs">
                             <LuX size={12} />
                             {validationError}
                           </p>
@@ -392,7 +408,7 @@ export const InstallGameModal: React.FC<Props> = ({
               )}
 
               {/* Informations sur l'espace disque */}
-              <div className="rounded-lg bg-default-50 p-3">
+              <div className="bg-default-50 rounded-lg p-3">
                 <div className="mb-2 flex items-center gap-2">
                   <LuMapPin className="text-muted-foreground" size={16} />
                   <span className="text-sm font-medium">

@@ -1,11 +1,11 @@
 import { Suspense, lazy, memo } from 'react'
-import { Divider } from '@heroui/divider'
+import { Divider } from '@heroui/react'
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 // Lazy loading des composants du Huz Studio Launcher
 const Sidebar = lazy(() =>
-  import('@/components/page/Sidebar').then((module) => ({ default: module.Sidebar })),
+  import('@/components/page/sidebar').then((module) => ({ default: module.Sidebar })),
 )
 
 const HuzStudioGame = lazy(() =>
@@ -18,7 +18,7 @@ const ContentComponent: React.FC = () => {
   return (
     <>
       {/* Navigation */}
-      <Suspense fallback={<div className="w-16 bg-content1" />}>
+      <Suspense fallback={<div className="bg-content1 w-16" />}>
         <Sidebar />
       </Suspense>
 

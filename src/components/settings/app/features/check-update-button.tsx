@@ -1,6 +1,5 @@
 import { relaunch } from '@tauri-apps/plugin-process'
-import { Button } from '@heroui/button'
-import { addToast } from '@heroui/toast'
+import { Button, addToast } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
 import { LuRefreshCw, LuCheck, LuX, LuCode } from 'react-icons/lu'
 

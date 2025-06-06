@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Select, SelectItem } from '@heroui/select'
+import { Select, SelectItem } from '@heroui/react'
 
 import { useLanguagePreference } from '@/hooks/useLanguagePreference'
 

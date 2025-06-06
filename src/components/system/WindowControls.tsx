@@ -1,5 +1,4 @@
-import { Tooltip } from '@heroui/tooltip'
-import { Button } from '@heroui/button'
+import { Tooltip, Button } from '@heroui/react'
 import { LuMinus, LuX } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
 
@@ -9,7 +8,7 @@ export const WindowControls: React.FC = () => {
   const { t } = useTranslation()
 
   return (
-    <div className="absolute right-6 top-4 z-20 space-x-4">
+    <div className="absolute top-4 right-6 z-20 space-x-4">
       <Tooltip content={t('window.minimize')} placement="bottom">
         <Button isIconOnly radius="full" size="sm" variant="light" onPress={handleMinimize}>
           <LuMinus size={16} />

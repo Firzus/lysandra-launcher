@@ -1,6 +1,4 @@
-import { Modal, ModalContent } from '@heroui/modal'
-import { Tabs, Tab } from '@heroui/tabs'
-import { Card, CardBody } from '@heroui/card'
+import { Modal, ModalContent, Tabs, Tab, Card, CardBody } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
 
 import { UninstallGameButton } from './features/UninstallGameButton'
@@ -19,7 +17,7 @@ export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange, onGam
   return (
     <Modal isOpen={isOpen} size="3xl" onOpenChange={onOpenChange}>
       <ModalContent>
-        <p className="text-muted-foreground absolute left-8 top-6 text-xl">
+        <p className="text-muted-foreground absolute top-6 left-8 text-xl">
           {t('game.settings_title')}
         </p>
 
@@ -76,7 +74,7 @@ export const GameSettingsModal: React.FC<Props> = ({ isOpen, onOpenChange, onGam
                 <Card className="border-danger-200" shadow="none">
                   <CardBody className="flex-row items-center justify-between">
                     <div>
-                      <p className="font-medium text-danger">{t('game.actions.uninstall_game')}</p>
+                      <p className="text-danger font-medium">{t('game.actions.uninstall_game')}</p>
                       <p className="text-muted-foreground text-xs">
                         {t('game.actions.uninstall_game_desc')}
                       </p>

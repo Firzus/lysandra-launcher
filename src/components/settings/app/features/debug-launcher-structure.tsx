@@ -1,4 +1,4 @@
-import { Button } from '@heroui/button'
+import { Button } from '@heroui/react'
 import { useState } from 'react'
 import { LuFolderPlus, LuCheck, LuX } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'

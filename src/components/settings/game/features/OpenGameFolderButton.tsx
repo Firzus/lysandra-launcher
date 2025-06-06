@@ -1,4 +1,4 @@
-import { Button } from '@heroui/button'
+import { Button } from '@heroui/react'
 import { LuFolderOpen } from 'react-icons/lu'
 import { openPath } from '@tauri-apps/plugin-opener'
 

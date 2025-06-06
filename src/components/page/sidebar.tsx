@@ -1,7 +1,5 @@
 import { LuBolt, LuGamepad2 } from 'react-icons/lu'
-import { Button } from '@heroui/button'
-import { Tooltip } from '@heroui/tooltip'
-import { useDisclosure } from '@heroui/modal'
+import { Button, Tooltip, useDisclosure } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
 
 import { AppSettingsModal } from '@/components/settings/app/app-settings-modal'

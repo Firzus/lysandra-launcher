@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Spinner } from '@heroui/spinner'
+import { Spinner } from '@heroui/react'
 
 type LoadingSpinnerProps = {
   size?: 'sm' | 'md' | 'lg'

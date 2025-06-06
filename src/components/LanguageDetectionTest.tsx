@@ -1,7 +1,5 @@
 import { memo } from 'react'
-import { Card, CardBody, CardHeader } from '@heroui/card'
-import { Chip } from '@heroui/chip'
-import { Button } from '@heroui/button'
+import { Card, CardBody, CardHeader, Chip, Button } from '@heroui/react'
 
 import { useSystemLocale, useLanguagePreference } from '@/hooks'
 

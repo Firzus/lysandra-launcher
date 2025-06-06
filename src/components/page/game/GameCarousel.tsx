@@ -1,8 +1,5 @@
 import React from 'react'
-import { Button } from '@heroui/button'
-import { Link } from '@heroui/link'
-import { Image } from '@heroui/image'
-import { Card, CardBody, CardFooter } from '@heroui/card'
+import { Button, Link, Image, Card, CardBody, CardFooter } from '@heroui/react'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 import { useTranslation } from 'react-i18next'
 
@@ -30,7 +27,7 @@ export const GameCarousel: React.FC<Props> = () => {
   }, [])
 
   return (
-    <Card className="mt-auto h-[220px] border border-default backdrop-blur-md">
+    <Card className="border-default mt-auto h-[220px] border backdrop-blur-md">
       <CardBody className="relative p-0">
         <Image
           removeWrapper
@@ -43,7 +40,7 @@ export const GameCarousel: React.FC<Props> = () => {
         <Button
           isIconOnly
           aria-label={t('carousel.previous_slide')}
-          className="absolute left-4 top-1/2 z-10 -translate-y-1/2"
+          className="absolute top-1/2 left-4 z-10 -translate-y-1/2"
           radius="full"
           size="sm"
           variant="flat"
@@ -55,7 +52,7 @@ export const GameCarousel: React.FC<Props> = () => {
         <Button
           isIconOnly
           aria-label={t('carousel.next_slide')}
-          className="absolute right-4 top-1/2 z-10 -translate-y-1/2"
+          className="absolute top-1/2 right-4 z-10 -translate-y-1/2"
           radius="full"
           size="sm"
           variant="flat"
@@ -68,7 +65,7 @@ export const GameCarousel: React.FC<Props> = () => {
       <CardFooter className="flex px-4 py-2">
         <Link
           isExternal
-          className="cursor-pointer truncate pr-2 text-sm font-medium leading-none text-foreground"
+          className="text-foreground cursor-pointer truncate pr-2 text-sm leading-none font-medium"
           underline="hover"
           onPress={() => {
             openLink(carouselEvents[currentIndex].link)
@@ -77,7 +74,7 @@ export const GameCarousel: React.FC<Props> = () => {
           {carouselEvents[currentIndex].title}
         </Link>
 
-        <p className="text-muted-foreground ml-auto text-sm font-medium leading-none">
+        <p className="text-muted-foreground ml-auto text-sm leading-none font-medium">
           {carouselEvents[currentIndex].date.toLocaleDateString()}
         </p>
       </CardFooter>

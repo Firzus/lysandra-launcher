@@ -1,4 +1,4 @@
-import { Card, CardBody } from '@heroui/card'
+import { Card, CardBody } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
 
 import { LanguageSwitcher } from '../features/language-switcher'
@@ -22,7 +22,7 @@ export const GeneralAppSettings: React.FC = () => {
         </CardBody>
       </Card>
 
-      <p className="text-muted-foreground mb-2 mt-4">{t('settings.language_client')}</p>
+      <p className="text-muted-foreground mt-4 mb-2">{t('settings.language_client')}</p>
       {/* Language Selection */}
       <Card shadow="none">
         <CardBody className="flex-row justify-between">
@@ -31,7 +31,7 @@ export const GeneralAppSettings: React.FC = () => {
         </CardBody>
       </Card>
 
-      <p className="text-muted-foreground mb-2 mt-4">{t('settings.autostart.title')}</p>
+      <p className="text-muted-foreground mt-4 mb-2">{t('settings.autostart.title')}</p>
       {/* Autostart Option */}
       <Card shadow="none">
         <CardBody className="flex-row justify-between">
@@ -49,7 +49,7 @@ export const GeneralAppSettings: React.FC = () => {
       {/* Section Debug - Seulement en développement */}
       {process.env.NODE_ENV === 'development' && (
         <>
-          <p className="text-muted-foreground mb-2 mt-6">{t('debug.title')}</p>
+          <p className="text-muted-foreground mt-6 mb-2">{t('debug.title')}</p>
 
           {/* Créer structure */}
           <Card className="border-orange-200" shadow="none">

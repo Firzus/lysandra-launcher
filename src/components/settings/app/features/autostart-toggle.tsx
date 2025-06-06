@@ -1,5 +1,4 @@
-import { Switch } from '@heroui/switch'
-import { Spinner } from '@heroui/spinner'
+import { Switch, Spinner } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
 
 import { useAutostart } from '@/hooks/useAutostart'
@@ -18,7 +17,7 @@ export const AutostartToggle: React.FC<Props> = ({ className }) => {
 
   if (error) {
     return (
-      <div className={`${className} text-sm text-danger`}>
+      <div className={`${className} text-danger text-sm`}>
         {t('settings.autostart.error')}: {error}
       </div>
     )
