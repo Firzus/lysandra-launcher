@@ -4,8 +4,102 @@ use std::path::PathBuf;
 pub struct PathManager;
 
 impl PathManager {
+    /// Détermine si nous sommes en mode développement
+    fn is_development_mode() -> bool {
+        // Vérifie si nous sommes en mode dev via la variable d'environnement TAURI_DEV
+        std::env::var("TAURI_DEV").is_ok() ||
+        // Ou si le binaire est dans target/debug
+        std::env::current_exe()
+            .map(|path| path.to_string_lossy().contains("target/debug"))
+            .unwrap_or(false) ||
+        // En cas de doute, toujours utiliser le mode dev si on peut écrire dans AppLocalData mais pas dans Program Files
+        Self::can_write_to_local_appdata() && !Self::can_write_to_program_files()
+    }
+
+    /// Vérifie si on peut écrire dans LocalAppData
+    fn can_write_to_local_appdata() -> bool {
+        #[cfg(target_os = "windows")]
+        {
+            if let Ok(local_appdata) = std::env::var("LOCALAPPDATA") {
+                let test_path = std::path::PathBuf::from(local_appdata).join("HuzStudio_test");
+                std::fs::create_dir_all(&test_path).is_ok() && {
+                    let _ = std::fs::remove_dir_all(&test_path);
+                    true
+                }
+            } else {
+                false
+            }
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            true // Pour les autres plateformes, on suppose que c'est possible
+        }
+    }
+
+    /// Vérifie si on peut écrire dans Program Files
+    fn can_write_to_program_files() -> bool {
+        #[cfg(target_os = "windows")]
+        {
+            let program_files = std::env::var("ProgramFiles")
+                .unwrap_or_else(|_| "C:\\Program Files".to_string());
+            let test_path = std::path::PathBuf::from(program_files).join("HuzStudio_test");
+            std::fs::create_dir_all(&test_path).is_ok() && {
+                let _ = std::fs::remove_dir_all(&test_path);
+                true
+            }
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            false // Pour les autres plateformes, on force l'utilisation du mode dev
+        }
+    }
+
     /// Obtient le répertoire racine HuzStudio/ cross-plateforme
     pub fn get_huzstudio_root() -> Result<PathBuf, String> {
+        if Self::is_development_mode() {
+            // En mode développement, utilise AppLocalData
+            Self::get_development_root()
+        } else {
+            // En mode production, utilise les chemins système
+            Self::get_production_root()
+        }
+    }
+
+    /// Obtient le répertoire racine pour le développement
+    fn get_development_root() -> Result<PathBuf, String> {
+        #[cfg(target_os = "windows")]
+        {
+            // Windows: %LOCALAPPDATA%/HuzStudio/
+            let local_appdata = std::env::var("LOCALAPPDATA")
+                .or_else(|_| std::env::var("USERPROFILE").map(|p| format!("{}\\AppData\\Local", p)))
+                .map_err(|_| "Unable to get LocalAppData directory".to_string())?;
+            Ok(PathBuf::from(local_appdata).join("HuzStudio"))
+        }
+        
+        #[cfg(target_os = "macos")]
+        {
+            // macOS: ~/Library/Application Support/HuzStudio/
+            let home = std::env::var("HOME")
+                .map_err(|_| "Unable to get HOME directory".to_string())?;
+            Ok(PathBuf::from(home).join("Library/Application Support/HuzStudio"))
+        }
+        
+        #[cfg(target_os = "linux")]
+        {
+            // Linux: ~/.local/share/HuzStudio/ 
+            let home = std::env::var("HOME")
+                .map_err(|_| "Unable to get HOME directory".to_string())?;
+            Ok(PathBuf::from(home).join(".local/share/HuzStudio"))
+        }
+        
+        #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+        {
+            Err("Platform not supported".to_string())
+        }
+    }
+
+    /// Obtient le répertoire racine pour la production
+    fn get_production_root() -> Result<PathBuf, String> {
         #[cfg(target_os = "windows")]
         {
             // Sur Windows : C:/Program Files/HuzStudio/

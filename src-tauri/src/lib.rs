@@ -219,7 +219,6 @@ fn force_file_sync(path: String) -> Result<(), String> {
         // Sur Windows, utiliser FlushFileBuffers
         use std::os::windows::io::AsRawHandle;
         use winapi::um::fileapi::FlushFileBuffers;
-        use winapi::um::handleapi::INVALID_HANDLE_VALUE;
         
         let handle = file.as_raw_handle() as winapi::um::winnt::HANDLE;
         unsafe {
@@ -480,14 +479,14 @@ fn write_text_file(path: String, content: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_app_data_dir(app: tauri::AppHandle) -> Result<String, String> {
+fn get_app_data_dir(_app: tauri::AppHandle) -> Result<String, String> {
     // Utilise maintenant la nouvelle structure HuzStudio
     path_manager::PathManager::get_huzstudio_root()
         .map(|p| p.to_string_lossy().to_string())
 }
 
 #[tauri::command]
-fn store_config(app: tauri::AppHandle, key: String, value: String) -> Result<(), String> {
+fn store_config(_app: tauri::AppHandle, key: String, value: String) -> Result<(), String> {
     use std::collections::HashMap;
     
     // Utiliser le nouveau gestionnaire de chemins pour le répertoire config
@@ -521,7 +520,7 @@ fn store_config(app: tauri::AppHandle, key: String, value: String) -> Result<(),
 }
 
 #[tauri::command]
-fn get_config(app: tauri::AppHandle, key: String) -> Result<String, String> {
+fn get_config(_app: tauri::AppHandle, key: String) -> Result<String, String> {
     use std::collections::HashMap;
     
     let config_dir = path_manager::PathManager::get_config_dir()?;
@@ -653,7 +652,7 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> std::io::Result<()> {
 }
 
 /// Initialise la structure de base du launcher (appelé au setup)
-fn initialize_launcher_structure(app_handle: &tauri::AppHandle) -> Result<(), String> {
+fn initialize_launcher_structure(_app_handle: &tauri::AppHandle) -> Result<(), String> {
     // Utiliser le nouveau PathManager pour initialiser la structure HuzStudio
     path_manager::PathManager::initialize_structure()?;
     
