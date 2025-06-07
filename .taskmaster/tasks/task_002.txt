@@ -1,0 +1,20 @@
+# Task ID: 2
+# Title: Implement Core Data Models and SQLite Integration
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Define and implement core data models for manifests, games, and user settings. Set up SQLite integration for local storage.
+# Details:
+1. Define TypeScript interfaces for GameManifest, LocalGame, UserSettings, etc.
+2. Set up SQLite database schema for games.db
+3. Implement Tauri SQL plugin for database operations
+4. Create data access layer for CRUD operations on local games and settings
+5. Implement data migration strategy for future schema updates
+6. Set up error handling and logging for database operations
+
+# Test Strategy:
+1. Unit test all data model interfaces
+2. Integration tests for SQLite operations
+3. Test data migration scenarios
+4. Verify error handling for database operations
+5. Benchmark database performance for various operations

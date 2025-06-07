@@ -1,0 +1,21 @@
+# Task ID: 6
+# Title: Implement Version Comparison and Update Detection
+# Status: pending
+# Dependencies: 2, 3
+# Priority: medium
+# Description: Develop logic for comparing versions and detecting available updates for games and the launcher.
+# Details:
+1. Implement semantic versioning (semver) comparison logic
+2. Create update detection algorithm comparing local and manifest versions
+3. Implement periodic update checks (hourly by default)
+4. Develop user notification system for available updates
+5. Create update history tracking
+6. Implement rollback functionality to previous versions
+
+# Test Strategy:
+1. Unit test version comparison logic
+2. Test update detection with various scenarios
+3. Verify periodic update checks
+4. Test user notification system
+5. Verify update history tracking
+6. Test rollback functionality

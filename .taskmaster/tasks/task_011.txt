@@ -1,0 +1,81 @@
+# Task ID: 11
+# Title: Implement Auto-Updater for Launcher
+# Status: pending
+# Dependencies: 3, 4, 6, 10
+# Priority: high
+# Description: Develop and validate an automatic update system for the launcher itself. The core implementation exists in src/hooks/useAutoAppUpdate.ts but requires comprehensive testing and validation before being considered complete.
+# Details:
+The auto-updater has been implemented using Tauri with React integration in src/hooks/useAutoAppUpdate.ts. The implementation includes development/production mode handling, but requires thorough testing and validation:
+
+1. Test auto-update functionality in production environment
+2. Validate version detection and update availability checks
+3. Test update download and installation process
+4. Validate error handling during update process
+5. Test user interface components (notifications, progress indicators)
+6. Validate automatic restart functionality after updates
+7. Create comprehensive test scenarios for different update cases
+8. Document the complete update process and troubleshooting
+
+The existing implementation appears functional but must be tested in real-world conditions before validation.
+
+# Test Strategy:
+1. Set up production-like testing environment for auto-updater
+2. Test update detection with mock and real version servers
+3. Verify complete update download and installation workflow
+4. Test error scenarios (network failures, corrupted downloads, installation failures)
+5. Validate user interface behavior during update process
+6. Test automatic restart and post-update verification
+7. Perform regression testing to ensure launcher functionality remains intact
+8. Test update process across different operating systems
+9. Validate rollback scenarios if update fails
+10. Document test results and create troubleshooting guide
+
+# Subtasks:
+## 11-1. Set up production testing environment for auto-updater [pending]
+### Dependencies: None
+### Description: Configure a production-like environment to test the existing auto-updater implementation
+### Details:
+
+
+## 11-2. Test version detection and update availability [pending]
+### Dependencies: None
+### Description: Validate that the useAutoAppUpdate hook correctly detects new versions and determines update availability
+### Details:
+
+
+## 11-3. Test update download and installation process [pending]
+### Dependencies: None
+### Description: Verify the complete workflow from update detection to successful installation
+### Details:
+
+
+## 11-4. Validate error handling during updates [pending]
+### Dependencies: None
+### Description: Test various error scenarios including network failures, corrupted downloads, and installation failures
+### Details:
+
+
+## 11-5. Test user interface during update process [pending]
+### Dependencies: None
+### Description: Validate notifications, progress indicators, and user prompts throughout the update workflow
+### Details:
+
+
+## 11-6. Test automatic restart functionality [pending]
+### Dependencies: None
+### Description: Verify that the launcher properly restarts after update installation and maintains functionality
+### Details:
+
+
+## 11-7. Create comprehensive update test scenarios [pending]
+### Dependencies: None
+### Description: Develop and execute test cases covering different update situations and edge cases
+### Details:
+
+
+## 11-8. Document update process and create troubleshooting guide [pending]
+### Dependencies: None
+### Description: Create comprehensive documentation for the auto-update system and common troubleshooting steps
+### Details:
+
+
