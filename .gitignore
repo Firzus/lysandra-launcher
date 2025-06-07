@@ -35,8 +35,5 @@ dev-debug.log
 node_modules/
 # Environment variables
 .vscode
-# OS specific
-# Task files
-tasks.json
-tasks/
+
 pubkey.key
