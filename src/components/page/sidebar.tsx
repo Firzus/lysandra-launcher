@@ -1,10 +1,15 @@
-import { LuBolt, LuGamepad2 } from 'react-icons/lu'
+import { LuBolt, LuGamepad2, LuTestTube } from 'react-icons/lu'
 import { Button, Tooltip, useDisclosure } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
 
 import { AppSettingsModal } from '@/components/settings/app/app-settings-modal'
 
-export const Sidebar: React.FC = () => {
+type SidebarProps = {
+  onTestModeToggle?: () => void
+  isTestModeActive?: boolean
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onTestModeToggle, isTestModeActive = false }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const { t } = useTranslation()
 
@@ -14,11 +19,24 @@ export const Sidebar: React.FC = () => {
         <LuGamepad2 className="text-foreground" size={32} />
       </span>
 
-      <Tooltip content={t('sidebar.settings')} placement="right">
-        <Button isIconOnly variant="light" onPress={onOpen}>
-          <LuBolt size={20} />
-        </Button>
-      </Tooltip>
+      <div className="flex flex-col gap-2">
+        <Tooltip content="Windows Permissions Test" placement="right">
+          <Button
+            isIconOnly
+            variant={isTestModeActive ? 'solid' : 'light'}
+            color={isTestModeActive ? 'primary' : 'default'}
+            onPress={onTestModeToggle}
+          >
+            <LuTestTube size={20} />
+          </Button>
+        </Tooltip>
+
+        <Tooltip content={t('sidebar.settings')} placement="right">
+          <Button isIconOnly variant="light" onPress={onOpen}>
+            <LuBolt size={20} />
+          </Button>
+        </Tooltip>
+      </div>
 
       <AppSettingsModal isOpen={isOpen} onOpenChange={onOpenChange} />
     </nav>

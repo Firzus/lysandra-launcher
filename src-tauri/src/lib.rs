@@ -9,6 +9,8 @@ pub mod zip;
 pub mod download_manager;
 pub mod game_detection;
 pub mod path_manager;
+pub mod windows_permissions;
+pub mod updater_manager;
 
 // Structure pour les événements de progression
 #[derive(Clone, Serialize, Deserialize)]
@@ -37,6 +39,41 @@ pub struct GameProcessEvent {
     pub process_id: Option<u32>,
     pub status: String, // "starting", "running", "stopped"
     pub error: Option<String>,
+}
+
+// Structures pour le manifest du launcher
+#[derive(Clone, Serialize, Deserialize)]
+pub struct LauncherManifest {
+    pub success: bool,
+    pub data: LauncherManifestData,
+    pub repository: String,
+    pub cached: bool,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct LauncherManifestData {
+    pub version: String,
+    pub name: String,
+    pub description: String,
+    pub published_at: String,
+    pub html_url: String,
+    #[serde(rename = "type")]
+    pub manifest_type: String,
+    pub platforms: LauncherPlatforms,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct LauncherPlatforms {
+    pub windows: Option<PlatformAsset>,
+    pub macos: Option<PlatformAsset>,
+    pub linux: Option<PlatformAsset>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct PlatformAsset {
+    pub url: String,
+    pub size: u64,
+    pub name: String,
 }
 
 // Commandes Tauri
@@ -103,9 +140,19 @@ fn verify_file_integrity(file_path: String) -> Result<String, String> {
 async fn fetch_manifest_from_github(url: String) -> Result<String, String> {
     println!("🌐 Fetching manifest from: {}", url);
     
-    let response = reqwest::get(&url).await.map_err(|e| {
-        format!("Network error fetching {}: {}", url, e)
-    })?;
+    // Créer un client avec les headers requis
+    let client = reqwest::Client::new();
+    let response = client
+        .get(&url)
+        .header("Content-Type", "application/json")
+        .header("User-Agent", "HuzStudioLauncher/1.0.0")
+        .header("Accept", "application/json")
+        .header("Accept-Encoding", "gzip, deflate")
+        .send()
+        .await
+        .map_err(|e| {
+            format!("Network error fetching {}: {}", url, e)
+        })?;
     
     if !response.status().is_success() {
         let status = response.status();
@@ -122,8 +169,41 @@ async fn fetch_manifest_from_github(url: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn read_version_file() -> Result<String, String> {
-    std::fs::read_to_string("version.txt").map_err(|e| e.to_string())
+async fn read_version_file() -> Result<LauncherManifest, String> {
+    const MANIFEST_URL: &str = "https://huz-studio-api.up.railway.app/api/v1/manifests/launcher";
+    
+    println!("🔍 Fetching launcher manifest from: {}", MANIFEST_URL);
+    
+    // Créer un client avec les headers requis
+    let client = reqwest::Client::new();
+    let response = client
+        .get(MANIFEST_URL)
+        .header("Content-Type", "application/json")
+        .header("User-Agent", "HuzStudioLauncher/1.0.0")
+        .header("Accept", "application/json")
+        .header("Accept-Encoding", "gzip, deflate")
+        .send()
+        .await
+        .map_err(|e| {
+            format!("Network error fetching launcher manifest: {}", e)
+        })?;
+    
+    if !response.status().is_success() {
+        let status = response.status();
+        let error_body = response.text().await.unwrap_or_else(|_| "Unable to read error response".to_string());
+        return Err(format!("HTTP {} from launcher manifest API: {}", status, error_body));
+    }
+
+    let manifest_text = response.text().await.map_err(|e| {
+        format!("Failed to read launcher manifest response body: {}", e)
+    })?;
+    
+    let manifest: LauncherManifest = serde_json::from_str(&manifest_text).map_err(|e| {
+        format!("Failed to parse launcher manifest JSON: {}", e)
+    })?;
+    
+    println!("✅ Successfully fetched launcher manifest, version: {}", manifest.data.version);
+    Ok(manifest)
 }
 
 #[tauri::command]
@@ -605,6 +685,88 @@ fn get_free_space(path: String) -> Result<u64, String> {
     }
 }
 
+// ===== COMMANDES WINDOWS PERMISSIONS =====
+
+/// Obtient le statut des permissions Windows
+#[tauri::command]
+fn get_windows_permission_status() -> windows_permissions::PermissionStatus {
+    windows_permissions::get_permission_status()
+}
+
+/// Vérifie si l'application s'exécute avec des privilèges administrateur
+#[tauri::command]
+fn is_running_as_admin() -> Result<bool, String> {
+    windows_permissions::is_running_as_admin()
+        .map_err(|e| e.to_string())
+}
+
+/// Vérifie si UAC est activé sur le système
+#[tauri::command]
+fn is_uac_enabled() -> bool {
+    windows_permissions::is_uac_enabled()
+}
+
+/// Vérifie si une opération nécessite des privilèges élevés
+#[tauri::command]
+fn requires_elevation(operation: String) -> bool {
+    windows_permissions::requires_elevation(&operation)
+}
+
+/// Vérifie si l'utilisateur peut effectuer une opération donnée
+#[tauri::command]
+fn can_perform_operation(operation: String) -> bool {
+    windows_permissions::can_perform_operation(&operation)
+}
+
+/// Redémarre l'application avec des privilèges élevés
+#[tauri::command]
+fn restart_as_admin(executable_path: String, arguments: Option<String>) -> Result<(), String> {
+    windows_permissions::restart_as_admin(&executable_path, arguments.as_deref())
+        .map_err(|e| e.to_string())
+}
+
+/// Exécute une commande avec des privilèges élevés
+#[tauri::command]
+fn run_elevated_command(command: String, arguments: Option<String>, show_window: bool) -> Result<(), String> {
+    windows_permissions::run_elevated_command(&command, arguments.as_deref(), show_window)
+        .map_err(|e| e.to_string())
+}
+
+/// Vérifie si l'application peut effectuer des mises à jour (nécessite admin ou UAC)
+#[tauri::command]
+fn can_update_application() -> bool {
+    windows_permissions::can_perform_operation("update")
+}
+
+/// Demande l'élévation pour effectuer une mise à jour
+#[tauri::command]
+fn request_update_elevation(app_handle: tauri::AppHandle) -> Result<(), String> {
+    let status = windows_permissions::get_permission_status();
+    
+    if status.is_admin {
+        return Ok(()); // Déjà admin, pas besoin d'élévation
+    }
+    
+    if !status.can_elevate {
+        return Err("UAC n'est pas disponible sur ce système".to_string());
+    }
+    
+    // Obtenir le chemin de l'exécutable actuel
+    let current_exe = std::env::current_exe()
+        .map_err(|e| format!("Impossible d'obtenir le chemin de l'exécutable: {}", e))?;
+    
+    let exe_path = current_exe.to_string_lossy().to_string();
+    
+    // Redémarrer avec des privilèges élevés
+    windows_permissions::restart_as_admin(&exe_path, Some("--elevated-update"))
+        .map_err(|e| e.to_string())?;
+    
+    // Fermer l'instance actuelle après avoir lancé la version élevée
+    app_handle.exit(0);
+    
+    Ok(())
+}
+
 #[tauri::command]
 async fn copy_directory(source: String, destination: String) -> Result<(), String> {
     use std::path::Path;
@@ -682,8 +844,9 @@ pub fn run() {
                 println!("{}, {argv:?}, {cwd}", app.package_info().name);
             }));
         
-        // Plugin updater uniquement si activé par variable d'environnement
-        if std::env::var("TAURI_CONFIG_PLUGINS_UPDATER_ACTIVE").unwrap_or_default() == "true" {
+        // Plugin updater uniquement en release
+        #[cfg(not(debug_assertions))]
+        {
             builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
         }
     }
@@ -741,6 +904,23 @@ pub fn run() {
             path_manager::get_game_install_directory,
             path_manager::initialize_game_directories,
             path_manager::verify_huzstudio_structure,
+            // Commandes Windows Permissions
+            get_windows_permission_status,
+            is_running_as_admin,
+            is_uac_enabled,
+            requires_elevation,
+            can_perform_operation,
+            restart_as_admin,
+            run_elevated_command,
+            can_update_application,
+            request_update_elevation,
+            // Commandes Updater Manager 
+            updater_manager::check_for_updates,
+            updater_manager::install_update,
+            updater_manager::download_update,
+            updater_manager::restart_for_update,
+            updater_manager::get_current_version,
+            updater_manager::is_elevated_update_mode,
         ])
         .setup(|app| {
             println!("🚀 Tauri application starting...");
@@ -758,6 +938,22 @@ pub fn run() {
             let download_manager = download_manager::init_download_manager();
             app.manage(download_manager);
             println!("✅ Download manager initialized successfully");
+
+            // Initialiser le gestionnaire de mises à jour (seulement en release)
+            #[cfg(not(debug_assertions))]
+            {
+                println!("🔄 Initializing updater manager...");
+                if let Err(e) = updater_manager::initialize_updater(app.handle()) {
+                    eprintln!("❌ Failed to initialize updater manager: {}", e);
+                    // Ne pas faire échouer le setup pour l'updater, juste logger l'erreur
+                } else {
+                    println!("✅ Updater manager initialized successfully");
+                }
+            }
+            #[cfg(debug_assertions)]
+            {
+                println!("⚠️ Updater disabled in development mode");
+            }
 
             println!("🌐 Tauri setup completed successfully");
             Ok(())

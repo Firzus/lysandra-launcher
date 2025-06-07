@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <!-- Registry entries for HuzStudio Windows integration -->
+    <DirectoryRef Id="TARGETDIR">
+      <!-- Component for registry entries with unique ID -->
+      <Component Id="HuzStudioRegistryEntries" Guid="*">
+        <!-- Main application registry key under HKEY_LOCAL_MACHINE -->
+        <RegistryKey
+          Root="HKLM"
+          Key="Software\HuzStudio\Launcher"
+          Action="createAndRemoveOnUninstall"
+        >
+          <!-- Installation path -->
+          <RegistryValue
+            Type="string"
+            Name="InstallPath"
+            Value="[INSTALLDIR]"
+            KeyPath="yes"
+          />
+          <!-- Version info -->
+          <RegistryValue
+            Type="string"
+            Name="Version"
+            Value="[ProductVersion]"
+          />
+          <!-- Install date -->
+          <RegistryValue
+            Type="string"
+            Name="InstallDate"
+            Value="[Date]"
+          />
+        </RegistryKey>
+
+        <!-- Uninstall registry entries -->
+        <RegistryKey
+          Root="HKLM"
+          Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\{$(var.ProductCode)}"
+          Action="createAndRemoveOnUninstall"
+        >
+          <RegistryValue
+            Type="string"
+            Name="DisplayName"
+            Value="HuzStudio Launcher"
+          />
+          <RegistryValue
+            Type="string"
+            Name="DisplayVersion"
+            Value="[ProductVersion]"
+          />
+          <RegistryValue
+            Type="string"
+            Name="Publisher"
+            Value="HuzStudio"
+          />
+          <RegistryValue
+            Type="string"
+            Name="InstallLocation"
+            Value="[INSTALLDIR]"
+          />
+          <RegistryValue
+            Type="string"
+            Name="UninstallString"
+            Value="[INSTALLDIR]uninstall.exe"
+          />
+          <RegistryValue
+            Type="integer"
+            Name="NoModify"
+            Value="1"
+          />
+          <RegistryValue
+            Type="integer"
+            Name="NoRepair"
+            Value="1"
+          />
+        </RegistryKey>
+
+        <!-- File associations for .huzstudio files -->
+        <RegistryKey
+          Root="HKLM"
+          Key="Software\Classes\.huzstudio"
+          Action="createAndRemoveOnUninstall"
+        >
+          <RegistryValue
+            Type="string"
+            Value="HuzStudioLauncher.File"
+          />
+        </RegistryKey>
+
+        <RegistryKey
+          Root="HKLM"
+          Key="Software\Classes\HuzStudioLauncher.File"
+          Action="createAndRemoveOnUninstall"
+        >
+          <RegistryValue
+            Type="string"
+            Value="HuzStudio Launcher File"
+          />
+        </RegistryKey>
+
+        <RegistryKey
+          Root="HKLM"
+          Key="Software\Classes\HuzStudioLauncher.File\shell\open\command"
+          Action="createAndRemoveOnUninstall"
+        >
+          <RegistryValue
+            Type="string"
+            Value="&quot;[INSTALLDIR]HuzStudio.exe&quot; &quot;%1&quot;"
+          />
+        </RegistryKey>
+
+        <!-- Application capabilities for Windows 10/11 -->
+        <RegistryKey
+          Root="HKLM"
+          Key="Software\HuzStudio\Launcher\Capabilities"
+          Action="createAndRemoveOnUninstall"
+        >
+          <RegistryValue
+            Type="string"
+            Name="ApplicationName"
+            Value="HuzStudio Launcher"
+          />
+          <RegistryValue
+            Type="string"
+            Name="ApplicationDescription"
+            Value="Game launcher and manager for HuzStudio games"
+          />
+        </RegistryKey>
+
+        <!-- Register application for "Open with" dialog -->
+        <RegistryKey
+          Root="HKLM"
+          Key="Software\RegisteredApplications"
+          Action="createAndRemoveOnUninstall"
+        >
+          <RegistryValue
+            Type="string"
+            Name="HuzStudio Launcher"
+            Value="Software\HuzStudio\Launcher\Capabilities"
+          />
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix> 
